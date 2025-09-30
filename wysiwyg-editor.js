@@ -16,10 +16,10 @@ class WYSIWYGEditor {
             isDirty: false
         };
         this.autoSaveTimer = null;
-        this.autoSaveDelay = 2000; // Default delay when not editing
-        this.editingDelay = 5000; // Longer delay while actively editing
+        this.autoSaveDelay = 3000; // Default delay when not editing (increased for performance)
+        this.editingDelay = 8000; // Longer delay while actively editing (increased for performance)
         this.pauseTimer = null; // Timer to detect when editing has paused
-        this.pauseDelay = 1500; // Time to wait before considering editing paused
+        this.pauseDelay = 2000; // Time to wait before considering editing paused (increased)
         this.isActivelyEditing = false;
         this.autoSaveEnabled = true;
         this.linkAutoComplete = {
@@ -54,6 +54,34 @@ class WYSIWYGEditor {
         this.shortcuts = new Map();
         this.toolbarButtons = new Map();
         this.externalLinksEnabled = true;
+        
+        // Performance optimization: throttle expensive operations
+        this.throttledUpdateStats = this.throttle(() => this.updateStats(), 300);
+        this.throttledMarkdownShortcuts = this.throttle((e) => this.handleMarkdownShortcuts(e), 100);
+    }
+
+    /**
+     * Throttle function to limit how often a function can be called
+     */
+    throttle(func, limit) {
+        let lastFunc;
+        let lastRan;
+        return function() {
+            const context = this;
+            const args = arguments;
+            if (!lastRan) {
+                func.apply(context, args);
+                lastRan = Date.now();
+            } else {
+                clearTimeout(lastFunc);
+                lastFunc = setTimeout(function() {
+                    if ((Date.now() - lastRan) >= limit) {
+                        func.apply(context, args);
+                        lastRan = Date.now();
+                    }
+                }, limit - (Date.now() - lastRan));
+            }
+        }
     }
 
     /**
@@ -225,10 +253,12 @@ class WYSIWYGEditor {
     handleWYSIWYGInput(e) {
         this.markDocumentDirty();
         this.handleEditingState();
-        this.updateStats();
         
-        // Handle special markdown-like input patterns
-        this.handleMarkdownShortcuts(e);
+        // Throttle expensive operations for better performance
+        this.throttledUpdateStats();
+        
+        // Handle special markdown-like input patterns (throttled)
+        this.throttledMarkdownShortcuts(e);
     }
 
     /**
@@ -1119,7 +1149,13 @@ class WYSIWYGEditor {
      * Update the conversion mode indicator
      */
     updateConversionModeIndicator() {
-        // Find or create the conversion mode indicator
+        // Use the global function from index.html if available
+        if (window.updateConversionMode) {
+            window.updateConversionMode(this.autoConversion.enabled);
+            return;
+        }
+        
+        // Fallback: Find or create the conversion mode indicator
         let indicator = document.getElementById('conversion-mode-indicator');
         if (!indicator) {
             indicator = document.createElement('span');
@@ -1127,7 +1163,7 @@ class WYSIWYGEditor {
             indicator.className = 'conversion-mode-indicator';
             
             // Add to status bar
-            const statusBar = document.querySelector('.status-bar');
+            const statusBar = document.querySelector('.status-bar .status-right');
             if (statusBar) {
                 statusBar.appendChild(indicator);
             }
@@ -1843,7 +1879,7 @@ class WYSIWYGEditor {
         
         // Mark as actively editing
         this.isActivelyEditing = true;
-        this.updateAutoSaveStatus('⏸️ Auto-save paused (editing...)');
+        this.updateAutoSaveStatusDisplay(true);
         
         // Clear existing timers
         if (this.autoSaveTimer) {
@@ -1857,7 +1893,7 @@ class WYSIWYGEditor {
         this.pauseTimer = setTimeout(() => {
             this.isActivelyEditing = false;
             this.scheduleAutoSave();
-            this.updateAutoSaveStatus('⚡ Auto-save ON');
+            this.updateAutoSaveStatusDisplay(false);
         }, this.pauseDelay);
         
         // Schedule auto-save with longer delay while editing
@@ -1868,6 +1904,20 @@ class WYSIWYGEditor {
                 this.saveDocument();
             }
         }, this.editingDelay);
+    }
+    
+    /**
+     * Update auto-save status display
+     */
+    updateAutoSaveStatusDisplay(isPaused) {
+        // Use global function if available
+        if (window.updateAutoSaveStatus) {
+            window.updateAutoSaveStatus(isPaused);
+            return;
+        }
+        
+        // Fallback to direct update
+        this.updateAutoSaveStatus(isPaused ? '⏸️ Auto-save paused (editing...)' : '⚡ Auto-save ON');
     }
     
     /**

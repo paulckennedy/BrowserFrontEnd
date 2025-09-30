@@ -10,7 +10,7 @@
 </head>
 <body>
     <!-- Collapsing Menu Bar -->
-        <header class="menu-bar collapsed" id="menu-bar">
+        <header class="menu-bar collapsed" id="menu-bar" onmouseenter="expandMenuBar()" onmouseleave="collapseMenuBar()">
         <div class="menu-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 20px;">
             <!-- Menu items on far left -->
             <nav class="main-nav" style="display: flex; align-items: center; gap: 5px;">
@@ -191,6 +191,7 @@
             <div class="status-right">
                 <span id="last-saved" class="status-item">Saved just now</span>
                 <span id="sync-status" class="status-item">⚡ Auto-save ON</span>
+                <span id="conversion-mode-indicator" class="conversion-mode-indicator" title="Manual conversion - use Ctrl+Enter to convert markdown">MANUAL</span>
             </div>
         </div>
     </main>
@@ -241,6 +242,67 @@
         }
     });
 
+    // Menu bar expand/collapse functionality
+    function expandMenuBar() {
+        const menuBar = document.getElementById('menu-bar');
+        if (menuBar) {
+            menuBar.classList.remove('collapsed');
+        }
+    }
+    
+    function collapseMenuBar() {
+        const menuBar = document.getElementById('menu-bar');
+        if (menuBar) {
+            menuBar.classList.add('collapsed');
+        }
+    }
+    
+    window.expandMenuBar = expandMenuBar;
+    window.collapseMenuBar = collapseMenuBar;
+
+    // Status bar update functions
+    function updateStatusBar(type, message) {
+        const statusElements = {
+            connection: document.getElementById('connection-status'),
+            document: document.getElementById('document-status'),
+            saved: document.getElementById('last-saved'),
+            sync: document.getElementById('sync-status')
+        };
+        
+        if (statusElements[type]) {
+            statusElements[type].textContent = message;
+        }
+    }
+    
+    function updateAutoSaveStatus(isPaused) {
+        const syncStatus = document.getElementById('sync-status');
+        if (syncStatus) {
+            if (isPaused) {
+                syncStatus.innerHTML = '⏸️ Auto-save paused (editing...)';
+            } else {
+                syncStatus.innerHTML = '⚡ Auto-save ON';
+            }
+        }
+    }
+    
+    function updateConversionMode(isAuto) {
+        const indicator = document.getElementById('conversion-mode-indicator');
+        if (indicator) {
+            if (isAuto) {
+                indicator.textContent = 'AUTO';
+                indicator.className = 'conversion-mode-indicator auto';
+                indicator.title = 'Auto conversion - markdown converts as you type';
+            } else {
+                indicator.textContent = 'MANUAL';
+                indicator.className = 'conversion-mode-indicator';
+                indicator.title = 'Manual conversion - use Ctrl+Enter to convert markdown';
+            }
+        }
+    }
+    
+    window.updateStatusBar = updateStatusBar;
+    window.updateAutoSaveStatus = updateAutoSaveStatus;
+    window.updateConversionMode = updateConversionMode;
 
     </script>
 </body>
