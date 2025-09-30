@@ -123,16 +123,24 @@ main {
 }
 
 .menu-bar.collapsed {
-    height: 8px !important;
+    height: 8px;
     overflow: hidden;
-    background: #b0b0b0 !important;
-    transform: none;
-    cursor: pointer;
     transition: height 0.3s ease, background 0.3s ease;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     position: relative;
-    z-index: 1001;
-    display: block !important;
-    visibility: visible !important;
+    z-index: 1000;
+}
+
+/* Visual indicator for collapsed menu */
+.menu-bar.collapsed::before {
+    content: '≡';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .menu-bar.collapsed:hover,
@@ -206,10 +214,12 @@ main {
     z-index: 1001;
 }
 
-.nav-group:hover .dropdown {
+.nav-group:hover .dropdown,
+.dropdown.show {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    pointer-events: auto;
 }
 
 .dropdown-item {
@@ -299,13 +309,25 @@ main {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+    position: relative;
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
-    /* Firefox specific */
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    position: relative;
+}
+
+/* Right-side gray spacer to balance the collapsed file explorer */
+.browser-window::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 5px;
+    background: #f8f9fa;
+    border-left: 1px solid #e0e0e0;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .browser-btn {
@@ -323,16 +345,37 @@ main {
 }
 
 /* Address Bar */
+/* Address bar styling */
 .address-bar {
-    background: #f6f6f6;
-    border-bottom: 1px solid #ddd;
-    padding: 4px 0px !important;
-    margin: 0 !important;
-    width: 100% !important;
-    /* Firefox specific */
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    display: block;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #e0e0e0;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    min-height: 40px;
+    position: relative;
+}
+
+/* Gray spacer bars for visual balance */
+.address-bar::before,
+.address-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    background: #e9ecef;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.address-bar::before {
+    left: 0;
+}
+
+.address-bar::after {
+    right: 0;
 }
 
 .url-container {

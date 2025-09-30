@@ -66,6 +66,7 @@ class WYSIWYGEditor {
             this.setupKeyboardShortcuts();
             this.setupToolbarButtons();
             this.initializeAutoSave();
+            this.initializeMenuFunctionality();
             await this.initializeDatabaseConnection();
             await this.loadDocuments();
             
@@ -2129,6 +2130,272 @@ class WYSIWYGEditor {
         }
     }
 
+    /**
+     * Initialize menu functionality
+     */
+    initializeMenuFunctionality() {
+        // File menu handlers
+        const fileMenu = document.getElementById('file-menu');
+        const newFileBtn = document.getElementById('new-file');
+        const openFileBtn = document.getElementById('open-file');
+        const saveFileBtn = document.getElementById('save-file');
+        const exportFileBtn = document.getElementById('export-file');
+        
+        // Edit menu handlers
+        const editMenu = document.getElementById('edit-menu');
+        const undoBtn = document.getElementById('undo');
+        const redoBtn = document.getElementById('redo');
+        const cutBtn = document.getElementById('cut');
+        const copyBtn = document.getElementById('copy');
+        const pasteBtn = document.getElementById('paste');
+        
+        // View menu handlers
+        const viewMenu = document.getElementById('view-menu');
+        const togglePreviewBtn = document.getElementById('toggle-preview');
+        const toggleMenuBtn = document.getElementById('toggle-menu');
+        const toggleExplorerBtn = document.getElementById('toggle-explorer');
+        
+        // File menu actions
+        if (newFileBtn) {
+            newFileBtn.addEventListener('click', () => {
+                this.newFile();
+                this.closeDropdowns();
+            });
+        }
+        
+        if (openFileBtn) {
+            openFileBtn.addEventListener('click', () => {
+                this.openFile();
+                this.closeDropdowns();
+            });
+        }
+        
+        if (saveFileBtn) {
+            saveFileBtn.addEventListener('click', () => {
+                this.saveDocument();
+                this.closeDropdowns();
+            });
+        }
+        
+        if (exportFileBtn) {
+            exportFileBtn.addEventListener('click', () => {
+                this.exportFile();
+                this.closeDropdowns();
+            });
+        }
+        
+        // Edit menu actions
+        if (undoBtn) {
+            undoBtn.addEventListener('click', () => {
+                document.execCommand('undo');
+                this.closeDropdowns();
+            });
+        }
+        
+        if (redoBtn) {
+            redoBtn.addEventListener('click', () => {
+                document.execCommand('redo');
+                this.closeDropdowns();
+            });
+        }
+        
+        if (cutBtn) {
+            cutBtn.addEventListener('click', () => {
+                document.execCommand('cut');
+                this.closeDropdowns();
+            });
+        }
+        
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                document.execCommand('copy');
+                this.closeDropdowns();
+            });
+        }
+        
+        if (pasteBtn) {
+            pasteBtn.addEventListener('click', () => {
+                document.execCommand('paste');
+                this.closeDropdowns();
+            });
+        }
+        
+        // View menu actions
+        if (togglePreviewBtn) {
+            togglePreviewBtn.addEventListener('click', () => {
+                this.togglePreview();
+                this.closeDropdowns();
+            });
+        }
+        
+        if (toggleMenuBtn) {
+            toggleMenuBtn.addEventListener('click', () => {
+                this.toggleMenu();
+                this.closeDropdowns();
+            });
+        }
+        
+        if (toggleExplorerBtn) {
+            toggleExplorerBtn.addEventListener('click', () => {
+                this.toggleExplorerPin();
+                this.closeDropdowns();
+            });
+        }
+        
+        // Dropdown toggle functionality
+        this.initializeDropdowns();
+        
+        // Menu bar hover enhancement
+        this.enhanceMenuHover();
+    }
+    
+    /**
+     * Initialize dropdown menus
+     */
+    initializeDropdowns() {
+        const navBtns = document.querySelectorAll('.nav-btn');
+        
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = btn.nextElementSibling;
+                if (dropdown && dropdown.classList.contains('dropdown')) {
+                    // Close other dropdowns
+                    this.closeDropdowns(dropdown);
+                    
+                    // Toggle current dropdown
+                    dropdown.classList.toggle('show');
+                }
+            });
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            this.closeDropdowns();
+        });
+    }
+    
+    /**
+     * Close all dropdown menus
+     */
+    closeDropdowns(except = null) {
+        const dropdowns = document.querySelectorAll('.dropdown');
+        dropdowns.forEach(dropdown => {
+            if (dropdown !== except) {
+                dropdown.classList.remove('show');
+            }
+        });
+    }
+    
+    /**
+     * Enhance menu hover behavior
+     */
+    enhanceMenuHover() {
+        const menuBar = document.getElementById('menu-bar');
+        if (menuBar) {
+            let hoverTimeout;
+            
+            menuBar.addEventListener('mouseenter', () => {
+                clearTimeout(hoverTimeout);
+                menuBar.classList.add('hover');
+            });
+            
+            menuBar.addEventListener('mouseleave', () => {
+                hoverTimeout = setTimeout(() => {
+                    menuBar.classList.remove('hover');
+                    this.closeDropdowns();
+                }, 300);
+            });
+        }
+    }
+    
+    /**
+     * New file action
+     */
+    newFile() {
+        if (this.isDirty && this.currentFile) {
+            if (confirm('You have unsaved changes. Create new file anyway?')) {
+                this.wysiwygEditor.innerHTML = '<p><br></p>';
+                this.currentFile = null;
+                this.isDirty = false;
+                this.updateStatus('New file created', 'success');
+            }
+        } else {
+            this.wysiwygEditor.innerHTML = '<p><br></p>';
+            this.currentFile = null;
+            this.isDirty = false;
+            this.updateStatus('New file created', 'success');
+        }
+    }
+    
+    /**
+     * Open file action
+     */
+    openFile() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.md,.txt';
+        
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                try {
+                    const content = await file.text();
+                    this.wysiwygEditor.innerHTML = this.convertMarkdownToHtml(content);
+                    this.currentFile = file.name;
+                    this.isDirty = false;
+                    this.updateStatus(`Opened: ${file.name}`, 'success');
+                } catch (error) {
+                    this.updateStatus('Failed to open file', 'error');
+                }
+            }
+        };
+        
+        input.click();
+    }
+    
+    /**
+     * Export file action
+     */
+    exportFile() {
+        const content = this.getMarkdownContent();
+        const blob = new Blob([content], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.currentFile || 'document.md';
+        a.click();
+        
+        URL.revokeObjectURL(url);
+        this.updateStatus('File exported', 'success');
+    }
+    
+    /**
+     * Toggle preview mode
+     */
+    togglePreview() {
+        // This would toggle between edit and preview modes
+        this.updateStatus('Preview mode toggled', 'info');
+    }
+    
+    /**
+     * Convert markdown to HTML for display
+     */
+    convertMarkdownToHtml(markdown) {
+        // Basic markdown to HTML conversion
+        let html = markdown
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+            .replace(/`(.*?)`/gim, '<code>$1</code>')
+            .replace(/\n/gim, '<br>');
+        
+        return `<p>${html}</p>`;
+    }
+    
     /**
      * Toggle menu visibility
      */
