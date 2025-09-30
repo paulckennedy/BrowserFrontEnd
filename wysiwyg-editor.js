@@ -2134,6 +2134,9 @@ class WYSIWYGEditor {
      * Initialize menu functionality
      */
     initializeMenuFunctionality() {
+        console.log('Initializing menu functionality...');
+        alert('Menu initialization started!');
+        
         // File menu handlers
         const fileMenu = document.getElementById('file-menu');
         const newFileBtn = document.getElementById('new-file');
