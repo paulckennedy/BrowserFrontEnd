@@ -2135,7 +2135,7 @@ class WYSIWYGEditor {
      */
     initializeMenuFunctionality() {
         console.log('Initializing menu functionality...');
-        alert('Menu initialization started!');
+
         
         // File menu handlers
         const fileMenu = document.getElementById('file-menu');
@@ -2159,8 +2159,10 @@ class WYSIWYGEditor {
         const toggleExplorerBtn = document.getElementById('toggle-explorer');
         
         // File menu actions
+        console.log('New file button found:', !!newFileBtn);
         if (newFileBtn) {
             newFileBtn.addEventListener('click', () => {
+                console.log('New File clicked!');
                 this.newFile();
                 this.closeDropdowns();
             });
