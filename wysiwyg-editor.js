@@ -2358,25 +2358,25 @@ class WYSIWYGEditor {
     enhanceMenuHover() {
         const menuBar = document.getElementById('menu-bar');
         if (menuBar) {
-            // Ensure menu starts collapsed
-            menuBar.classList.add('collapsed');
-            menuBar.classList.remove('hover');
+            // Force initial state to be collapsed and prevent any immediate hover events
+            menuBar.className = 'menu-bar collapsed';
             
-            let hoverTimeout;
-            
-            menuBar.addEventListener('mouseenter', () => {
-                clearTimeout(hoverTimeout);
-                menuBar.classList.remove('collapsed');
-                menuBar.classList.add('hover');
-            });
-            
-            menuBar.addEventListener('mouseleave', () => {
-                hoverTimeout = setTimeout(() => {
-                    menuBar.classList.remove('hover');
-                    menuBar.classList.add('collapsed');
-                    this.closeDropdowns();
-                }, 300);
-            });
+            // Use a small delay to ensure the initial state is properly set
+            setTimeout(() => {
+                let hoverTimeout;
+                
+                menuBar.addEventListener('mouseenter', () => {
+                    clearTimeout(hoverTimeout);
+                    menuBar.className = 'menu-bar hover';
+                });
+                
+                menuBar.addEventListener('mouseleave', () => {
+                    hoverTimeout = setTimeout(() => {
+                        menuBar.className = 'menu-bar collapsed';
+                        this.closeDropdowns();
+                    }, 300);
+                });
+            }, 100);
         }
     }
     

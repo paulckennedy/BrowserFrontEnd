@@ -10,7 +10,7 @@
 </head>
 <body>
     <!-- Collapsing Menu Bar -->
-        <header class="menu-bar collapsed" id="menu-bar" onmouseenter="expandMenuBar()" onmouseleave="collapseMenuBar()">
+        <header class="menu-bar collapsed" id="menu-bar">
         <div class="menu-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 20px;">
             <!-- Menu items on far left -->
             <nav class="main-nav" style="display: flex; align-items: center; gap: 5px;">
@@ -27,7 +27,7 @@
                 
                 <!-- Edit button -->
                 <div style="display: inline-block; position: relative;">
-                    <button onclick="simpleToggle('edit-dropdown')" style="background: #e0e0e0; color: black; padding: 8px 16px; margin: 2px; border: 1px solid #ccc; position: relative; z-index: 10000; pointer-events: auto; cursor: pointer;">✏️ Edit</button>
+                    <button id="edit-menu" onclick="simpleToggle('edit-dropdown')" style="background: #e0e0e0; color: black; padding: 8px 16px; margin: 2px; border: 1px solid #ccc; position: relative; z-index: 10000; pointer-events: auto; cursor: pointer;">✏️ Edit</button>
                     <div id="edit-dropdown" style="display: none; position: fixed; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 99999; min-width: 150px; flex-direction: column;">
                         <button style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: white; cursor: pointer;">Undo</button>
                         <button style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: white; cursor: pointer;">Redo</button>
