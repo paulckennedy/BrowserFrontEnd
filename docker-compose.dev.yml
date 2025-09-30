@@ -1,0 +1,56 @@
+# Development override for docker-compose.yml\n# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  markdown-editor:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      - NODE_ENV=development
+      - DEBUG=true
+      - HOT_RELOAD=true
+    volumes:
+      - .:/usr/share/nginx/html
+      - /usr/share/nginx/html/node_modules
+      - ./logs:/var/log/nginx
+    ports:
+      - "3000:80"
+      - "3001:3001"  # For hot reload
+    command: sh -c "npm run dev"
+
+  postgres:\n    image: postgres:15-alpine\n    environment:\n      - POSTGRES_USER=editor_user\n      - POSTGRES_PASSWORD=editor_password\n      - POSTGRES_DB=markdown_editor_dev\n    ports:\n      - \"5433:5432\"  # Different port for dev\n    volumes:\n      - postgres_dev_data:/var/lib/postgresql/data\n      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  redis:\n    image: redis:7-alpine\n    ports:\n      - \"6380:6379\"  # Different port for dev\n    volumes:\n      - redis_dev_data:/data\n      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro\n    command: redis-server /usr/local/etc/redis/redis.conf --save 20 1 --loglevel warning
+
+  # Development tools
+  adminer:
+    image: adminer:latest
+    container_name: markdown-editor-adminer
+    ports:
+      - "8081:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+    networks:
+      - markdown_network
+    profiles:
+      - dev-tools
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: markdown-editor-redis-commander
+    ports:
+      - "8082:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+      - REDIS_PASSWORD=redis_password_change_in_production
+    networks:
+      - markdown_network
+    profiles:
+      - dev-tools
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+networks:
+  markdown_network:
+    driver: bridge

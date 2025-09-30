@@ -1,0 +1,62 @@
+{
+  "name": "markdown-editor",
+  "version": "1.0.0",
+  "description": "Browser-in-browser markdown editor with auto-save and database storage",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js --dev",
+    "build": "npm run build:css && npm run build:js",
+    "build:css": "echo 'CSS build complete'",
+    "build:js": "echo 'JS build complete'",
+    "test": "echo 'Tests would run here'",
+    "docker:build": "docker build -t markdown-editor .",
+    "docker:run": "docker-compose up -d",
+    "docker:stop": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:clean": "docker-compose down -v --rmi all",
+    "db:migrate": "node database/migrate.js",
+    "db:seed": "node database/seed.js",
+    "db:backup": "docker-compose exec postgres pg_dump -U markdown_user markdown_editor > database/backup/backup-$(date +%Y%m%d-%H%M%S).sql"
+  },
+  "keywords": [
+    "markdown",
+    "editor",
+    "browser",
+    "auto-save",
+    "postgresql",
+    "docker",
+    "ai-integration"
+  ],
+  "author": "BrowserFrontEnd Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "compression": "^1.7.4",
+    "dotenv": "^16.3.1",
+    "multer": "^1.4.5-lts.1",
+    "express-rate-limit": "^6.10.0",
+    "express-session": "^1.17.3",
+    "connect-redis": "^7.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/markdown-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/markdown-editor/issues"
+  },
+  "homepage": "https://github.com/yourusername/markdown-editor#readme"
+}

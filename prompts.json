@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2025-09-30",
+    "description": "Centralized AI prompts for BrowserFrontEnd project",
+    "author": "BrowserFrontEnd Team"
+  },
+  "system": {
+    "projectContext": {
+      "role": "You are an AI assistant helping with a modern frontend web application called BrowserFrontEnd.",
+      "tech_stack": "HTML5, CSS3, JavaScript (ES2017+), no frameworks",
+      "design_system": "Purple gradient theme (#667eea to #764ba2), responsive design, modern web standards",
+      "code_style": "Clean, semantic HTML, mobile-first CSS, vanilla JavaScript with ES6+ features"
+    },
+    "codeReview": {
+      "role": "You are a senior frontend developer reviewing code for best practices, performance, and maintainability.",
+      "criteria": "Check for: semantic HTML, efficient CSS, modern JavaScript patterns, accessibility, responsive design, browser compatibility",
+      "standards": "Follow web standards, use semantic elements, ensure mobile-first approach, optimize for performance"
+    },
+    "debugging": {
+      "role": "You are a debugging expert helping to identify and fix issues in frontend web applications.",
+      "approach": "Analyze symptoms, check browser console, validate HTML/CSS/JS, test responsiveness, verify cross-browser compatibility",
+      "tools": "Browser dev tools, validators, lighthouse, accessibility checkers"
+    }
+  },
+  "development": {
+    "featureRequest": {
+      "template": "I need to add {feature_name} to the BrowserFrontEnd project. The feature should {description}. Please consider: 1) HTML structure, 2) CSS styling matching our purple gradient theme, 3) JavaScript functionality, 4) Responsive design, 5) Accessibility.",
+      "examples": {
+        "contact_form": "I need to add a contact form to the BrowserFrontEnd project. The feature should allow users to send messages with name, email, and message fields. Please consider: 1) HTML structure, 2) CSS styling matching our purple gradient theme, 3) JavaScript functionality, 4) Responsive design, 5) Accessibility.",
+        "image_gallery": "I need to add an image gallery to the BrowserFrontEnd project. The feature should display images in a responsive grid with lightbox functionality. Please consider: 1) HTML structure, 2) CSS styling matching our purple gradient theme, 3) JavaScript functionality, 4) Responsive design, 5) Accessibility."
+      }
+    },
+    "optimization": {
+      "performance": "Analyze the BrowserFrontEnd project for performance improvements. Focus on: loading speed, CSS efficiency, JavaScript optimization, image optimization, and overall user experience.",
+      "accessibility": "Review the BrowserFrontEnd project for accessibility compliance. Check: ARIA labels, keyboard navigation, color contrast, semantic HTML, screen reader compatibility.",
+      "seo": "Evaluate the BrowserFrontEnd project for SEO best practices. Examine: meta tags, semantic structure, page titles, descriptions, structured data opportunities."
+    },
+    "refactoring": {
+      "template": "Refactor the {file_name} in the BrowserFrontEnd project to improve {aspect}. Maintain the existing functionality while enhancing {goals}. Keep the purple gradient design theme consistent.",
+      "goals": ["code readability", "performance", "maintainability", "scalability", "accessibility"]
+    }
+  },
+  "content": {
+    "copywriting": {
+      "website_copy": "Generate engaging copy for the BrowserFrontEnd website sections. Tone: modern, professional, friendly. Focus on: clear value propositions, user benefits, call-to-actions that convert.",
+      "technical_docs": "Create clear technical documentation for the BrowserFrontEnd project. Style: concise, well-structured, includes examples, suitable for developers of all levels.",
+      "user_guides": "Write user-friendly guides for BrowserFrontEnd features. Style: step-by-step, visual descriptions, beginner-friendly, include common troubleshooting."
+    },
+    "metadata": {
+      "page_titles": "Generate SEO-optimized page titles for BrowserFrontEnd pages. Requirements: under 60 characters, include relevant keywords, compelling and descriptive.",
+      "descriptions": "Create meta descriptions for BrowserFrontEnd pages. Requirements: 150-160 characters, include key features, compelling call-to-action.",
+      "alt_text": "Generate descriptive alt text for images in BrowserFrontEnd. Be specific, concise, and helpful for screen readers while being SEO-friendly."
+    }
+  },
+  "analysis": {
+    "codeReview": {
+      "security": "Perform a security review of the BrowserFrontEnd code. Check for: XSS vulnerabilities, input validation, secure coding practices, potential security risks.",
+      "performance": "Analyze BrowserFrontEnd performance. Examine: load times, resource optimization, rendering efficiency, JavaScript execution, CSS efficiency.",
+      "compatibility": "Review BrowserFrontEnd for cross-browser compatibility. Test considerations: modern browsers, mobile devices, accessibility features, progressive enhancement."
+    },
+    "userExperience": {
+      "usability": "Evaluate BrowserFrontEnd user experience. Focus on: navigation clarity, content hierarchy, user flow, interaction feedback, error handling.",
+      "mobile": "Assess BrowserFrontEnd mobile experience. Check: responsive design, touch interactions, loading speed, readability, mobile-specific features.",
+      "conversion": "Analyze BrowserFrontEnd for conversion optimization. Review: call-to-actions, user journey, friction points, trust signals, engagement elements."
+    }
+  },
+  "testing": {
+    "scenarios": {
+      "functionality": "Create test scenarios for BrowserFrontEnd features. Include: happy path tests, edge cases, error conditions, user interaction flows.",
+      "responsive": "Generate responsive design test cases for BrowserFrontEnd. Test: various screen sizes, orientation changes, touch interactions, browser zoom levels.",
+      "accessibility": "Develop accessibility test procedures for BrowserFrontEnd. Cover: keyboard navigation, screen readers, color contrast, focus management."
+    },
+    "automation": {
+      "unit_tests": "Suggest unit test cases for BrowserFrontEnd JavaScript functions. Focus on: input validation, utility functions, event handlers, data processing.",
+      "integration": "Recommend integration test scenarios for BrowserFrontEnd components. Test: component interactions, data flow, API integrations, user workflows."
+    }
+  },
+  "deployment": {
+    "checklist": {
+      "pre_deploy": "Create pre-deployment checklist for BrowserFrontEnd: code review complete, tests passing, performance optimized, accessibility verified, documentation updated.",
+      "post_deploy": "Generate post-deployment verification steps for BrowserFrontEnd: functionality testing, performance monitoring, error tracking, user feedback collection."
+    },
+    "optimization": {
+      "build_process": "Suggest build process improvements for BrowserFrontEnd. Consider: asset optimization, code minification, caching strategies, deployment automation.",
+      "monitoring": "Recommend monitoring setup for BrowserFrontEnd. Include: performance metrics, error tracking, user analytics, uptime monitoring."
+    }
+  },
+  "maintenance": {
+    "updates": {
+      "content": "Plan content update strategy for BrowserFrontEnd. Consider: regular refresh schedule, content accuracy, user engagement, SEO maintenance.",
+      "technical": "Create technical maintenance schedule for BrowserFrontEnd. Include: dependency updates, security patches, performance reviews, compatibility checks."
+    },
+    "monitoring": {
+      "health_check": "Design health check procedures for BrowserFrontEnd. Monitor: page load times, functionality status, error rates, user experience metrics.",
+      "analytics": "Set up analytics tracking for BrowserFrontEnd. Track: user behavior, conversion rates, popular features, performance bottlenecks."
+    }
+  }
+}

@@ -1,0 +1,45 @@
+# Development Dockerfile for MarkdownEditor
+FROM node:18-alpine
+
+# Install development tools
+RUN apk add --no-cache \
+    curl \
+    vim \
+    git \
+    bash
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev)
+RUN npm install
+
+# Install global development tools
+RUN npm install -g nodemon concurrently
+
+# Create app user for security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+
+# Copy application files
+COPY --chown=nodejs:nodejs . .
+
+# Create necessary directories
+RUN mkdir -p /app/data /app/logs
+RUN chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
+
+# Expose ports
+EXPOSE 3000 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Start in development mode
+CMD ["npm", "run", "dev"]

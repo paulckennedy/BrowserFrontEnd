@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarkdownEditor - Browser-in-Browser Markdown Editor</title>
+    <meta name="description" content="A sophisticated browser-in-browser markdown editor with live editing, auto-save, and database storage">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="editor-styles.css">
+</head>
+<body>
+    <!-- Collapsing Menu Bar -->
+        <header class="menu-bar collapsed" id="menu-bar">
+        <div class="menu-container">
+            <div class="logo">
+                📝 MarkdownEditor
+            </div>
+            
+            <nav class="main-nav">
+                <div class="nav-group">
+                    <button class="nav-btn" id="file-menu">📁 File</button>
+                    <div class="dropdown" id="file-dropdown">
+                        <button class="dropdown-item" id="new-file">New File</button>
+                        <button class="dropdown-item" id="open-file">Open File</button>
+                        <button class="dropdown-item" id="save-file">Save File</button>
+                        <button class="dropdown-item" id="export-file">Export</button>
+                    </div>
+                </div>
+                
+                <div class="nav-group">
+                    <button class="nav-btn" id="edit-menu">✏️ Edit</button>
+                    <div class="dropdown" id="edit-dropdown">
+                        <button class="dropdown-item" id="undo">Undo</button>
+                        <button class="dropdown-item" id="redo">Redo</button>
+                        <button class="dropdown-item" id="find-replace">Find & Replace</button>
+                    </div>
+                </div>
+                
+                <div class="nav-group">
+                    <button class="nav-btn" id="view-menu">👁️ View</button>
+                    <div class="dropdown" id="view-dropdown">
+                        <button class="dropdown-item" id="toggle-preview">Toggle Preview</button>
+                        <button class="dropdown-item" id="split-view">Split View</button>
+                        <button class="dropdown-item" id="fullscreen">Fullscreen</button>
+                    </div>
+                </div>
+                
+                <div class="nav-group">
+                    <button class="nav-btn" id="tools-menu">🛠️ Tools</button>
+                    <div class="dropdown" id="tools-dropdown">
+                        <button class="dropdown-item" id="word-count">Word Count</button>
+                        <button class="dropdown-item" id="outline">Document Outline</button>
+                        <button class="dropdown-item" id="ai-assist">AI Assistant</button>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="menu-controls">
+                <div class="auto-save-indicator" id="auto-save-status">
+                    <span class="save-icon">💾</span>
+                    <span class="save-text">Saved</span>
+                </div>
+                <button class="menu-toggle" id="menu-toggle">⚡</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Editor Container -->
+    <main class="editor-container" id="editor-container">
+        <!-- Browser-in-Browser Window -->
+        <div class="browser-window">
+            <!-- Address Bar -->
+            <div class="address-bar">
+                <div class="url-container">
+                    <span class="protocol">md://</span>
+                    <input type="text" class="url-input" id="document-path" placeholder="untitled.md" readonly>
+                    <button class="browser-btn" id="external-link-btn" title="Open links externally">🔗</button>
+                </div>
+            </div>
+            
+            <!-- Editor Content Area -->
+            <div class="editor-content">
+                <!-- File Explorer Sidebar -->
+                <aside class="file-explorer collapsed" id="file-explorer">
+                    <div class="explorer-header">
+                        <h3>Documents</h3>
+                        <button class="explorer-toggle" id="explorer-toggle" title="Pin/Unpin Explorer">📌</button>
+                    </div>
+                    <div class="file-tree" id="file-tree">
+                        <div class="loading-files">Loading documents...</div>
+                    </div>
+                </aside>
+                
+                <!-- WYSIWYG Editor -->
+                <div class="wysiwyg-editor-container">
+                    <div class="editor-toolbar">
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" id="bold-btn" title="Bold (Ctrl+B)"><strong>B</strong></button>
+                            <button class="toolbar-btn" id="italic-btn" title="Italic (Ctrl+I)"><em>I</em></button>
+                            <button class="toolbar-btn" id="strikethrough-btn" title="Strikethrough">~~S~~</button>
+                            <button class="toolbar-btn" id="code-btn" title="Inline Code">&lt;/&gt;</button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" id="h1-btn" title="Heading 1">H1</button>
+                            <button class="toolbar-btn" id="h2-btn" title="Heading 2">H2</button>
+                            <button class="toolbar-btn" id="h3-btn" title="Heading 3">H3</button>
+                            <button class="toolbar-btn" id="quote-btn" title="Quote">❝</button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" id="ul-btn" title="Bullet List">• List</button>
+                            <button class="toolbar-btn" id="ol-btn" title="Numbered List">1. List</button>
+                            <button class="toolbar-btn" id="checklist-btn" title="Checklist">☐ Task</button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" id="link-btn" title="Link (Ctrl+K)">🔗</button>
+                            <button class="toolbar-btn" id="image-btn" title="Image">🖼️</button>
+                            <button class="toolbar-btn" id="table-btn" title="Table">📋</button>
+                            <button class="toolbar-btn" id="codeblock-btn" title="Code Block">{ }</button>
+                        </div>
+                        <div class="toolbar-group">
+                            <button class="toolbar-btn" id="source-btn" title="Toggle Source View">⚡</button>
+                            <button class="toolbar-btn" id="fullscreen-btn" title="Fullscreen">⛶</button>
+                        </div>
+                    </div>
+                    
+                    <!-- WYSIWYG Editor -->
+                    <div class="wysiwyg-editor" 
+                         id="wysiwyg-editor" 
+                         contenteditable="true" 
+                         spellcheck="true"
+                         data-placeholder="Start writing your markdown document...">
+                        <h1>Welcome to MarkdownEditor</h1>
+                        <p>This is a powerful browser-in-browser WYSIWYG markdown editor with:</p>
+                        <ul>
+                            <li>💾 <strong>Auto-save functionality</strong> - Changes saved automatically</li>
+                            <li>🔄 <strong>Live WYSIWYG editing</strong> - Edit formatted text directly</li>
+                            <li>🗂️ <strong>Database storage</strong> - Documents stored in PostgreSQL</li>
+                            <li>🎨 <strong>Rich formatting</strong> - Full markdown support</li>
+                            <li>🤖 <strong>AI integration</strong> - Smart writing assistance</li>
+                        </ul>
+                        <h2>Getting Started</h2>
+                        <ol>
+                            <li>Start typing in this editor</li>
+                            <li>Your changes are automatically saved</li>
+                            <li>Use the toolbar for quick formatting</li>
+                            <li>Toggle source view to see raw markdown</li>
+                        </ol>
+                        <h2>Features</h2>
+                        <h3>WYSIWYG Editing</h3>
+                        <p>Every keystroke is captured and auto-saved, similar to Obsidian's workflow with visual editing.</p>
+                        <h3>Database Integration</h3>
+                        <p>All documents are stored in a PostgreSQL database via SQL agent.</p>
+                        <h3>AI-Powered</h3>
+                        <p>Integrated AI assistance for writing, editing, and content generation.</p>
+                        <hr>
+                        <p><em>Happy writing! 📝</em></p>
+                    </div>
+                    
+                    <!-- Source Editor (Hidden by default) -->
+                    <textarea class="markdown-source-editor hidden" 
+                             id="markdown-source-editor" 
+                             spellcheck="false"></textarea>
+                    
+                    <div class="editor-stats">
+                        <span id="word-count-display">0 words</span>
+                        <span id="char-count-display">0 characters</span>
+                        <span id="cursor-position">Line 1, Col 1</span>
+                        <span class="view-mode" id="view-mode">WYSIWYG Mode</span>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span id="connection-status" class="status-item">🟢 Connected</span>
+                <span id="document-status" class="status-item">📄 untitled.md</span>
+            </div>
+            <div class="status-right">
+                <span id="last-saved" class="status-item">Saved just now</span>
+                <span id="sync-status" class="status-item">⚡ Auto-save ON</span>
+            </div>
+        </div>
+    </main>
+
+    <script src="ai-integration.js"></script>
+    <script src="wysiwyg-editor.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1170 @@
+/* Reset and base styles - Enhanced for Firefox compatibility */
+* {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    -moz-box-sizing: border-box !important;
+    -webkit-box-sizing: border-box !important;
+}
+
+/* Firefox specific resets */
+@-moz-document url-prefix() {
+    * {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    html, body {
+        width: 100vw !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+    }
+}
+
+/* Ensure no browser default margins/padding */
+html, body, main {
+    -webkit-margin-before: 0 !important;
+    -webkit-margin-after: 0 !important;
+    -webkit-margin-start: 0 !important;
+    -webkit-margin-end: 0 !important;
+    -webkit-padding-start: 0 !important;
+    -moz-margin-start: 0 !important;
+    -moz-margin-end: 0 !important;
+    -moz-padding-start: 0 !important;
+}
+
+/* Hide any scrollbars that might cause white space */
+::-webkit-scrollbar {
+    width: 0px !important;
+    background: transparent !important;
+}
+
+/* Firefox scrollbar hiding */
+html {
+    scrollbar-width: none !important;
+}
+
+/* Prevent any element from causing overflow */
+* {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+}
+
+html {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    /* Firefox specific */
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    line-height: 1.6;
+    color: #333;
+    background: white;
+    overflow: hidden !important;
+    height: 100vh !important;
+    width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    /* Firefox specific */
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+}
+
+main {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    /* Firefox specific */
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Menu Bar Styles */
+.menu-bar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    transition: transform 0.3s ease;
+}
+
+.menu-bar.collapsed {
+    height: 8px !important;
+    overflow: hidden;
+    background: #b0b0b0 !important;
+    transform: none;
+    cursor: pointer;
+    transition: height 0.3s ease, background 0.3s ease;
+    position: relative;
+    z-index: 1001;
+    display: block !important;
+    visibility: visible !important;
+}
+
+.menu-bar.collapsed:hover,
+.menu-bar.collapsed.hover {
+    height: auto !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    overflow: visible !important;
+}
+
+.menu-bar.collapsed .menu-container {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.menu-bar.collapsed:hover .menu-container,
+.menu-bar.collapsed.hover .menu-container {
+    opacity: 1 !important;
+}
+
+.menu-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    max-width: 100%;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.main-nav {
+    display: flex;
+    gap: 4px;
+}
+
+.nav-group {
+    position: relative;
+}
+
+.nav-btn {
+    background: transparent;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    min-width: 160px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    z-index: 1001;
+}
+
+.nav-group:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    text-align: left;
+    color: #333;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 0;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-item:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.dropdown-item:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.menu-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.auto-save-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.menu-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.menu-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Editor Container */
+.editor-container {
+    height: calc(100vh - 8px) !important;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    /* Firefox specific */
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    position: absolute !important;
+    top: 8px !important;
+    left: 0 !important;
+    right: 0 !important;
+    overflow: hidden !important;
+}
+
+.menu-bar:not(.collapsed) + .editor-container {
+    height: calc(100vh - 48px);
+}
+
+/* Browser Window */
+.browser-window {
+    flex: 1;
+    background: white;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    /* Firefox specific */
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.browser-btn {
+    background: none;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.browser-btn:hover {
+    background: #e0e0e0;
+}
+
+/* Address Bar */
+.address-bar {
+    background: #f6f6f6;
+    border-bottom: 1px solid #ddd;
+    padding: 4px 0px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    /* Firefox specific */
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    display: block;
+}
+
+.url-container {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: none;
+    border-radius: 0;
+    padding: 6px 8px;
+    gap: 8px;
+    margin: 0;
+}
+
+.protocol {
+    color: #667eea;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.url-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    background: transparent;
+}
+
+/* Editor Content Area */
+.editor-content {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+/* File Explorer */
+.file-explorer {
+    width: 5px;
+    background: #d0d0d0;
+    border-right: none;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease, background 0.3s ease, border-right 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
+}
+
+.file-explorer:hover,
+.file-explorer.hover {
+    width: 240px !important;
+    background: #fafafa !important;
+    border-right: 1px solid #e0e0e0 !important;
+}
+
+.file-explorer.collapsed:not(.pinned):not(:hover) {
+    width: 5px !important;
+    background: #d0d0d0 !important;
+    border-right: none !important;
+}
+
+.explorer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f0f0f0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    min-width: 240px;
+}
+
+.file-explorer:hover .explorer-header,
+.file-explorer.pinned .explorer-header {
+    opacity: 1;
+}
+
+/* Special handling for pinned state - highest specificity */
+.file-explorer.pinned {
+    width: 240px !important;
+    background: #fafafa !important;
+    border-right: 1px solid #e0e0e0 !important;
+    cursor: default !important;
+    overflow: visible !important;
+}
+
+.file-explorer.pinned .explorer-header {
+    opacity: 1 !important;
+    display: flex !important;
+    visibility: visible !important;
+}
+
+.file-explorer.pinned .file-tree {
+    opacity: 1 !important;
+    display: block !important;
+    visibility: visible !important;
+}
+
+/* Ensure pinned state overrides collapsed */
+.file-explorer.pinned.collapsed {
+    width: 240px !important;
+    background: #fafafa !important;
+    border-right: 1px solid #e0e0e0 !important;
+}
+
+.file-explorer.pinned.collapsed .explorer-header {
+    opacity: 1 !important;
+}
+
+.file-explorer.pinned.collapsed .file-tree {
+    opacity: 1 !important;
+}
+
+.explorer-header h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    white-space: nowrap;
+}
+
+.explorer-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.explorer-toggle:hover {
+    background: #e0e0e0;
+}
+
+/* Ensure explorer toggle button is always visible when explorer is pinned */
+.file-explorer.pinned .explorer-toggle {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: #667eea;
+    color: white;
+    border-radius: 4px;
+}
+
+.file-explorer.pinned .explorer-toggle:hover {
+    background: #5a67d8;
+}
+
+.file-tree {
+    flex: 1;
+    padding: 8px;
+    overflow-y: auto;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    min-width: 240px;
+}
+
+.file-explorer:hover .file-tree,
+.file-explorer.pinned .file-tree {
+    opacity: 1;
+}
+
+.loading-files {
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+    padding: 20px;
+}
+
+/* WYSIWYG Editor Container */
+.wysiwyg-editor-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.editor-toolbar, .preview-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    gap: 8px;
+}
+
+.toolbar-group {
+    display: flex;
+    gap: 4px;
+}
+
+.toolbar-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.toolbar-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.preview-toolbar h4 {
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
+}
+
+/* Markdown Editor */
+.editor-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.markdown-editor {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 20px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: none;
+    background: white;
+    color: #333;
+    min-height: 0;
+}
+
+.markdown-editor::placeholder {
+    color: #aaa;
+}
+
+/* WYSIWYG Editor */
+.wysiwyg-editor {
+    flex: 1;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #333;
+    background: white;
+    border: none;
+    outline: none;
+    overflow-y: auto;
+    min-height: 0;
+    width: 100%;
+    margin: 0;
+}
+
+.wysiwyg-editor:empty:before {
+    content: attr(data-placeholder);
+    color: #aaa;
+    font-style: italic;
+}
+
+/* WYSIWYG Typography */
+.wysiwyg-editor h1 {
+    font-size: 2.2em;
+    font-weight: 700;
+    margin: 1.2em 0 0.8em 0;
+    color: #2c3e50;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.3em;
+}
+
+.wysiwyg-editor h1:first-child {
+    margin-top: 0;
+}
+
+.wysiwyg-editor h2 {
+    font-size: 1.8em;
+    font-weight: 600;
+    margin: 1em 0 0.6em 0;
+    color: #34495e;
+    border-bottom: 2px solid #95a5a6;
+    padding-bottom: 0.2em;
+}
+
+.wysiwyg-editor h3 {
+    font-size: 1.4em;
+    font-weight: 600;
+    margin: 0.8em 0 0.5em 0;
+    color: #34495e;
+}
+
+.wysiwyg-editor h4 {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin: 0.6em 0 0.4em 0;
+    color: #34495e;
+}
+
+.wysiwyg-editor h5 {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin: 0.5em 0 0.3em 0;
+    color: #34495e;
+}
+
+.wysiwyg-editor h6 {
+    font-size: 1em;
+    font-weight: 600;
+    margin: 0.4em 0 0.2em 0;
+    color: #7f8c8d;
+}
+
+.wysiwyg-editor p {
+    margin: 0.8em 0;
+}
+
+.wysiwyg-editor strong {
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.wysiwyg-editor em {
+    font-style: italic;
+    color: #34495e;
+}
+
+.wysiwyg-editor code {
+    background: #f1f2f6;
+    color: #e74c3c;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+}
+
+.wysiwyg-editor pre {
+    background: #2f3640;
+    color: #f5f6fa;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1em 0;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.wysiwyg-editor blockquote {
+    border-left: 4px solid #667eea;
+    background: #f8f9fa;
+    margin: 1em 0;
+    padding: 0.8em 1.2em;
+    color: #555;
+    font-style: italic;
+}
+
+.wysiwyg-editor ul, .wysiwyg-editor ol {
+    margin: 0.8em 0;
+    padding-left: 2em;
+}
+
+.wysiwyg-editor ul li {
+    list-style-type: disc;
+    margin: 0.3em 0;
+}
+
+.wysiwyg-editor ol li {
+    list-style-type: decimal;
+    margin: 0.3em 0;
+}
+
+.wysiwyg-editor ul li ul li {
+    list-style-type: circle;
+}
+
+.wysiwyg-editor ul li ul li ul li {
+    list-style-type: square;
+}
+
+.wysiwyg-editor a {
+    color: #667eea;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.wysiwyg-editor a:hover {
+    color: #764ba2;
+}
+
+.wysiwyg-editor hr {
+    border: none;
+    border-top: 2px solid #e9ecef;
+    margin: 2em 0;
+}
+
+.wysiwyg-editor img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin: 1em 0;
+}
+
+.wysiwyg-editor table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.wysiwyg-editor th, .wysiwyg-editor td {
+    border: 1px solid #e9ecef;
+    padding: 12px;
+    text-align: left;
+}
+
+.wysiwyg-editor th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+/* Source Editor */
+.markdown-source-editor {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 20px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: none;
+    background: #2f3640;
+    color: #f5f6fa;
+    min-height: 0;
+}
+
+.markdown-source-editor.hidden {
+    display: none;
+}
+
+.editor-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+    font-size: 11px;
+    color: #666;
+}
+
+.view-mode {
+    background: #667eea;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Fullscreen mode */
+.wysiwyg-editor-container.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: white;
+}
+
+.wysiwyg-editor-container.fullscreen .file-explorer {
+    display: none;
+}
+
+/* Checklist styling */
+.wysiwyg-editor p:has(span[contenteditable]) {
+    cursor: pointer;
+}
+
+.wysiwyg-editor p:has(span[contenteditable]):hover {
+    background: #f8f9fa;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: 2px 0;
+}
+
+/* Preview Content */
+.preview-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: white;
+}
+
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content h4,
+.preview-content h5,
+.preview-content h6 {
+    color: #333;
+    margin: 1.5em 0 0.5em 0;
+    font-weight: 600;
+}
+
+.preview-content h1 {
+    font-size: 2em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.3em;
+}
+
+.preview-content h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.3em;
+}
+
+.preview-content p {
+    margin: 1em 0;
+}
+
+.preview-content code {
+    background: #f6f8fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+}
+
+.preview-content pre {
+    background: #f6f8fa;
+    padding: 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+.preview-content blockquote {
+    border-left: 4px solid #dfe2e5;
+    padding: 0 16px;
+    color: #6a737d;
+    margin: 1em 0;
+}
+
+.preview-content ul,
+.preview-content ol {
+    padding-left: 2em;
+    margin: 1em 0;
+}
+
+.preview-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+}
+
+.preview-content th,
+.preview-content td {
+    border: 1px solid #dfe2e5;
+    padding: 6px 13px;
+    text-align: left;
+}
+
+.preview-content th {
+    background: #f6f8fa;
+    font-weight: 600;
+}
+
+/* Status Bar */
+.status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+    font-size: 12px;
+    color: #666;
+}
+
+.conversion-mode-indicator {
+    background: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 10px;
+    opacity: 0.9;
+    user-select: none;
+}
+
+.conversion-mode-indicator.auto {
+    background: #fd7e14;
+}
+
+.status-left,
+.status-right {
+    display: flex;
+    gap: 16px;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Auto-save status styling */
+#sync-status {
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+#sync-status:contains('⚡') {
+    color: #28a745;
+    background: rgba(40, 167, 69, 0.1);
+}
+
+#sync-status:contains('⏸️') {
+    color: #ffc107;
+    background: rgba(255, 193, 7, 0.1);
+}
+
+#sync-status:contains('⏹️') {
+    color: #dc3545;
+    background: rgba(220, 53, 69, 0.1);
+}
+
+/* Link auto-completion styling */
+.link-completion-active {
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 2px;
+    padding: 0 2px;
+}
+
+.wysiwyg-editor a {
+    color: #667eea;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.wysiwyg-editor a:hover {
+    color: #5a67d8;
+    text-decoration: none;
+}
+
+/* Markdown tooltip styling */
+.markdown-tooltip {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Courier New', Monaco, monospace;
+    max-width: 300px;
+    word-break: break-word;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.markdown-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tooltip-header {
+    font-size: 10px;
+    color: #aaa;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tooltip-content {
+    color: #fff;
+    background: none;
+    padding: 0;
+    font-size: 11px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+/* Hover effects for WYSIWYG elements */
+.wysiwyg-editor h1:hover,
+.wysiwyg-editor h2:hover,
+.wysiwyg-editor h3:hover,
+.wysiwyg-editor h4:hover,
+.wysiwyg-editor h5:hover,
+.wysiwyg-editor h6:hover {
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 2px;
+}
+
+.wysiwyg-editor p:hover,
+.wysiwyg-editor li:hover {
+    background: rgba(102, 126, 234, 0.03);
+    border-radius: 2px;
+}
+
+.wysiwyg-editor blockquote:hover {
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 2px;
+}
+
+.wysiwyg-editor code:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+}
+
+.wysiwyg-editor pre:hover {
+    background: rgba(102, 126, 234, 0.05) !important;
+}
+
+/* Markdown editing hints */
+.markdown-tooltip.editing-hint {
+    background: rgba(102, 126, 234, 0.95);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.markdown-tooltip.editing-hint .tooltip-header {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.markdown-tooltip.editing-hint .tooltip-content {
+    color: #fff;
+    font-weight: 500;
+}
+
+/* Reduced hover effects for plain text areas */
+.wysiwyg-editor p:not(:hover) {
+    background: transparent;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .editor-panes {
+        flex-direction: column;
+    }
+    
+    .editor-pane,
+    .preview-pane {
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .file-explorer {
+        width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .editor-container {
+        padding: 10px;
+    }
+    
+    .file-explorer {
+        width: 0;
+        overflow: hidden;
+    }
+    
+    .main-nav {
+        display: none;
+    }
+    
+    .menu-container {
+        padding: 8px 12px;
+    }
+    
+    .browser-controls {
+        padding: 8px 12px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.editor-content {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Auto-save states */
+.auto-save-indicator.saving .save-text::after {
+    content: '...';
+    animation: dots 1s infinite;
+}
+
+@keyframes dots {
+    0%, 20% { color: transparent; }
+    40% { color: currentColor; }
+    100% { color: transparent; }
+}
+
+/* Connection status indicators */
+#connection-status.connected::before {
+    content: '🟢';
+}
+
+#connection-status.disconnected::before {
+    content: '🔴';
+}
+
+#connection-status.connecting::before {
+    content: '🟡';
+}
