@@ -216,10 +216,78 @@ main {
 
 .nav-group:hover .dropdown,
 .dropdown.show {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    pointer-events: auto;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+    display: block !important;
+}
+
+/* Emergency visibility override for dropdowns */
+.dropdown[style*="display: block"] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+    display: block !important;
+    background: white !important;
+    border: 1px solid #ccc !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+    z-index: 99999 !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    min-width: 150px !important;
+}
+
+/* MAXIMUM FORCE dropdown visibility */
+.dropdown.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    background: white !important;
+    border: 2px solid #000 !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+    z-index: 999999 !important;
+    min-width: 200px !important;
+    transform: none !important;
+    transition: none !important;
+    padding: 10px !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
+}
+
+/* Override ANY conflicting styles */
+div.dropdown.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* EMERGENCY BUTTON FIX - Override all button blocking */
+button[onclick] {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 10000 !important;
+    display: inline-block !important;
+    background: inherit !important;
+    border: inherit !important;
+    padding: inherit !important;
+    margin: inherit !important;
+}
+
+/* WORKING TEST SECTION - Maximum override */
+div[style*="background: yellow"] * {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative !important;
+    z-index: 10000 !important;
+    margin: 5px !important;
+    padding: 10px !important;
 }
 
 .dropdown-item {

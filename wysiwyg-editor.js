@@ -2247,8 +2247,8 @@ class WYSIWYGEditor {
             });
         }
         
-        // Dropdown toggle functionality
-        this.initializeDropdowns();
+        // Dropdown toggle functionality - DISABLED to prevent conflicts with debug-menu.js
+        // this.initializeDropdowns();
         
         // Menu bar hover enhancement
         this.enhanceMenuHover();
@@ -2258,18 +2258,24 @@ class WYSIWYGEditor {
      * Initialize dropdown menus
      */
     initializeDropdowns() {
+        console.log('🔧 Initializing dropdowns...');
         const navBtns = document.querySelectorAll('.nav-btn');
+        console.log('🔧 Found nav buttons:', navBtns.length);
         
-        navBtns.forEach(btn => {
+        navBtns.forEach((btn, index) => {
+            console.log(`🔧 Setting up dropdown for button ${index}:`, btn.id);
             btn.addEventListener('click', (e) => {
+                console.log('🔧 Dropdown button clicked:', btn.id);
                 e.stopPropagation();
                 const dropdown = btn.nextElementSibling;
+                console.log('🔧 Found dropdown:', dropdown?.id, dropdown?.classList.contains('dropdown'));
                 if (dropdown && dropdown.classList.contains('dropdown')) {
                     // Close other dropdowns
                     this.closeDropdowns(dropdown);
                     
                     // Toggle current dropdown
                     dropdown.classList.toggle('show');
+                    console.log('🔧 Dropdown toggled, has show class:', dropdown.classList.contains('show'));
                 }
             });
         });
