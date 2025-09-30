@@ -63,15 +63,24 @@ test.describe('WYSIWYG Editor Functionality', () => {
     // Initially should be MANUAL
     await expect(conversionIndicator).toContainText('MANUAL');
     
-    // Toggle to auto mode
-    await page.keyboard.press('Control+Shift+KeyC');
+    // Toggle to auto mode - Focus the editor first to ensure event reaches it
+    await page.locator('.wysiwyg-editor').focus();
+    await page.keyboard.down('Control');
+    await page.keyboard.down('Shift');
+    await page.keyboard.press('c');
+    await page.keyboard.up('Shift');
+    await page.keyboard.up('Control');
     
     // Should change to AUTO
     await page.waitForTimeout(500);
     await expect(conversionIndicator).toContainText('AUTO');
     
     // Toggle back to manual
-    await page.keyboard.press('Control+Shift+KeyC');
+    await page.keyboard.down('Control');
+    await page.keyboard.down('Shift');
+    await page.keyboard.press('c');
+    await page.keyboard.up('Shift');
+    await page.keyboard.up('Control');
     await page.waitForTimeout(500);
     await expect(conversionIndicator).toContainText('MANUAL');
   });

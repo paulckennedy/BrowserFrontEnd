@@ -199,9 +199,7 @@ class WYSIWYGEditor {
         this.shortcuts.set('ctrl+shift+m', () => this.toggleSourceMode());
         this.shortcuts.set('cmd+shift+m', () => this.toggleSourceMode());
         
-        // Conversion mode toggle
-        this.shortcuts.set('ctrl+shift+c', () => this.toggleAutoConversion());
-        this.shortcuts.set('cmd+shift+c', () => this.toggleAutoConversion());
+        // Conversion mode toggle (registered later in initializeAutoSave)
     }
 
     /**
