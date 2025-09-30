@@ -198,6 +198,10 @@ class WYSIWYGEditor {
         // Source toggle
         this.shortcuts.set('ctrl+shift+m', () => this.toggleSourceMode());
         this.shortcuts.set('cmd+shift+m', () => this.toggleSourceMode());
+        
+        // Conversion mode toggle
+        this.shortcuts.set('ctrl+shift+c', () => this.toggleAutoConversion());
+        this.shortcuts.set('cmd+shift+c', () => this.toggleAutoConversion());
     }
 
     /**
@@ -2354,16 +2358,22 @@ class WYSIWYGEditor {
     enhanceMenuHover() {
         const menuBar = document.getElementById('menu-bar');
         if (menuBar) {
+            // Ensure menu starts collapsed
+            menuBar.classList.add('collapsed');
+            menuBar.classList.remove('hover');
+            
             let hoverTimeout;
             
             menuBar.addEventListener('mouseenter', () => {
                 clearTimeout(hoverTimeout);
+                menuBar.classList.remove('collapsed');
                 menuBar.classList.add('hover');
             });
             
             menuBar.addEventListener('mouseleave', () => {
                 hoverTimeout = setTimeout(() => {
                     menuBar.classList.remove('hover');
+                    menuBar.classList.add('collapsed');
                     this.closeDropdowns();
                 }, 300);
             });
