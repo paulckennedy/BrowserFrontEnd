@@ -1,0 +1,64 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - text: ≡
+    - generic [ref=e3]:
+      - generic [ref=e4]: 📝 MarkdownEditor
+      - generic [ref=e5]:
+        - generic [ref=e6]: "💡 Tip: Hover over formatted elements to see markdown, type shortcuts like # for hints"
+        - button "⚡" [ref=e7] [cursor=pointer]
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e11]:
+        - generic [ref=e12]: md://
+        - textbox "untitled.md" [ref=e13]
+        - button "🔗" [ref=e14] [cursor=pointer]
+      - generic [ref=e15]:
+        - complementary [ref=e16] [cursor=pointer]:
+          - generic [ref=e17] [cursor=pointer]:
+            - heading "Documents" [level=3] [ref=e18] [cursor=pointer]
+            - button "📌" [ref=e19] [cursor=pointer]
+          - generic [ref=e21] [cursor=pointer]: Loading documents...
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - generic [ref=e24]:
+              - button "B" [ref=e25] [cursor=pointer]:
+                - strong [ref=e26] [cursor=pointer]: B
+              - button "I" [ref=e27] [cursor=pointer]:
+                - emphasis [ref=e28] [cursor=pointer]: I
+              - button "~~S~~" [ref=e29] [cursor=pointer]
+              - button "</>" [ref=e30] [cursor=pointer]
+            - generic [ref=e31]:
+              - button "H1" [ref=e32] [cursor=pointer]
+              - button "H2" [ref=e33] [cursor=pointer]
+              - button "H3" [ref=e34] [cursor=pointer]
+              - button "❝" [ref=e35] [cursor=pointer]
+            - generic [ref=e36]:
+              - button "• List" [ref=e37] [cursor=pointer]
+              - button "1. List" [ref=e38] [cursor=pointer]
+              - button "☐ Task" [ref=e39] [cursor=pointer]
+            - generic [ref=e40]:
+              - button "🔗" [ref=e41] [cursor=pointer]
+              - button "🖼️" [ref=e42] [cursor=pointer]
+              - button "📋" [ref=e43] [cursor=pointer]
+              - 'button "{ }" [ref=e44] [cursor=pointer]'
+            - generic [ref=e45]:
+              - button "⚡" [ref=e46] [cursor=pointer]
+              - button "⛶" [ref=e47] [cursor=pointer]
+          - heading "This is some test content for cursor position t INSERTED MORE TEXTesting" [level=1] [ref=e49]
+          - generic [ref=e50]:
+            - generic [ref=e51]: 12 words
+            - generic [ref=e52]: 118 characters
+            - generic [ref=e53]: Cursor position updated
+            - generic [ref=e54]: WYSIWYG Mode
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]: 🟢 Connected
+        - generic [ref=e58]: 📄 untitled.md
+      - generic [ref=e59]:
+        - generic [ref=e60]: Saved just now
+        - generic [ref=e61]: ⚡ Auto-save ON
+      - generic "Manual conversion - use Ctrl+Enter to convert markdown" [ref=e62]: MANUAL
+```

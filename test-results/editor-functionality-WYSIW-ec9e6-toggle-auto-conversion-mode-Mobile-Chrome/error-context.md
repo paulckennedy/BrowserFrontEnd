@@ -1,0 +1,103 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - text: ≡
+    - generic [ref=e3]:
+      - generic [ref=e4]: 📝 MarkdownEditor
+      - generic [ref=e5]:
+        - generic [ref=e6]: "💡 Tip: Hover over formatted elements to see markdown, type shortcuts like # for hints"
+        - button "⚡" [ref=e7] [cursor=pointer]
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e11]:
+        - generic [ref=e12]: md://
+        - textbox "untitled.md" [ref=e13]
+        - button "🔗" [ref=e14] [cursor=pointer]
+      - generic [ref=e15]:
+        - complementary [ref=e16] [cursor=pointer]:
+          - generic [ref=e17] [cursor=pointer]:
+            - heading "Documents" [level=3] [ref=e18] [cursor=pointer]
+            - button "📌" [ref=e19] [cursor=pointer]
+          - generic [ref=e21] [cursor=pointer]: Loading documents...
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - generic [ref=e24]:
+              - button "B" [ref=e25] [cursor=pointer]:
+                - strong [ref=e26] [cursor=pointer]: B
+              - button "I" [ref=e27] [cursor=pointer]:
+                - emphasis [ref=e28] [cursor=pointer]: I
+              - button "~~S~~" [ref=e29] [cursor=pointer]
+              - button "</>" [ref=e30] [cursor=pointer]
+            - generic [ref=e31]:
+              - button "H1" [ref=e32] [cursor=pointer]
+              - button "H2" [ref=e33] [cursor=pointer]
+              - button "H3" [ref=e34] [cursor=pointer]
+              - button "❝" [ref=e35] [cursor=pointer]
+            - generic [ref=e36]:
+              - button "• List" [ref=e37] [cursor=pointer]
+              - button "1. List" [ref=e38] [cursor=pointer]
+              - button "☐ Task" [ref=e39] [cursor=pointer]
+            - generic [ref=e40]:
+              - button "🔗" [ref=e41] [cursor=pointer]
+              - button "🖼️" [ref=e42] [cursor=pointer]
+              - button "📋" [ref=e43] [cursor=pointer]
+              - 'button "{ }" [ref=e44] [cursor=pointer]'
+            - generic [ref=e45]:
+              - button "⚡" [ref=e46] [cursor=pointer]
+              - button "⛶" [ref=e47] [cursor=pointer]
+          - generic [ref=e48]:
+            - heading "Welcome to MarkdownEditor" [level=1] [ref=e49]
+            - paragraph [ref=e50]: "This is a powerful browser-in-browser WYSIWYG markdown editor with:"
+            - list [ref=e51]:
+              - listitem [ref=e52]:
+                - text: 💾
+                - strong [ref=e53]: Auto-save functionality
+                - text: "- Changes saved automatically"
+              - listitem [ref=e54]:
+                - text: 🔄
+                - strong [ref=e55]: Live WYSIWYG editing
+                - text: "- Edit formatted text directly"
+              - listitem [ref=e56]:
+                - text: 🗂️
+                - strong [ref=e57]: Database storage
+                - text: "- Documents stored in PostgreSQL"
+              - listitem [ref=e58]:
+                - text: 🎨
+                - strong [ref=e59]: Rich formatting
+                - text: "- Full markdown support"
+              - listitem [ref=e60]:
+                - text: 🤖
+                - strong [ref=e61]: AI integration
+                - text: "- Smart writing assistance"
+            - heading "Getting Started" [level=2] [ref=e62]
+            - list [ref=e63]:
+              - listitem [ref=e64]: Start typing in this editor
+              - listitem [ref=e65]: Your changes are automatically saved
+              - listitem [ref=e66]: Use the toolbar for quick formatting
+              - listitem [ref=e67]: Toggle source view to see raw markdown
+            - heading "Features" [level=2] [ref=e68]
+            - heading "WYSIWYG Editing" [level=3] [ref=e69]
+            - paragraph [ref=e70]: Every keystroke is captured and auto-saved, similar to Obsidian's workflow with visual editing.
+            - heading "Database Integration" [level=3] [ref=e71]
+            - paragraph [ref=e72]: All documents are stored in a PostgreSQL database via SQL agent.
+            - heading "AI-Powered" [level=3] [ref=e73]
+            - paragraph [ref=e74]: Integrated AI assistance for writing, editing, and content generation.
+            - separator [ref=e75]
+            - paragraph [ref=e76]:
+              - emphasis [ref=e77]: Happy writing! 📝
+          - generic [ref=e78]:
+            - generic [ref=e79]: 117 words
+            - generic [ref=e80]: 1474 characters
+            - generic [ref=e81]: Line 1, Col 1
+            - generic [ref=e82]: WYSIWYG Mode
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - generic [ref=e85]: 🟢 Connected
+        - generic [ref=e86]: 📄 untitled.md
+      - generic [ref=e87]:
+        - generic [ref=e88]: Saved just now
+        - generic [ref=e89]: ⚡ Auto-save ON
+      - generic "Manual conversion - use Ctrl+Enter to convert markdown" [ref=e90]: MANUAL
+```

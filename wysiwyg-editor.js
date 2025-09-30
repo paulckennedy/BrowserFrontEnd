@@ -2506,5 +2506,9 @@ class WYSIWYGEditor {
 // Initialize the WYSIWYG editor when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     const editor = new WYSIWYGEditor();
+    
+    // Expose the editor instance globally for testing and external access
+    window.WYSIWYGEditor = editor;
+    
     editor.init().catch(console.error);
 });
