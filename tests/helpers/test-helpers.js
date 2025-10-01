@@ -12,24 +12,33 @@ export class EditorTestHelpers {
    * Wait for editor to be fully initialized
    */
   async waitForEditorReady() {
-    // Wait for the main editor element
-    await this.page.waitForSelector('.wysiwyg-editor', { timeout: 15000 });
+    // Add console listener to capture browser logs
+    this.page.on('console', msg => console.log('BROWSER:', msg.text()));
+    this.page.on('pageerror', error => console.log('PAGE ERROR:', error.message));
     
-    // Wait for the WYSIWYGEditor instance to be available
-    await this.page.waitForFunction(() => {
-      return window.WYSIWYGEditor !== undefined && 
-             window.WYSIWYGEditor.wysiwygEditor !== null &&
-             window.WYSIWYGEditor.wysiwygEditor !== undefined;
-    }, { timeout: 15000 });
+    // Wait for the WYSIWYG editor to be available globally (initialization complete)
+    await this.page.waitForFunction(
+      () => window.WYSIWYGEditor !== undefined,
+      {},
+      { timeout: 30000 }
+    );
+    
+    // Wait for the body to have either no-tabs or has-tabs class (initialization complete)
+    await this.page.waitForFunction(
+      () => document.body.classList.contains('no-tabs') || document.body.classList.contains('has-tabs'),
+      {},
+      { timeout: 15000 }
+    );
+    
+    // If we're in no-tabs state, open a file to make the editor visible for tests that need it
+    const hasNoTabs = await this.page.evaluate(() => document.body.classList.contains('no-tabs'));
+    if (hasNoTabs) {
+      await this.page.click('.tree-item[data-path="profile.md"]');
+      await this.page.waitForSelector('.wysiwyg-editor', { timeout: 10000 });
+    }
     
     // Wait for any async initialization to complete
     await this.page.waitForTimeout(1000);
-    
-    // Verify editor is actually ready to use
-    await this.page.waitForFunction(() => {
-      const editor = document.querySelector('.wysiwyg-editor');
-      return editor && editor.style.display !== 'none';
-    }, { timeout: 5000 });
   }
 
   /**

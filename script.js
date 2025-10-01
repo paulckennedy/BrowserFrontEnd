@@ -104,50 +104,7 @@ document.addEventListener('aiIntegrationReady', function(event) {
     console.log('Available AI Prompt Categories:', categories);
 });
 
-// AI Helper Functions
-const aiHelpers = {
-    // Generate content using AI prompts
-    generatePrompt: async function(category, type, variables = {}) {
-        if (!window.aiIntegration || !window.aiIntegration.isInitialized) {
-            console.warn('AI Integration not available');
-            return null;
-        }
-        
-        try {
-            const result = await window.aiIntegration.generateContent(category, type, variables);
-            return result;
-        } catch (error) {
-            console.error('Error generating AI content:', error);
-            return null;
-        }
-    },
-    
-    // Quick access to common prompts
-    getCodeReviewPrompt: function() {
-        return window.aiIntegration?.getPrompt('system', 'codeReview');
-    },
-    
-    getFeatureRequestPrompt: function(featureName, description) {
-        return window.aiIntegration?.getPrompt('development', 'featureRequest', {
-            feature_name: featureName,
-            description: description
-        });
-    },
-    
-    // Debug helper
-    listAllPrompts: function() {
-        if (!window.aiIntegration) return {};
-        
-        const categories = window.aiIntegration.getAvailableCategories();
-        const allPrompts = {};
-        
-        categories.forEach(category => {
-            allPrompts[category] = window.aiIntegration.getPromptTypes(category);
-        });
-        
-        return allPrompts;
-    }
-};
+// Note: AI Helper Functions could be implemented here if needed in the future
 
 // Utility functions
 const utils = {
@@ -184,7 +141,13 @@ const utils = {
     }
 };
 
-// Export utils for potential module use
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = utils;
+// Export utils for potential module use (Node.js environment)
+if (typeof window === 'undefined') {
+    // We're in Node.js - module will be available
+    try {
+        // eslint-disable-next-line no-undef
+        module.exports = utils;
+    } catch {
+        // Ignore if module is not available
+    }
 }

@@ -7,6 +7,7 @@
     <meta name="description" content="A sophisticated browser-in-browser markdown editor with live editing, auto-save, and database storage">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="editor-styles.css">
+    <script src="branding/branding.js"></script>
 </head>
 <body>
     <!-- Collapsing Menu Bar -->
@@ -79,8 +80,8 @@
     <main class="editor-container" id="editor-container">
         <!-- Browser-in-Browser Window -->
         <div class="browser-window">
-            <!-- Address Bar -->
-            <div class="address-bar">
+            <!-- Address Bar (hidden for now, keeping for future use) -->
+            <div class="address-bar" style="display: none;">
                 <div class="url-container">
                     <span class="protocol">md://</span>
                     <input type="text" class="url-input" id="document-path" placeholder="untitled.md" readonly>
@@ -97,12 +98,50 @@
                         <button class="explorer-toggle" id="explorer-toggle" title="Pin/Unpin Explorer">📌</button>
                     </div>
                     <div class="file-tree" id="file-tree">
-                        <div class="loading-files">Loading documents...</div>
+                        <!-- Root user document -->
+                        <div class="tree-item file root-user" data-path="profile.md">
+                            <span class="file-icon">�</span>
+                            <span class="file-name">My Profile</span>
+                        </div>
+                        
+                        <!-- User's project documents -->
+                        <div class="tree-item file project" data-path="projects/markdown-editor.md">
+                            <span class="file-icon">📄</span>
+                            <span class="file-name">Markdown Editor Project</span>
+                        </div>
+                        
+                        <div class="tree-item file project" data-path="projects/web-portfolio.md">
+                            <span class="file-icon">📄</span>
+                            <span class="file-name">Web Portfolio</span>
+                        </div>
+                        
+                        <div class="tree-item file project" data-path="projects/task-manager.md">
+                            <span class="file-icon">📄</span>
+                            <span class="file-name">Task Manager App</span>
+                        </div>
+                        
+                        <div class="tree-item file project" data-path="projects/blog-platform.md">
+                            <span class="file-icon">📄</span>
+                            <span class="file-name">Blog Platform</span>
+                        </div>
+                        
+                        <div class="tree-item file project" data-path="projects/ecommerce-site.md">
+                            <span class="file-icon">📄</span>
+                            <span class="file-name">E-commerce Site</span>
+                        </div>
                     </div>
                 </aside>
                 
                 <!-- WYSIWYG Editor -->
                 <div class="wysiwyg-editor-container">
+                    <!-- Tabs Container -->
+                    <div class="tabs-container" id="tabs-container">
+                        <div class="tab-bar" id="tab-bar">
+                            <!-- Tabs will be created dynamically when files are opened -->
+                            <button class="new-tab-btn" id="new-tab-btn" title="New tab" style="display: none;">+</button>
+                        </div>
+                    </div>
+                    
                     <div class="editor-toolbar">
                         <div class="toolbar-group">
                             <button class="toolbar-btn" id="bold-btn" title="Bold (Ctrl+B)"><strong>B</strong></button>
@@ -139,31 +178,7 @@
                          contenteditable="true" 
                          spellcheck="true"
                          data-placeholder="Start writing your markdown document...">
-                        <h1>Welcome to MarkdownEditor</h1>
-                        <p>This is a powerful browser-in-browser WYSIWYG markdown editor with:</p>
-                        <ul>
-                            <li>💾 <strong>Auto-save functionality</strong> - Changes saved automatically</li>
-                            <li>🔄 <strong>Live WYSIWYG editing</strong> - Edit formatted text directly</li>
-                            <li>🗂️ <strong>Database storage</strong> - Documents stored in PostgreSQL</li>
-                            <li>🎨 <strong>Rich formatting</strong> - Full markdown support</li>
-                            <li>🤖 <strong>AI integration</strong> - Smart writing assistance</li>
-                        </ul>
-                        <h2>Getting Started</h2>
-                        <ol>
-                            <li>Start typing in this editor</li>
-                            <li>Your changes are automatically saved</li>
-                            <li>Use the toolbar for quick formatting</li>
-                            <li>Toggle source view to see raw markdown</li>
-                        </ol>
-                        <h2>Features</h2>
-                        <h3>WYSIWYG Editing</h3>
-                        <p>Every keystroke is captured and auto-saved, similar to Obsidian's workflow with visual editing.</p>
-                        <h3>Database Integration</h3>
-                        <p>All documents are stored in a PostgreSQL database via SQL agent.</p>
-                        <h3>AI-Powered</h3>
-                        <p>Integrated AI assistance for writing, editing, and content generation.</p>
-                        <hr>
-                        <p><em>Happy writing! 📝</em></p>
+                        <!-- Content will be loaded by JavaScript -->
                     </div>
                     
                     <!-- Source Editor (Hidden by default) -->

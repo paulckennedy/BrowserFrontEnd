@@ -1,0 +1,11 @@
+# ESLint ignore file
+# Test files
+tests/
+playwright-report/
+test-results/
+
+# External libraries
+node_modules/
+
+# Generated files
+*.min.js

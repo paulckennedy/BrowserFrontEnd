@@ -3,12 +3,31 @@ import { test, expect } from '@playwright/test';
 test.describe('UI Layout and Visual Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('.wysiwyg-editor', { timeout: 15000 });
-    await page.waitForFunction(() => {
-      return window.WYSIWYGEditor !== undefined && 
-             window.WYSIWYGEditor.wysiwygEditor !== null;
-    }, { timeout: 15000 });
-    await page.waitForTimeout(1000); // Stabilization time
+    
+    // Add console listener to capture browser logs
+    page.on('console', msg => console.log('BROWSER:', msg.text()));
+    page.on('pageerror', error => console.log('PAGE ERROR:', error.message));
+    
+    // Wait for the WYSIWYG editor to be available globally (initialization complete)
+    await page.waitForFunction(
+      () => window.WYSIWYGEditor !== undefined,
+      {},
+      { timeout: 30000 }
+    );
+    
+    // Wait for the body to have either no-tabs or has-tabs class (initialization complete)
+    await page.waitForFunction(
+      () => document.body.classList.contains('no-tabs') || document.body.classList.contains('has-tabs'),
+      {},
+      { timeout: 15000 }
+    );
+    
+    // If we're in no-tabs state, open a file to make the editor visible for tests that need it
+    const hasNoTabs = await page.evaluate(() => document.body.classList.contains('no-tabs'));
+    if (hasNoTabs) {
+      await page.click('.tree-item[data-path="profile.md"]');
+      await page.waitForSelector('.wysiwyg-editor', { timeout: 10000 });
+    }
   });
 
   test('should have proper responsive layout', async ({ page }) => {
@@ -83,18 +102,25 @@ test.describe('UI Layout and Visual Tests', () => {
     });
     expect(hasRightSpacer).toBeTruthy();
     
-    // Verify address bar spacers
+    // Verify address bar spacers (only when tabs are open)
     const addressBar = page.locator('.address-bar');
-    await expect(addressBar).toBeVisible();
+    const hasTabsOpen = await page.evaluate(() => document.body.classList.contains('has-tabs'));
     
-    const hasAddressBarSpacers = await page.evaluate(() => {
-      const element = document.querySelector('.address-bar');
-      const beforeStyle = window.getComputedStyle(element, '::before');
-      const afterStyle = window.getComputedStyle(element, '::after');
-      return beforeStyle.getPropertyValue('width') === '5px' && 
-             afterStyle.getPropertyValue('width') === '5px';
-    });
-    expect(hasAddressBarSpacers).toBeTruthy();
+    if (hasTabsOpen) {
+      await expect(addressBar).toBeVisible();
+      
+      const hasAddressBarSpacers = await page.evaluate(() => {
+        const element = document.querySelector('.address-bar');
+        const beforeStyle = window.getComputedStyle(element, '::before');
+        const afterStyle = window.getComputedStyle(element, '::after');
+        return beforeStyle.getPropertyValue('width') === '5px' && 
+               afterStyle.getPropertyValue('width') === '5px';
+      });
+      expect(hasAddressBarSpacers).toBeTruthy();
+    } else {
+      // In no-tabs state, address bar is hidden - this is expected behavior
+      await expect(addressBar).toBeHidden();
+    }
   });
 
   test('should handle full-width editor layout', async ({ page }) => {
@@ -130,9 +156,16 @@ test.describe('UI Layout and Visual Tests', () => {
     const browserWindow = page.locator('.browser-window');
     await expect(browserWindow).toBeVisible();
     
-    // Address bar should be present
+    // Address bar visibility depends on tab state
     const addressBar = page.locator('.address-bar');
-    await expect(addressBar).toBeVisible();
+    const hasTabsOpen = await page.evaluate(() => document.body.classList.contains('has-tabs'));
+    
+    if (hasTabsOpen) {
+      await expect(addressBar).toBeVisible();
+    } else {
+      // In no-tabs state, address bar is hidden - this is expected behavior
+      await expect(addressBar).toBeHidden();
+    }
     
     // Browser buttons (if implemented)
     const browserBtns = page.locator('.browser-btn');

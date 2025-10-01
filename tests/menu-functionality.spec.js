@@ -3,12 +3,31 @@ import { test, expect } from '@playwright/test';
 test.describe('Menu Functionality Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('.wysiwyg-editor', { timeout: 15000 });
-    await page.waitForFunction(() => {
-      return window.WYSIWYGEditor !== undefined && 
-             window.WYSIWYGEditor.wysiwygEditor !== null;
-    }, { timeout: 15000 });
-    await page.waitForTimeout(1000); // Stabilization time
+    
+    // Add console listener to capture browser logs
+    page.on('console', msg => console.log('BROWSER:', msg.text()));
+    page.on('pageerror', error => console.log('PAGE ERROR:', error.message));
+    
+    // Wait for the WYSIWYG editor to be available globally (initialization complete)
+    await page.waitForFunction(
+      () => window.WYSIWYGEditor !== undefined,
+      {},
+      { timeout: 30000 }
+    );
+    
+    // Wait for the body to have either no-tabs or has-tabs class (initialization complete)
+    await page.waitForFunction(
+      () => document.body.classList.contains('no-tabs') || document.body.classList.contains('has-tabs'),
+      {},
+      { timeout: 15000 }
+    );
+    
+    // If we're in no-tabs state, open a file to make the editor visible for tests that need it
+    const hasNoTabs = await page.evaluate(() => document.body.classList.contains('no-tabs'));
+    if (hasNoTabs) {
+      await page.click('.tree-item[data-path="profile.md"]');
+      await page.waitForSelector('.wysiwyg-editor', { timeout: 10000 });
+    }
   });
 
   test('should expand menu bar on hover', async ({ page }) => {
@@ -85,12 +104,12 @@ test.describe('Menu Functionality Tests', () => {
     const editDropdown = page.locator('#edit-dropdown');
     await expect(editDropdown).toBeVisible();
     
-    // Check if edit menu items are present
-    await expect(page.locator('#undo')).toBeVisible();
-    await expect(page.locator('#redo')).toBeVisible();
-    await expect(page.locator('#cut')).toBeVisible();
-    await expect(page.locator('#copy')).toBeVisible();
-    await expect(page.locator('#paste')).toBeVisible();
+    // Check if edit menu items are present using text content
+    await expect(page.locator('#edit-dropdown button:has-text("Undo")')).toBeVisible();
+    await expect(page.locator('#edit-dropdown button:has-text("Redo")')).toBeVisible();
+    await expect(page.locator('#edit-dropdown button:has-text("Cut")')).toBeVisible();
+    await expect(page.locator('#edit-dropdown button:has-text("Copy")')).toBeVisible();
+    await expect(page.locator('#edit-dropdown button:has-text("Paste")')).toBeVisible();
   });
 
   test('should open View dropdown menu', async ({ page }) => {

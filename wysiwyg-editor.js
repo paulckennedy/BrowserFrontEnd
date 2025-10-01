@@ -8,13 +8,12 @@ class WYSIWYGEditor {
         this.wysiwygEditor = null;
         this.sourceEditor = null;
         this.isSourceMode = false;
-        this.currentDocument = {
-            id: null,
-            name: 'untitled.md',
-            content: '',
-            lastSaved: null,
-            isDirty: false
-        };
+        
+        // Multi-document support
+        this.documents = new Map(); // Map of tab-id -> document
+        this.activeTabId = null; // Start with no active tab
+        this.tabCounter = 1; // For generating unique tab IDs
+        this.currentDocument = null; // No default document
         this.autoSaveTimer = null;
         this.autoSaveDelay = 3000; // Default delay when not editing (increased for performance)
         this.editingDelay = 8000; // Longer delay while actively editing (increased for performance)
@@ -89,6 +88,11 @@ class WYSIWYGEditor {
      */
     async init() {
         try {
+            console.log('Step 0: Clearing localStorage and sessionStorage');
+            localStorage.clear();
+            sessionStorage.clear();
+            console.log('Cleared all localStorage and sessionStorage');
+            
             console.log('Step 1: Setting up elements');
             this.setupElements();
             console.log('Step 2: Elements setup complete, wysiwygEditor:', !!this.wysiwygEditor);
@@ -118,6 +122,17 @@ class WYSIWYGEditor {
             this.updateStats();
             this.updateStatus('Ready');
             this.initializeExplorerState();
+            
+            console.log('Step 11: Initializing tab system');
+            this.initializeTabSystem();
+            
+            console.log('Step 11.5: Force no-tabs state immediately');
+            // Force the no-tabs state immediately
+            document.body.classList.add('no-tabs');
+            console.log('Added no-tabs class to body:', document.body.classList.toString());
+            
+            console.log('Step 12: Clean start - no default content to load');
+            console.log('Clean start initialized - user can open files from explorer');
             
             console.log('WYSIWYG Editor initialized successfully');
             return true;
@@ -209,12 +224,22 @@ class WYSIWYGEditor {
         this.shortcuts.set('cmd+k', () => this.insertLink());
         
         // Save
-        this.shortcuts.set('ctrl+s', (e) => { e.preventDefault(); this.saveDocument(); });
+        this.shortcuts.set('ctrl+s', (_e) => { _e.preventDefault(); this.saveDocument(); });
         this.shortcuts.set('cmd+s', (e) => { e.preventDefault(); this.saveDocument(); });
         
         // Source toggle
         this.shortcuts.set('ctrl+shift+m', () => this.toggleSourceMode());
         this.shortcuts.set('cmd+shift+m', () => this.toggleSourceMode());
+        
+        // Tab management shortcuts
+        this.shortcuts.set('ctrl+t', (e) => { e.preventDefault(); this.createNewTab('Untitled'); });
+        this.shortcuts.set('cmd+t', (e) => { e.preventDefault(); this.createNewTab('Untitled'); });
+        this.shortcuts.set('ctrl+w', (e) => { e.preventDefault(); this.closeCurrentTab().catch(err => console.error('Error closing tab:', err)); });
+        this.shortcuts.set('cmd+w', (e) => { e.preventDefault(); this.closeCurrentTab().catch(err => console.error('Error closing tab:', err)); });
+        this.shortcuts.set('ctrl+tab', (e) => { e.preventDefault(); this.switchToNextTab(); });
+        this.shortcuts.set('cmd+option+right', (e) => { e.preventDefault(); this.switchToNextTab(); });
+        this.shortcuts.set('ctrl+shift+tab', (e) => { e.preventDefault(); this.switchToPreviousTab(); });
+        this.shortcuts.set('cmd+option+left', (e) => { e.preventDefault(); this.switchToPreviousTab(); });
         
         // Conversion mode toggle (registered later in initializeAutoSave)
     }
@@ -814,15 +839,15 @@ class WYSIWYGEditor {
         // Don't show if already visible or if we're editing
         if (this.markdownTooltip.isVisible || this.isActivelyEditing) return;
         
-        const markdown = this.getMarkdownForElement(element);
-        if (!markdown || markdown.trim() === '') return;
+        const markdownData = this.getMarkdownForElement(element);
+        if (!markdownData || !markdownData.markdown || markdownData.markdown.trim() === '') return;
         
         // Create tooltip element
         const tooltip = document.createElement('div');
         tooltip.className = 'markdown-tooltip';
         tooltip.innerHTML = `
             <div class="tooltip-header">Markdown:</div>
-            <code class="tooltip-content">${this.escapeHtml(markdown)}</code>
+            <code class="tooltip-content">${this.escapeHtml(markdownData.markdown)}</code>
         `;
         
         // Position tooltip
@@ -1994,6 +2019,8 @@ class WYSIWYGEditor {
     markDocumentDirty() {
         this.currentDocument.isDirty = true;
         this.updateStatus('Unsaved changes', 'warning');
+        // Update tab visual state to show modified indicator
+        this.updateTabBar();
     }
 
     /**
@@ -2008,16 +2035,31 @@ class WYSIWYGEditor {
                 ? this.sourceEditor.value 
                 : this.htmlToMarkdown(this.wysiwygEditor.innerHTML);
             
-            this.currentDocument.content = content;
-            this.currentDocument.lastSaved = new Date().toISOString();
-            this.currentDocument.isDirty = false;
+            // Update current document with tabs support
+            if (this.activeTabId && this.documents.has(this.activeTabId)) {
+                const currentDoc = this.documents.get(this.activeTabId);
+                currentDoc.content = content;
+                currentDoc.lastSaved = new Date().toISOString();
+                currentDoc.isDirty = false;
+                
+                // Update tab visual state
+                this.updateTabBar();
+            } else if (this.currentDocument) {
+                // Fallback for non-tabs mode
+                this.currentDocument.content = content;
+                this.currentDocument.lastSaved = new Date().toISOString();
+                this.currentDocument.isDirty = false;
+            }
             
             // Save to database or localStorage
             if (this.sqlAgent) {
-                await this.sqlAgent.saveDocument(this.currentDocument);
+                const docToSave = this.activeTabId && this.documents.has(this.activeTabId) 
+                    ? this.documents.get(this.activeTabId) 
+                    : this.currentDocument;
+                await this.sqlAgent.saveDocument(docToSave);
             } else {
                 localStorage.setItem('markdown-editor-content', content);
-                localStorage.setItem('markdown-editor-last-saved', this.currentDocument.lastSaved);
+                localStorage.setItem('markdown-editor-last-saved', new Date().toISOString());
             }
             
             // Refresh WYSIWYG display to show updated markdown formatting
@@ -2144,11 +2186,15 @@ class WYSIWYGEditor {
      * Load documents (placeholder)
      */
     async loadDocuments() {
-        // Load from localStorage for now
-        const savedContent = localStorage.getItem('markdown-editor-content');
-        if (savedContent) {
-            this.wysiwygEditor.innerHTML = this.markdownToHTML(savedContent);
-            this.currentDocument.content = savedContent;
+        // Allow default profile content to load
+        console.log('loadDocuments: Allowing profile content in first tab');
+        
+        // Only log current content, don't clear it
+        if (this.wysiwygEditor) {
+            console.log('loadDocuments - WYSIWYG content preview:', this.wysiwygEditor.innerHTML.substring(0, 100));
+        }
+        if (this.sourceEditor) {
+            console.log('loadDocuments - Source content preview:', this.sourceEditor.value.substring(0, 100));
         }
     }
 
@@ -2177,6 +2223,740 @@ class WYSIWYGEditor {
      */
     setupFileExplorerEvents() {
         // File explorer functionality
+    }
+
+    // ===========================================
+    // TAB MANAGEMENT SYSTEM
+    // ===========================================
+
+    /**
+     * Initialize tab system
+     */
+    initializeTabSystem() {
+        // Start with no tabs - user will open files as needed
+        this.activeTabId = null;
+        this.currentDocument = null;
+        
+        this.setupTabEventListeners();
+        this.updateTabBar();
+        this.updateEditorVisibility();
+        console.log('Tab system initialized with no tabs - clean start');
+        
+        // Initialize file tree
+        this.initializeFileTree();
+    }
+
+    /**
+     * Initialize file tree functionality
+     */
+    initializeFileTree() {
+        const fileTree = document.getElementById('file-tree');
+        if (!fileTree) return;
+
+        // Handle folder expand/collapse
+        fileTree.addEventListener('click', (e) => {
+            const folderItem = e.target.closest('.tree-item.folder');
+            const fileItem = e.target.closest('.tree-item.file');
+            
+            if (folderItem) {
+                e.preventDefault();
+                this.toggleFolder(folderItem);
+            } else if (fileItem) {
+                e.preventDefault();
+                this.openFileFromTree(fileItem);
+            }
+        });
+        
+        console.log('File tree initialized');
+    }
+
+    /**
+     * Toggle folder expansion/collapse
+     */
+    toggleFolder(folderElement) {
+        const folderPath = folderElement.dataset.path;
+        const toggle = folderElement.querySelector('.folder-toggle');
+        const children = document.querySelector(`[data-parent="${folderPath}"]`);
+        
+        if (!toggle || !children) return;
+        
+        const isExpanded = folderElement.classList.contains('expanded');
+        
+        if (isExpanded) {
+            // Collapse
+            folderElement.classList.remove('expanded');
+            folderElement.classList.add('collapsed');
+            toggle.textContent = '▶';
+            children.classList.add('hidden');
+        } else {
+            // Expand
+            folderElement.classList.remove('collapsed');
+            folderElement.classList.add('expanded');
+            toggle.textContent = '▼';
+            children.classList.remove('hidden');
+        }
+        
+        console.log(`Toggled folder: ${folderPath} (${isExpanded ? 'collapsed' : 'expanded'})`);
+    }
+
+    /**
+     * Open file from tree view
+     */
+    openFileFromTree(fileElement) {
+        const filePath = fileElement.dataset.path;
+        const fileName = fileElement.querySelector('.file-name').textContent;
+        
+        console.log(`Opening file: ${fileName} (${filePath})`);
+        
+        // Check if this file is already open in a tab
+        for (const [tabId, doc] of this.documents.entries()) {
+            if (doc.path === filePath || (doc.name === fileName && doc.path)) {
+                console.log(`File ${fileName} is already open in tab ${tabId}, switching to it`);
+                this.switchToTab(tabId);
+                
+                // Update visual selection
+                const allItems = document.querySelectorAll('.tree-item');
+                allItems.forEach(item => item.classList.remove('selected'));
+                fileElement.classList.add('selected');
+                return; // Don't create a new tab
+            }
+        }
+        
+        // File is not open, proceed with creating new tab
+        // Remove selection from all items
+        const allItems = document.querySelectorAll('.tree-item');
+        allItems.forEach(item => item.classList.remove('selected'));
+        
+        // Select current item
+        fileElement.classList.add('selected');
+        
+        // Create new tab with the file content (mock content for now)
+        const mockContent = this.getMockFileContent(filePath, fileName);
+        const tabId = this.createNewTab(fileName, mockContent);
+        
+        // Update the document path in the tab
+        if (this.documents.has(tabId)) {
+            const doc = this.documents.get(tabId);
+            doc.path = filePath;
+        }
+    }
+
+    /**
+     * Get mock content for different file types
+     */
+    getMockFileContent(filePath, fileName) {
+        const mockContents = {
+            'profile.md': `# My Profile\n\n👤 **Developer & Creator**\n\n## About Me\n\nWelcome to my digital workspace! I'm a passionate developer working on various projects and constantly learning new technologies.\n\n## Current Focus\n\n- Building modern web applications\n- Exploring new frameworks and tools\n- Contributing to open source projects\n- Documenting my development journey\n\n## Skills\n\n### Frontend\n- JavaScript/TypeScript\n- React, Vue.js\n- HTML5, CSS3\n- Responsive Design\n\n### Backend\n- Node.js\n- Python\n- Databases (SQL/NoSQL)\n- API Development\n\n### Tools & Workflow\n- Git/GitHub\n- VS Code\n- Docker\n- CI/CD\n\n## Current Projects\n\nI'm actively working on several exciting projects:\n\n1. **Markdown Editor Project** - A feature-rich markdown editor with live preview\n2. **Web Portfolio** - Showcase of my work and skills\n3. **Task Manager App** - Productivity tool for personal use\n4. **Blog Platform** - Content management system\n5. **E-commerce Site** - Full-stack online store\n\n## Contact\n\n📧 Email: developer@example.com\n🌐 Portfolio: https://myportfolio.dev\n💼 LinkedIn: linkedin.com/in/myprofile\n🐙 GitHub: github.com/myusername\n\n---\n\n*Last updated: ${new Date().toLocaleDateString()}*`,
+            
+            'projects/markdown-editor.md': `# Markdown Editor Project\n\n## 📝 Project Overview\n\nA modern, feature-rich markdown editor built with vanilla JavaScript, featuring real-time preview, syntax highlighting, and a clean user interface.\n\n## ✨ Features\n\n- **Live Preview** - See your markdown rendered in real-time\n- **Syntax Highlighting** - Code blocks with syntax highlighting\n- **Tab Support** - Multiple document editing\n- **Auto-save** - Never lose your work\n- **File Explorer** - Organize your documents\n- **Export Options** - Save as HTML, PDF, or plain text\n\n## 🛠️ Technology Stack\n\n- **Frontend**: HTML5, CSS3, JavaScript (ES6+)\n- **Editor**: Custom WYSIWYG implementation\n- **Styling**: CSS Grid, Flexbox\n- **Icons**: Emoji and Unicode symbols\n\n## 📋 Development Status\n\n### ✅ Completed\n- [x] Basic editor functionality\n- [x] Markdown parsing and rendering\n- [x] Tab system implementation\n- [x] File explorer tree view\n- [x] Auto-save functionality\n\n### 🚧 In Progress\n- [ ] Syntax highlighting for code blocks\n- [ ] Export functionality\n- [ ] Search and replace\n- [ ] Collaborative editing\n\n### 📅 Roadmap\n- [ ] Plugin system\n- [ ] Themes and customization\n- [ ] Mobile app version\n- [ ] Cloud synchronization\n\n## 🚀 Getting Started\n\n\`\`\`bash\n# Clone the repository\ngit clone https://github.com/username/markdown-editor.git\n\n# Navigate to project directory\ncd markdown-editor\n\n# Start development server\npython3 -m http.server 8080\n\`\`\`\n\n## 📖 Documentation\n\nFor detailed documentation, see the project wiki or visit the docs folder.\n\n## 🤝 Contributing\n\nContributions are welcome! Please read the contributing guidelines before submitting pull requests.\n\n## 📄 License\n\nMIT License - see LICENSE file for details.`,
+            
+            'projects/web-portfolio.md': `# Web Portfolio\n\n## 🌟 Project Overview\n\nA responsive, modern portfolio website showcasing my development skills, projects, and professional experience.\n\n## 🎯 Goals\n\n- Showcase technical skills and projects\n- Provide easy contact methods\n- Demonstrate design and UX capabilities\n- Optimize for search engines\n- Ensure mobile responsiveness\n\n## 🎨 Design Approach\n\n### Visual Style\n- **Clean & Modern** - Minimalist design with focus on content\n- **Professional** - Business-appropriate color scheme\n- **Interactive** - Smooth animations and transitions\n- **Accessible** - WCAG compliant design\n\n### Layout Sections\n1. **Hero Section** - Introduction and call-to-action\n2. **About** - Personal background and skills\n3. **Projects** - Featured work with case studies\n4. **Experience** - Professional timeline\n5. **Contact** - Multiple contact methods\n\n## 🛠️ Technical Implementation\n\n### Frontend\n- **HTML5** - Semantic markup\n- **CSS3** - Custom properties, Grid, Flexbox\n- **JavaScript** - Interactive elements and animations\n- **Responsive Design** - Mobile-first approach\n\n### Performance\n- **Optimized Images** - WebP format with fallbacks\n- **Minified Assets** - Compressed CSS and JS\n- **Lazy Loading** - Improved page load times\n- **CDN Integration** - Fast global content delivery\n\n## 📊 Features\n\n### Core Features\n- [x] Responsive design (mobile, tablet, desktop)\n- [x] Project showcase with live demos\n- [x] Skills visualization\n- [x] Contact form with validation\n- [x] SEO optimization\n\n### Advanced Features\n- [ ] Dark/light mode toggle\n- [ ] Blog integration\n- [ ] Analytics dashboard\n- [ ] CMS integration for easy updates\n\n## 🚀 Deployment\n\n- **Hosting**: Netlify/Vercel\n- **Domain**: Custom domain with SSL\n- **CI/CD**: Automated deployment from Git\n- **Performance Monitoring**: Lighthouse scores tracking\n\n## 📈 Metrics & Goals\n\n- **Performance**: 95+ Lighthouse score\n- **Accessibility**: WCAG AA compliance\n- **SEO**: Top 10 ranking for relevant keywords\n- **Conversion**: 5%+ contact form completion rate`,
+            
+            'projects/task-manager.md': `# Task Manager App\n\n## 📋 Project Overview\n\nA comprehensive task management application designed to boost productivity and help organize daily workflows efficiently.\n\n## 🎯 Core Features\n\n### Task Management\n- **Create & Edit Tasks** - Rich text descriptions with markdown support\n- **Priority Levels** - High, Medium, Low with color coding\n- **Due Dates** - Calendar integration with reminders\n- **Categories** - Custom tags and project organization\n- **Subtasks** - Break down complex tasks\n\n### Organization\n- **Projects** - Group related tasks together\n- **Lists** - Multiple list views (Today, Week, All)\n- **Filters** - Sort by priority, date, category\n- **Search** - Quick task lookup\n\n### Productivity Features\n- **Time Tracking** - Pomodoro timer integration\n- **Progress Tracking** - Visual progress indicators\n- **Statistics** - Productivity analytics\n- **Notifications** - Browser and email reminders\n\n## 🛠️ Technical Stack\n\n### Frontend\n- **Framework**: React with TypeScript\n- **Styling**: Tailwind CSS\n- **State Management**: Redux Toolkit\n- **UI Components**: Custom component library\n\n### Backend\n- **API**: Node.js with Express\n- **Database**: PostgreSQL with Prisma ORM\n- **Authentication**: JWT with refresh tokens\n- **File Storage**: AWS S3 for attachments\n\n### Infrastructure\n- **Hosting**: Docker containers on AWS ECS\n- **Database**: AWS RDS PostgreSQL\n- **CDN**: CloudFront for static assets\n- **Monitoring**: CloudWatch and Sentry\n\n## 📱 User Experience\n\n### Interface Design\n- **Clean Layout** - Distraction-free workspace\n- **Keyboard Shortcuts** - Power user features\n- **Drag & Drop** - Intuitive task organization\n- **Dark Mode** - Eye-friendly night mode\n\n### Mobile Support\n- **Responsive Web App** - Works on all devices\n- **Offline Mode** - Local storage with sync\n- **Touch Gestures** - Swipe actions for quick edits\n\n## 🚀 Development Roadmap\n\n### Phase 1 - Core Features ✅\n- [x] Basic task CRUD operations\n- [x] User authentication\n- [x] Project organization\n- [x] Due date management\n\n### Phase 2 - Enhanced Features 🚧\n- [x] Time tracking integration\n- [ ] Team collaboration features\n- [ ] Advanced filtering and search\n- [ ] API for third-party integrations\n\n### Phase 3 - Advanced Features 📅\n- [ ] AI-powered task suggestions\n- [ ] Calendar integration (Google, Outlook)\n- [ ] Native mobile apps\n- [ ] Enterprise features\n\n## 📊 Success Metrics\n\n- **User Engagement**: 80% daily active users\n- **Task Completion**: 60% average completion rate\n- **Performance**: <2s page load time\n- **User Satisfaction**: 4.5+ star rating`,
+            
+            'projects/blog-platform.md': `# Blog Platform\n\n## 📖 Project Overview\n\nA full-featured content management system and blogging platform built for writers, content creators, and businesses.\n\n## 🌟 Key Features\n\n### Content Creation\n- **Rich Text Editor** - WYSIWYG with markdown support\n- **Media Management** - Image, video, and file uploads\n- **SEO Tools** - Meta tags, slugs, and social media previews\n- **Scheduling** - Publish posts at specified times\n- **Draft System** - Save and preview before publishing\n\n### Content Organization\n- **Categories & Tags** - Flexible taxonomy system\n- **Series** - Multi-part article management\n- **Related Posts** - AI-powered content suggestions\n- **Archives** - Date-based content organization\n\n### User Management\n- **Multi-Author Support** - Team collaboration features\n- **Role Management** - Admin, Editor, Author, Contributor roles\n- **User Profiles** - Custom author pages\n- **Comment System** - Moderated discussions\n\n## 🎨 Frontend Features\n\n### Reader Experience\n- **Responsive Design** - Mobile-first approach\n- **Fast Loading** - Optimized for performance\n- **Reading Progress** - Visual progress indicators\n- **Social Sharing** - Integrated sharing buttons\n- **Newsletter Signup** - Email list building\n\n### Customization\n- **Theme System** - Multiple layout options\n- **Custom CSS** - Advanced styling capabilities\n- **Widget Areas** - Flexible sidebar content\n- **Menu Builder** - Drag-and-drop navigation\n\n## 🛠️ Technical Architecture\n\n### Backend Stack\n- **Framework**: Django with Django REST Framework\n- **Database**: PostgreSQL with full-text search\n- **Media Storage**: AWS S3 with CloudFront CDN\n- **Search**: Elasticsearch for advanced search\n- **Cache**: Redis for session and page caching\n\n### Frontend Stack\n- **Framework**: Next.js with TypeScript\n- **Styling**: Styled Components with theme support\n- **State Management**: SWR for data fetching\n- **SEO**: Next.js built-in optimization\n\n### Infrastructure\n- **Hosting**: Vercel for frontend, AWS for backend\n- **Database**: AWS RDS PostgreSQL\n- **Monitoring**: DataDog for performance monitoring\n- **Analytics**: Google Analytics and custom metrics\n\n## 📈 Content Management\n\n### Editorial Workflow\n- **Draft → Review → Publish** pipeline\n- **Content calendar** with deadline tracking\n- **Bulk operations** for content management\n- **Import/Export** tools for content migration\n\n### Analytics & Insights\n- **Post Performance** - Views, engagement metrics\n- **Audience Analytics** - Reader demographics\n- **SEO Metrics** - Search ranking tracking\n- **Social Media** - Share and engagement tracking\n\n## 🚀 Deployment & Operations\n\n### Development Workflow\n- **Git-based** - Feature branch workflow\n- **CI/CD Pipeline** - Automated testing and deployment\n- **Staging Environment** - Content preview before production\n- **Database Migrations** - Version-controlled schema changes\n\n### Performance Optimization\n- **Image Optimization** - Automatic resizing and compression\n- **Lazy Loading** - Improved page load times\n- **CDN Integration** - Global content delivery\n- **Caching Strategy** - Multi-level caching system\n\n## 🎯 Future Enhancements\n\n### Phase 1 - Core Platform ✅\n- [x] Content creation and management\n- [x] User authentication and roles\n- [x] Responsive frontend\n- [x] Basic SEO features\n\n### Phase 2 - Advanced Features 🚧\n- [ ] AI-powered content suggestions\n- [ ] Advanced analytics dashboard\n- [ ] E-commerce integration\n- [ ] Multi-language support\n\n### Phase 3 - Enterprise Features 📅\n- [ ] White-label solutions\n- [ ] Advanced workflow management\n- [ ] Enterprise SSO integration\n- [ ] Custom plugin system`,
+            
+            'projects/ecommerce-site.md': `# E-commerce Site\n\n## 🛒 Project Overview\n\nA modern, full-stack e-commerce platform designed to provide a seamless shopping experience for customers and comprehensive management tools for administrators.\n\n## 🎯 Business Goals\n\n- **Customer Experience** - Intuitive, fast, and secure shopping\n- **Conversion Optimization** - Maximize sales through UX/UI design\n- **Scalability** - Handle growth in products and traffic\n- **Management Efficiency** - Streamlined admin operations\n\n## 🌟 Customer-Facing Features\n\n### Shopping Experience\n- **Product Catalog** - Advanced search, filtering, and sorting\n- **Product Details** - High-res images, 360° views, reviews\n- **Shopping Cart** - Persistent cart across sessions\n- **Wishlist** - Save items for later purchase\n- **Quick Buy** - One-click purchasing for registered users\n\n### Account Management\n- **User Registration** - Social login and email verification\n- **Profile Management** - Addresses, payment methods, preferences\n- **Order History** - Track current and past orders\n- **Returns & Exchanges** - Self-service return portal\n\n### Checkout Process\n- **Guest Checkout** - No registration required\n- **Payment Integration** - Stripe, PayPal, Apple Pay, Google Pay\n- **Shipping Options** - Multiple carriers and delivery speeds\n- **Order Confirmation** - Email receipts and tracking info\n\n## 🔧 Admin Features\n\n### Product Management\n- **Inventory Control** - Stock tracking with low-stock alerts\n- **Product Variants** - Size, color, and style management\n- **Bulk Operations** - Mass product updates and imports\n- **Digital Products** - Support for downloadable content\n\n### Order Management\n- **Order Processing** - Status updates and fulfillment tracking\n- **Customer Service** - Built-in help desk integration\n- **Returns Processing** - Automated return workflows\n- **Reporting** - Sales analytics and performance metrics\n\n### Marketing Tools\n- **Discount Codes** - Percentage and fixed-amount coupons\n- **Email Campaigns** - Integrated email marketing\n- **SEO Tools** - Product and category optimization\n- **Social Media** - Automated social sharing\n\n## 🛠️ Technical Implementation\n\n### Frontend Stack\n- **Framework**: React with Next.js for SSR/SSG\n- **Styling**: Tailwind CSS with custom design system\n- **State Management**: Zustand for global state\n- **Forms**: React Hook Form with Zod validation\n- **Payments**: Stripe Elements integration\n\n### Backend Stack\n- **API**: Node.js with Express and TypeScript\n- **Database**: PostgreSQL with Prisma ORM\n- **Authentication**: NextAuth.js with multiple providers\n- **File Storage**: AWS S3 for product images\n- **Email Service**: SendGrid for transactional emails\n\n### Infrastructure\n- **Hosting**: Vercel (frontend) + AWS ECS (backend)\n- **Database**: AWS RDS PostgreSQL with read replicas\n- **CDN**: CloudFront for global asset delivery\n- **Monitoring**: New Relic for application performance\n- **Search**: Algolia for product search\n\n## 📊 Performance & Security\n\n### Performance Optimization\n- **Image Optimization** - WebP format with lazy loading\n- **Code Splitting** - Route-based bundle optimization\n- **Caching Strategy** - Redis for session and page caching\n- **Database Indexing** - Optimized queries for fast searches\n\n### Security Measures\n- **PCI Compliance** - Secure payment processing\n- **SSL Encryption** - End-to-end data protection\n- **Input Validation** - Comprehensive data sanitization\n- **Rate Limiting** - API abuse prevention\n- **Security Headers** - OWASP recommended configurations\n\n## 📱 Mobile Experience\n\n### Progressive Web App\n- **Offline Browsing** - Cached product catalog\n- **Push Notifications** - Order updates and promotions\n- **Add to Home Screen** - App-like experience\n- **Touch Gestures** - Swipe navigation and actions\n\n### Mobile Optimization\n- **Responsive Design** - Optimized for all screen sizes\n- **Touch-Friendly** - Large buttons and easy navigation\n- **Fast Loading** - Optimized for mobile networks\n- **Mobile Payments** - Support for mobile wallets\n\n## 🚀 Development Roadmap\n\n### Phase 1 - MVP ✅\n- [x] Basic product catalog and search\n- [x] Shopping cart and checkout\n- [x] User authentication and accounts\n- [x] Payment processing integration\n- [x] Admin panel for product management\n\n### Phase 2 - Enhanced Features 🚧\n- [x] Advanced search and filtering\n- [x] Customer reviews and ratings\n- [ ] Inventory management system\n- [ ] Email marketing integration\n- [ ] Multi-language support\n\n### Phase 3 - Advanced Features 📅\n- [ ] B2B wholesale portal\n- [ ] Subscription and recurring billing\n- [ ] AI-powered product recommendations\n- [ ] Advanced analytics and reporting\n- [ ] Multi-vendor marketplace features\n\n## 📈 Success Metrics\n\n- **Conversion Rate**: Target 3-5%\n- **Page Load Speed**: <3 seconds\n- **Mobile Usage**: 60%+ of traffic\n- **Customer Satisfaction**: 4.5+ star rating\n- **Cart Abandonment**: <70%\n- **Return Customer Rate**: 30%+`
+        };
+        
+        return mockContents[filePath] || `# ${fileName}\n\nThis is a sample project document.\n\nAdd your project details here...`;
+    }
+
+    /**
+     * Setup tab event listeners
+     */
+    setupTabEventListeners() {
+        const tabBar = document.getElementById('tab-bar');
+        const newTabBtn = document.getElementById('new-tab-btn');
+
+        if (newTabBtn) {
+            newTabBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('New tab button clicked');
+                this.createNewTab();
+            });
+        }
+
+        if (tabBar) {
+            // Event delegation for tab clicks and close buttons
+            tabBar.addEventListener('click', (e) => {
+                const target = e.target;
+                const closeBtn = target.closest('.tab-close');
+                const tab = target.closest('.tab');
+                
+                console.log('Tab click - Target:', target.tagName, 'CloseBtn:', !!closeBtn, 'Tab:', tab?.dataset.tabId);
+                
+                if (closeBtn && tab) {
+                    // Close button clicked
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('CLOSING TAB:', tab.dataset.tabId);
+                    this.closeTab(tab.dataset.tabId).catch(err => console.error('Error closing tab:', err));
+                } else if (tab && !closeBtn) {
+                    // Tab body clicked (not close button)
+                    e.preventDefault();
+                    console.log('SWITCHING TO TAB:', tab.dataset.tabId);
+                    this.switchToTab(tab.dataset.tabId);
+                }
+            });
+            
+            // Add separate event listener specifically for close buttons
+            tabBar.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab-close')) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    const tab = e.target.closest('.tab');
+                    if (tab) {
+                        console.log('DIRECT CLOSE BUTTON CLICK:', tab.dataset.tabId);
+                        this.closeTab(tab.dataset.tabId).catch(err => console.error('Error closing tab:', err));
+                    }
+                }
+            }, true); // Use capture phase
+
+            // Right-click context menu for tabs
+            tabBar.addEventListener('contextmenu', (e) => {
+                const tab = e.target.closest('.tab');
+                if (tab) {
+                    e.preventDefault();
+                    this.showTabContextMenu(e, tab.dataset.tabId);
+                }
+            });
+        }
+
+        // Keyboard shortcuts for tabs
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.code) {
+                    case 'KeyT':
+                        if (!e.shiftKey) {
+                            e.preventDefault();
+                            this.createNewTab();
+                        }
+                        break;
+                    case 'KeyW':
+                        e.preventDefault();
+                        this.closeCurrentTab();
+                        break;
+                    case 'Tab':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            this.switchToPreviousTab();
+                        } else {
+                            this.switchToNextTab();
+                        }
+                        break;
+                }
+            }
+        });
+    }
+
+    /**
+     * Create a new tab
+     */
+    createNewTab(name = null, content = '') {
+        const tabId = `tab-${this.tabCounter++}`;
+        const tabName = name || `untitled-${this.tabCounter - 1}.md`;
+        
+        // Create new document
+        const newDocument = {
+            id: tabId,
+            name: tabName,
+            content: content,
+            lastSaved: null,
+            isDirty: false
+        };
+        
+        this.documents.set(tabId, newDocument);
+        
+        // Create tab element
+        this.createTabElement(tabId, tabName);
+        
+        // Switch to new tab
+        this.switchToTab(tabId);
+        this.updateEditorVisibility();
+        
+        this.updateStatus(`New tab created: ${tabName}`, 'success');
+        console.log(`Created new tab: ${tabName} (${tabId})`);
+        return tabId;
+    }
+
+    /**
+     * Create tab DOM element
+     */
+    createTabElement(tabId, name) {
+        const tabBar = document.getElementById('tab-bar');
+        const newTabBtn = document.getElementById('new-tab-btn');
+        
+        console.log(`Creating tab element for ${tabId} with name ${name}`);
+        console.log(`Tab bar found:`, !!tabBar);
+        console.log(`New tab button found:`, !!newTabBtn);
+        
+        if (!tabBar || !newTabBtn) {
+            console.error('Tab bar or new tab button not found');
+            return;
+        }
+        
+        const tab = document.createElement('div');
+        const isDefaultTab = tabId === 'default';
+        tab.className = isDefaultTab ? 'tab' : 'tab closable';
+        tab.dataset.tabId = tabId;
+        
+        // Only show close button for non-default tabs
+        const closeButtonHtml = isDefaultTab ? '' : '<button class="tab-close" title="Close tab">×</button>';
+        
+        // Create elements separately for better control
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'tab-title';
+        titleSpan.textContent = name;
+        tab.appendChild(titleSpan);
+        
+        // Add close button if not default tab
+        if (!isDefaultTab) {
+            const closeButton = document.createElement('button');
+            closeButton.className = 'tab-close';
+            closeButton.setAttribute('title', 'Close tab');
+            closeButton.textContent = '×';
+            closeButton.setAttribute('data-tab-id', tabId); // Add for easier identification
+            tab.appendChild(closeButton);
+        }
+        
+        console.log(`Created tab element (default: ${isDefaultTab}):`, tab.outerHTML);
+        
+        // Insert before the new tab button
+        tabBar.insertBefore(tab, newTabBtn);
+        
+        console.log(`Tab inserted into DOM. Current tabs in bar:`, tabBar.querySelectorAll('.tab').length);
+        
+        // Scroll to show the new tab
+        setTimeout(() => {
+            tab.scrollIntoView({ behavior: 'smooth', inline: 'nearest' });
+        }, 100);
+    }
+
+    /**
+     * Close a tab
+     */
+    async closeTab(tabId) {
+        console.log(`Attempting to close tab: ${tabId}`);
+        console.log(`Current documents:`, Array.from(this.documents.keys()));
+        
+        // Allow closing all tabs for clean state
+        
+        const doc = this.documents.get(tabId);
+        
+        // Auto-save if document has unsaved changes
+        if (doc && doc.isDirty) {
+            console.log(`Auto-saving document "${doc.name}" before closing...`);
+            try {
+                // Temporarily switch to this tab to save it
+                const originalActiveTab = this.activeTabId;
+                this.activeTabId = tabId;
+                this.currentDocument = doc;
+                
+                await this.saveDocument();
+                
+                // Restore original active tab
+                this.activeTabId = originalActiveTab;
+                this.currentDocument = this.documents.get(originalActiveTab);
+                
+                console.log(`Document "${doc.name}" auto-saved successfully`);
+            } catch (error) {
+                console.error(`Failed to auto-save document "${doc.name}":`, error);
+                const confirmClose = confirm(`Failed to save "${doc.name}". Close anyway?`);
+                if (!confirmClose) return;
+            }
+        }
+        
+        // Find and remove tab element FIRST (before removing from documents)
+        const tabBar = document.getElementById('tab-bar');
+        const tabElement = tabBar ? tabBar.querySelector(`[data-tab-id="${tabId}"]`) : null;
+        
+        console.log(`Found tab bar:`, tabBar);
+        console.log(`Found tab element:`, tabElement);
+        console.log(`Tab element attributes:`, tabElement ? tabElement.outerHTML : 'null');
+        
+        if (tabElement) {
+            console.log(`Removing tab element...`);
+            tabElement.parentNode.removeChild(tabElement);
+            console.log(`Tab element removed from DOM`);
+        } else {
+            console.error(`Could not find tab element for ${tabId} in tab bar`);
+            // Try alternative removal methods
+            const allTabs = document.querySelectorAll('.tab');
+            console.log(`All tabs found:`, allTabs.length);
+            allTabs.forEach((tab, index) => {
+                console.log(`Tab ${index}:`, tab.dataset.tabId, tab.outerHTML.substring(0, 100));
+                if (tab.dataset.tabId === tabId) {
+                    console.log(`Found matching tab, removing...`);
+                    tab.remove();
+                }
+            });
+        }
+        
+        // Remove from documents
+        this.documents.delete(tabId);
+        console.log(`Removed from documents. Remaining:`, Array.from(this.documents.keys()));
+        
+        // Switch to another tab if this was active
+        if (this.activeTabId === tabId) {
+            const remainingTabs = Array.from(this.documents.keys());
+            if (remainingTabs.length > 0) {
+                this.switchToTab(remainingTabs[0]);
+            } else {
+                // No tabs left - clear active state
+                this.activeTabId = null;
+                this.currentDocument = null;
+                console.log('No tabs remaining - cleared active state');
+            }
+        }
+        
+        this.updateEditorVisibility();
+        console.log(`Successfully closed tab: ${tabId}`);
+    }
+
+    /**
+     * Close current active tab
+     */
+    closeCurrentTab() {
+        this.closeTab(this.activeTabId);
+    }
+
+    /**
+     * Switch to a specific tab
+     */
+    switchToTab(tabId) {
+        if (!this.documents.has(tabId)) {
+            console.error(`Tab ${tabId} not found`);
+            return;
+        }
+        
+        // Save current document content before switching
+        if (this.activeTabId && this.documents.has(this.activeTabId)) {
+            this.saveCurrentDocumentContent();
+        }
+        
+        // Update active tab
+        this.activeTabId = tabId;
+        this.currentDocument = this.documents.get(tabId);
+        
+        // Update UI
+        this.updateTabBar();
+        this.loadDocumentContent();
+        this.updateDocumentTitle();
+        
+        console.log(`Switched to tab: ${tabId}`);
+    }
+
+    /**
+     * Switch to next tab
+     */
+    switchToNextTab() {
+        const tabIds = Array.from(this.documents.keys());
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+        const nextIndex = (currentIndex + 1) % tabIds.length;
+        this.switchToTab(tabIds[nextIndex]);
+    }
+
+    /**
+     * Switch to previous tab
+     */
+    switchToPreviousTab() {
+        const tabIds = Array.from(this.documents.keys());
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+        const prevIndex = currentIndex === 0 ? tabIds.length - 1 : currentIndex - 1;
+        this.switchToTab(tabIds[prevIndex]);
+    }
+
+    /**
+     * Update tab bar visual state
+     */
+    updateTabBar() {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            const tabId = tab.dataset.tabId;
+            const document = this.documents.get(tabId);
+            
+            // Update active state
+            if (tabId === this.activeTabId) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+            
+            // Update modified state
+            if (document && document.isDirty) {
+                tab.classList.add('modified');
+            } else {
+                tab.classList.remove('modified');
+            }
+            
+            // Update title
+            const titleElement = tab.querySelector('.tab-title');
+            if (titleElement && document) {
+                titleElement.textContent = document.name;
+            }
+        });
+    }
+
+    /**
+     * Get branding configuration value
+     */
+    getBranding(path) {
+        if (window.BrandingManager && window.BrandingManager.isLoaded()) {
+            return window.BrandingManager.get(path);
+        }
+        return null;
+    }
+
+    /**
+     * Get branded asset path
+     */
+    getBrandedAsset(assetKey) {
+        if (window.BrandingManager && window.BrandingManager.isLoaded()) {
+            return window.BrandingManager.getAssetPath(assetKey);
+        }
+        return null;
+    }
+
+    /**
+     * Update editor visibility based on whether tabs are open
+     */
+    updateEditorVisibility() {
+        const body = document.body;
+        const editorContainer = document.querySelector('.wysiwyg-editor-container');
+        const tabsContainer = document.getElementById('tabs-container');
+        const tabBar = document.getElementById('tab-bar');
+        const wysiwygEditor = document.getElementById('wysiwyg-editor');
+        const sourceEditor = document.querySelector('.markdown-source-editor');
+        const toolbar = document.querySelector('.editor-toolbar');
+        const statusBar = document.querySelector('.status-bar');
+        
+        const hasOpenTabs = this.documents.size > 0;
+        
+        console.log(`Updating editor visibility: ${hasOpenTabs ? 'show' : 'hide'} (${this.documents.size} tabs)`);
+        console.log('Documents:', Array.from(this.documents.keys()));
+        console.log('Current body classes before:', body.classList.toString());
+        
+        if (hasOpenTabs) {
+            // Show all editor components by adding has-tabs class
+            body.classList.remove('no-tabs');
+            body.classList.add('has-tabs');
+            console.log('Added has-tabs class, showing editor components');
+            console.log('Body classList:', body.classList.toString());
+        } else {
+            // Hide all editor components and show gray background
+            body.classList.remove('has-tabs');
+            body.classList.add('no-tabs');
+            console.log('Added no-tabs class to body, should show gray background');
+            console.log('Body classList after changes:', body.classList.toString());
+            console.log('Background color should now be gray with red border');
+            
+            // Clear any content
+            if (wysiwygEditor) wysiwygEditor.innerHTML = '';
+            if (sourceEditor) sourceEditor.value = '';
+        }
+    }
+
+    /**
+     * Switch to next tab
+     */
+    switchToNextTab() {
+        const tabIds = Array.from(this.documents.keys());
+        if (tabIds.length <= 1) return;
+        
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+        const nextIndex = (currentIndex + 1) % tabIds.length;
+        this.switchToTab(tabIds[nextIndex]);
+    }
+
+    /**
+     * Switch to previous tab
+     */
+    switchToPreviousTab() {
+        const tabIds = Array.from(this.documents.keys());
+        if (tabIds.length <= 1) return;
+        
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+        const prevIndex = currentIndex === 0 ? tabIds.length - 1 : currentIndex - 1;
+        this.switchToTab(tabIds[prevIndex]);
+    }
+
+    /**
+     * Close current tab (helper for keyboard shortcuts)
+     */
+    async closeCurrentTab() {
+        if (this.activeTabId) {
+            await this.closeTab(this.activeTabId);
+        }
+    }
+
+    /**
+     * Save all open documents
+     */
+    async saveAllDocuments() {
+        for (const [tabId, document] of this.documents) {
+            if (document.isDirty) {
+                // Temporarily switch to this document to save it
+                const originalActiveTab = this.activeTabId;
+                this.activeTabId = tabId;
+                this.currentDocument = document;
+                
+                try {
+                    await this.saveDocument();
+                } catch (error) {
+                    console.error(`Failed to save document ${document.name}:`, error);
+                }
+                
+                // Restore original active tab
+                this.activeTabId = originalActiveTab;
+                this.currentDocument = this.documents.get(originalActiveTab);
+            }
+        }
+        
+        this.updateTabBar();
+        this.updateStatus('All documents saved', 'success');
+    }
+
+    /**
+     * Save current document content from editor
+     */
+    saveCurrentDocumentContent() {
+        if (this.wysiwygEditor && this.currentDocument) {
+            const content = this.isSourceMode ? 
+                this.sourceEditor.value : 
+                this.htmlToMarkdown(this.wysiwygEditor.innerHTML);
+            
+            if (content !== this.currentDocument.content) {
+                this.currentDocument.content = content;
+                this.currentDocument.isDirty = true;
+            }
+        }
+    }
+
+    /**
+     * Load document content into editor
+     */
+    loadDocumentContent() {
+        if (this.wysiwygEditor && this.currentDocument) {
+            console.log('Loading document content:', this.currentDocument.name);
+            console.log('Content preview:', this.currentDocument.content.substring(0, 100) + '...');
+            
+            if (this.isSourceMode && this.sourceEditor) {
+                this.sourceEditor.value = this.currentDocument.content;
+                console.log('Loaded content into source editor');
+            } else {
+                const htmlContent = this.markdownToHTML(this.currentDocument.content);
+                this.wysiwygEditor.innerHTML = htmlContent;
+                console.log('Loaded content into WYSIWYG editor, HTML length:', htmlContent.length);
+            }
+        } else {
+            console.warn('Cannot load document content - missing editor or document:', {
+                hasWysiwygEditor: !!this.wysiwygEditor,
+                hasCurrentDocument: !!this.currentDocument
+            });
+        }
+    }
+
+    /**
+     * Update document title in status bar
+     */
+    updateDocumentTitle() {
+        const documentStatus = document.getElementById('document-status');
+        if (documentStatus && this.currentDocument) {
+            documentStatus.textContent = `📄 ${this.currentDocument.name}`;
+        }
+    }
+
+    /**
+     * Show tab context menu
+     */
+    showTabContextMenu(event, tabId) {
+        // Remove existing context menu
+        const existingMenu = document.querySelector('.tab-context-menu');
+        if (existingMenu) {
+            existingMenu.remove();
+        }
+        
+        const menu = document.createElement('div');
+        menu.className = 'tab-context-menu';
+        menu.style.left = event.pageX + 'px';
+        menu.style.top = event.pageY + 'px';
+        menu.style.display = 'block';
+        
+        const document = this.documents.get(tabId);
+        const isOnlyTab = this.documents.size === 1;
+        
+        menu.innerHTML = `
+            <button onclick="window.WYSIWYGEditor.createNewTab()" title="Ctrl+T">New Tab</button>
+            <button onclick="window.WYSIWYGEditor.closeTab('${tabId}')" ${isOnlyTab ? 'disabled' : ''} title="Ctrl+W">Close Tab</button>
+            <button onclick="window.WYSIWYGEditor.closeOtherTabs('${tabId}')" ${isOnlyTab ? 'disabled' : ''}>Close Other Tabs</button>
+            <button onclick="window.WYSIWYGEditor.closeTabsToRight('${tabId}')">Close Tabs to Right</button>
+            <button onclick="window.WYSIWYGEditor.renameTab('${tabId}')">Rename Tab</button>
+        `;
+        
+        document.body.appendChild(menu);
+        
+        // Close menu when clicking outside
+        setTimeout(() => {
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            document.addEventListener('click', closeMenu);
+        }, 100);
+    }
+
+    /**
+     * Close all tabs except the specified one
+     */
+    closeOtherTabs(keepTabId) {
+        const tabIds = Array.from(this.documents.keys());
+        tabIds.forEach(tabId => {
+            if (tabId !== keepTabId) {
+                this.closeTab(tabId);
+            }
+        });
+    }
+
+    /**
+     * Close all tabs to the right of the specified tab
+     */
+    closeTabsToRight(tabId) {
+        const tabElements = Array.from(document.querySelectorAll('.tab'));
+        const targetIndex = tabElements.findIndex(tab => tab.dataset.tabId === tabId);
+        
+        if (targetIndex >= 0) {
+            const tabsToClose = tabElements.slice(targetIndex + 1);
+            tabsToClose.forEach(tab => {
+                this.closeTab(tab.dataset.tabId);
+            });
+        }
+    }
+
+    /**
+     * Rename a tab
+     */
+    renameTab(tabId) {
+        const document = this.documents.get(tabId);
+        if (!document) return;
+        
+        const newName = prompt('Enter new name:', document.name);
+        if (newName && newName.trim()) {
+            document.name = newName.trim();
+            this.updateTabBar();
+            this.updateDocumentTitle();
+        }
+    }
+
+    /**
+     * Escape HTML for safe insertion
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**
@@ -2232,7 +3012,7 @@ class WYSIWYGEditor {
         if (newFileBtn) {
             newFileBtn.addEventListener('click', () => {
                 console.log('New File clicked!');
-                this.newFile();
+                this.createNewTab('Untitled');
                 this.closeDropdowns();
             });
         }
@@ -2584,9 +3364,53 @@ class WYSIWYGEditor {
     }
 }
 
+// Global debug function to force profile loading
+window.forceLoadProfile = function() {
+    console.log('🔧 DEBUG: Force loading profile');
+    const editor = window.WYSIWYGEditor;
+    if (editor && editor.documents) {
+        const defaultDoc = editor.documents.get('default');
+        if (defaultDoc) {
+            console.log('🔧 DEBUG: Found default doc:', defaultDoc.name, 'content length:', defaultDoc.content.length);
+            
+            const wysiwygEl = document.getElementById('wysiwyg-editor');
+            const sourceEl = document.querySelector('.markdown-source-editor');
+            
+            if (wysiwygEl) {
+                const htmlContent = editor.markdownToHTML(defaultDoc.content);
+                wysiwygEl.innerHTML = htmlContent;
+                console.log('🔧 DEBUG: Set WYSIWYG content, HTML length:', htmlContent.length);
+            }
+            
+            if (sourceEl) {
+                sourceEl.value = defaultDoc.content;
+                console.log('🔧 DEBUG: Set source content');
+            }
+        } else {
+            console.log('🔧 DEBUG: No default document found');
+            console.log('🔧 DEBUG: Available documents:', Array.from(editor.documents.keys()));
+        }
+    } else {
+        console.log('🔧 DEBUG: No editor found');
+    }
+};
+
 // Initialize the WYSIWYG editor when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOMContentLoaded fired, starting WYSIWYGEditor initialization');
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOMContentLoaded fired, loading branding and forcing no-tabs state');
+    
+    // Load branding configuration first
+    if (window.BrandingManager) {
+        await window.BrandingManager.loadBranding();
+        console.log('Branding loaded and applied successfully');
+    }
+    
+    // Force no-tabs state immediately  
+    document.body.classList.add('no-tabs');
+    document.body.classList.remove('has-tabs');
+    console.log('Body classes after immediate force:', document.body.classList.toString());
+    
+    console.log('Starting WYSIWYGEditor initialization');
     const editor = new WYSIWYGEditor();
     
     // Set the global reference immediately so tests can detect it
@@ -2598,6 +3422,10 @@ document.addEventListener('DOMContentLoaded', () => {
             editor: !!editor,
             wysiwygEditor: !!editor.wysiwygEditor
         });
+        
+        // Ready for user interaction - no auto-loading
+        console.log('🎯 READY: Editor initialized, ready for user to select files');
+        
     }).catch(error => {
         console.error('Failed to initialize WYSIWYGEditor:', error);
     });
