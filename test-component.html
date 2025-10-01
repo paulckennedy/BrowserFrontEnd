@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Editor Component - Simple Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .test-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .controls {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .controls button, .controls select {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .output {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Markdown Editor Component Test</h1>
+    
+    <div class="test-container">
+        <h3>Basic Component Test</h3>
+        <div class="controls">
+            <select id="mode-select">
+                <option value="wysiwyg">WYSIWYG</option>
+                <option value="markdown">Markdown</option>
+                <option value="split">Split View</option>
+            </select>
+            
+            <select id="theme-select">
+                <option value="default">Default</option>
+                <option value="dark">Dark</option>
+                <option value="minimal">Minimal</option>
+            </select>
+            
+            <button onclick="setTestContent()">Set Test Content</button>
+            <button onclick="getContent()">Get Content</button>
+            <button onclick="insertText()">Insert Text</button>
+            <button onclick="saveContent()">Save</button>
+        </div>
+        
+        <markdown-editor 
+            id="test-editor"
+            mode="wysiwyg" 
+            height="300px"
+            content="# Test Document&#10;&#10;This is a **test document** for the markdown editor component.&#10;&#10;Features to test:&#10;- Bold and *italic* text&#10;- `Code snippets`&#10;- Lists and formatting&#10;&#10;> This is a blockquote">
+        </markdown-editor>
+        
+        <div class="output" id="content-output">Content will appear here...</div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Event Monitoring</h3>
+        <div class="output" id="event-log">Events will be logged here...</div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div class="test-container">
+        <h3>API Test Results</h3>
+        <div class="output" id="api-results">API test results will appear here...</div>
+        <button onclick="runAPITests()">Run API Tests</button>
+    </div>
+    
+    <!-- Include the component -->
+    <script src="components/markdown-editor-component.js"></script>
+    
+    <script>
+        let eventLog = [];
+        
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const editor = document.getElementById('test-editor');
+            
+            // Set up event listeners
+            editor.addEventListener('editor-ready', (e) => {
+                logEvent('editor-ready', 'Editor initialized successfully');
+                console.log('Editor ready:', e);
+            });
+            
+            editor.addEventListener('content-change', (e) => {
+                logEvent('content-change', `Content length: ${e.detail.content.length}`);
+            });
+            
+            editor.addEventListener('save', (e) => {
+                logEvent('save', `Saved content length: ${e.detail.content.length}`);
+            });
+            
+            editor.addEventListener('editor-error', (e) => {
+                logEvent('editor-error', e.detail.error.message);
+            });
+            
+            // Set up control handlers
+            document.getElementById('mode-select').addEventListener('change', (e) => {
+                editor.setAttribute('mode', e.target.value);
+                logEvent('mode-change', `Changed to ${e.target.value} mode`);
+            });
+            
+            document.getElementById('theme-select').addEventListener('change', (e) => {
+                editor.setAttribute('theme', e.target.value);
+                logEvent('theme-change', `Changed to ${e.target.value} theme`);
+            });
+        });
+        
+        function logEvent(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            eventLog.push(`[${timestamp}] ${type}: ${message}`);
+            
+            const logElement = document.getElementById('event-log');
+            logElement.textContent = eventLog.slice(-10).join('\n');
+        }
+        
+        function clearLog() {
+            eventLog = [];
+            document.getElementById('event-log').textContent = 'Event log cleared...';
+        }
+        
+        function setTestContent() {
+            const editor = document.getElementById('test-editor');
+            const testContent = `# Advanced Test Document
+
+## Formatting Tests
+
+This document tests various **markdown features**:
+
+### Text Formatting
+- **Bold text**
+- *Italic text*
+- \`Inline code\`
+- ~~Strikethrough~~ (if supported)
+
+### Lists
+1. Numbered item 1
+2. Numbered item 2
+   - Nested bullet
+   - Another nested item
+
+### Code Block
+\`\`\`javascript
+function hello() {
+    console.log("Hello, World!");
+}
+\`\`\`
+
+### Links and Images
+[Link to example](https://example.com)
+
+### Blockquote
+> This is a blockquote with some important information.
+> It can span multiple lines.
+
+### Table (if supported)
+| Feature | Status |
+|---------|--------|
+| Bold | ✅ |
+| Italic | ✅ |
+| Code | ✅ |
+
+---
+
+*Last updated: ${new Date().toLocaleString()}*`;
+            
+            editor.setContent(testContent);
+            logEvent('content-set', 'Test content loaded');
+        }
+        
+        function getContent() {
+            const editor = document.getElementById('test-editor');
+            const content = editor.getContent();
+            document.getElementById('content-output').textContent = content;
+            logEvent('content-get', `Retrieved ${content.length} characters`);
+        }
+        
+        function insertText() {
+            const editor = document.getElementById('test-editor');
+            const timestamp = new Date().toLocaleTimeString();
+            editor.insertText(`\n\n**Inserted at ${timestamp}**: This text was inserted via API.`);
+            logEvent('text-insert', 'Text inserted via API');
+        }
+        
+        function saveContent() {
+            const editor = document.getElementById('test-editor');
+            const content = editor.save();
+            logEvent('save-trigger', 'Save triggered manually');
+        }
+        
+        function runAPITests() {
+            const editor = document.getElementById('test-editor');
+            const results = [];
+            
+            try {
+                // Test 1: Get current content
+                const content = editor.getContent();
+                results.push(`✅ getContent(): ${content.length} characters`);
+                
+                // Test 2: Get configuration
+                const config = editor.getConfiguration();
+                results.push(`✅ getConfiguration(): ${JSON.stringify(config.mode)}`);
+                
+                // Test 3: Focus editor
+                editor.focus();
+                results.push(`✅ focus(): Editor focused`);
+                
+                // Test 4: Configure editor
+                editor.configure({ 
+                    autosave: false,
+                    theme: 'minimal'
+                });
+                results.push(`✅ configure(): Configuration updated`);
+                
+                // Test 5: Check if methods exist
+                const methods = ['setContent', 'getContent', 'save', 'configure', 'focus', 'insertText'];
+                const availableMethods = methods.filter(method => typeof editor[method] === 'function');
+                results.push(`✅ Available methods: ${availableMethods.join(', ')}`);
+                
+                // Test 6: Event dispatch test
+                let eventReceived = false;
+                const testHandler = () => { eventReceived = true; };
+                editor.addEventListener('content-change', testHandler);
+                editor.insertText(' test');
+                setTimeout(() => {
+                    editor.removeEventListener('content-change', testHandler);
+                    results.push(`${eventReceived ? '✅' : '❌'} Event handling: ${eventReceived ? 'Working' : 'Failed'}`);
+                    document.getElementById('api-results').textContent = results.join('\n');
+                }, 100);
+                
+            } catch (error) {
+                results.push(`❌ API Test Error: ${error.message}`);
+                document.getElementById('api-results').textContent = results.join('\n');
+            }
+        }
+        
+        // Global error handler
+        window.addEventListener('error', (e) => {
+            logEvent('global-error', e.message);
+        });
+        
+        // Component loading check
+        if (typeof MarkdownEditorComponent !== 'undefined') {
+            logEvent('component-load', 'MarkdownEditorComponent class loaded successfully');
+        } else {
+            logEvent('component-error', 'MarkdownEditorComponent class not found');
+        }
+    </script>
+</body>
+</html>

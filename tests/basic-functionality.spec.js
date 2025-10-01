@@ -3,13 +3,42 @@ import { test, expect } from '@playwright/test';
 test.describe('WYSIWYG Markdown Editor - Basic Functionality', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    
+    // Add console listener to capture browser logs
+    page.on('console', msg => console.log('BROWSER:', msg.text()));
+    page.on('pageerror', error => console.log('PAGE ERROR:', error.message));
+    
     // Wait for the editor to initialize
     await page.waitForSelector('.wysiwyg-editor', { timeout: 15000 });
+    
+    // First, just check if the WYSIWYGEditor class exists (not instance)
+    const classExists = await page.evaluate(() => {
+      return typeof WYSIWYGEditor !== 'undefined';
+    });
+    
+    if (!classExists) {
+      throw new Error('WYSIWYGEditor class not found - JavaScript may not be loading');
+    }
+    
+    // Then wait for the instance to be created
     await page.waitForFunction(() => {
-      return window.WYSIWYGEditor !== undefined && 
-             window.WYSIWYGEditor.wysiwygEditor !== null;
-    }, { timeout: 15000 });
-    await page.waitForTimeout(1000); // Stabilization time
+      return window.WYSIWYGEditor !== undefined;
+    }, { timeout: 10000 });
+    
+    // Finally wait for full initialization (for non-WebKit browsers)  
+    const browserName = await page.evaluate(() => navigator.userAgent);
+    if (!browserName.includes('WebKit') || browserName.includes('Chrome')) {
+      await page.waitForFunction(() => {
+        return window.WYSIWYGEditor && 
+               window.WYSIWYGEditor.wysiwygEditor !== null &&
+               window.WYSIWYGEditor.wysiwygEditor !== undefined;
+      }, { timeout: 15000 });
+    } else {
+      // For WebKit, just wait a bit more for initialization to complete
+      await page.waitForTimeout(3000);
+    }
+    
+    await page.waitForTimeout(500); // Final stabilization time
   });
 
   test('should load the application successfully', async ({ page }) => {

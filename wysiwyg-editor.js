@@ -89,23 +89,40 @@ class WYSIWYGEditor {
      */
     async init() {
         try {
+            console.log('Step 1: Setting up elements');
             this.setupElements();
+            console.log('Step 2: Elements setup complete, wysiwygEditor:', !!this.wysiwygEditor);
+            
+            console.log('Step 3: Setting up event listeners');
             this.setupEventListeners();
+            
+            console.log('Step 4: Setting up keyboard shortcuts');
             this.setupKeyboardShortcuts();
+            
+            console.log('Step 5: Setting up toolbar buttons');
             this.setupToolbarButtons();
+            
+            console.log('Step 6: Initializing auto-save');
             this.initializeAutoSave();
+            
+            console.log('Step 7: Initializing menu functionality');
             this.initializeMenuFunctionality();
+            
+            console.log('Step 8: Initializing database connection');
             await this.initializeDatabaseConnection();
+            
+            console.log('Step 9: Loading documents');
             await this.loadDocuments();
             
-            console.log('WYSIWYG Editor initialized successfully');
+            console.log('Step 10: Updating stats and status');
             this.updateStats();
             this.updateStatus('Ready');
             this.initializeExplorerState();
             
+            console.log('WYSIWYG Editor initialized successfully');
             return true;
         } catch (error) {
-            console.error('Failed to initialize WYSIWYG Editor:', error);
+            console.error('Failed to initialize WYSIWYG Editor at step:', error);
             this.updateStatus('Initialization failed', 'error');
             return false;
         }
@@ -2569,10 +2586,19 @@ class WYSIWYGEditor {
 
 // Initialize the WYSIWYG editor when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded fired, starting WYSIWYGEditor initialization');
     const editor = new WYSIWYGEditor();
     
-    // Expose the editor instance globally for testing and external access
+    // Set the global reference immediately so tests can detect it
     window.WYSIWYGEditor = editor;
     
-    editor.init().catch(console.error);
+    // Initialize editor asynchronously
+    editor.init().then(() => {
+        console.log('WYSIWYGEditor initialized and available globally', {
+            editor: !!editor,
+            wysiwygEditor: !!editor.wysiwygEditor
+        });
+    }).catch(error => {
+        console.error('Failed to initialize WYSIWYGEditor:', error);
+    });
 });
