@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Browser Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-dropdown { 
+            position: relative; 
+            display: inline-block; 
+            margin: 10px;
+        }
+        .test-menu { 
+            display: none; 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            background: white; 
+            border: 2px solid #000; 
+            padding: 10px; 
+            min-width: 150px;
+            z-index: 1000;
+        }
+        .test-menu.show { 
+            display: block !important; 
+        }
+        button { 
+            padding: 10px; 
+            margin: 5px; 
+        }
+        .log { 
+            background: #f0f0f0; 
+            padding: 10px; 
+            margin: 10px 0; 
+            height: 200px; 
+            overflow-y: scroll; 
+            font-family: monospace; 
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Browser Compatibility Test</h1>
+    <p id="browser-info">Detecting browser...</p>
+    
+    <button onclick="testBasicJS()" style="background: green; color: white;">Test Basic JS</button>
+    <button onclick="testAlert()" style="background: blue; color: white;">Test Alert</button>
+    
+    <div class="test-dropdown">
+        <button onclick="testDropdown()" style="background: orange; color: white;">Test Dropdown</button>
+        <div id="test-menu" class="test-menu">
+            <div>Menu Item 1</div>
+            <div>Menu Item 2</div>
+            <div>Menu Item 3</div>
+        </div>
+    </div>
+    
+    <div class="log" id="log"></div>
+    
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += timestamp + ': ' + message + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function testBasicJS() {
+            log('✅ Basic JavaScript is working!');
+        }
+        
+        function testAlert() {
+            alert('Alert works!');
+            log('✅ Alert executed');
+        }
+        
+        function testDropdown() {
+            log('🔧 Testing dropdown...');
+            const menu = document.getElementById('test-menu');
+            
+            if (!menu) {
+                log('❌ Menu element not found');
+                return;
+            }
+            
+            log('✅ Menu element found');
+            
+            if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+                menu.style.display = 'none';
+                log('📦 Dropdown closed');
+            } else {
+                menu.classList.add('show');
+                menu.style.display = 'block';
+                log('📂 Dropdown opened');
+                
+                setTimeout(() => {
+                    const rect = menu.getBoundingClientRect();
+                    log('📏 Dropdown size: ' + rect.width + 'x' + rect.height + ' at ' + rect.top + ',' + rect.left);
+                }, 100);
+            }
+        }
+        
+        // Browser detection
+        function detectBrowser() {
+            const userAgent = navigator.userAgent;
+            let browser = 'Unknown';
+            
+            if (userAgent.includes('Firefox')) browser = 'Firefox';
+            else if (userAgent.includes('Chrome')) browser = 'Chrome/Chromium';
+            else if (userAgent.includes('Safari')) browser = 'Safari';
+            else if (userAgent.includes('Edge')) browser = 'Edge';
+            
+            document.getElementById('browser-info').textContent = 'Browser: ' + browser;
+            log('🌐 Browser detected: ' + browser);
+            log('🔧 User Agent: ' + userAgent);
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Page loaded');
+            detectBrowser();
+        });
+        
+        // Also run immediately in case DOMContentLoaded already fired
+        detectBrowser();
+        log('📋 Test page ready');
+    </script>
+</body>
+</html>

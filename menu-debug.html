@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Debug - Minimal</title>
+    <style>
+        .menu-bar { background: #f0f0f0; padding: 10px; }
+        .nav-group { display: inline-block; position: relative; margin-right: 10px; }
+        .nav-btn { padding: 8px 16px; background: #e0e0e0; border: 1px solid #ccc; cursor: pointer; }
+        .dropdown { 
+            display: none; 
+            position: absolute; 
+            top: 100%; 
+            left: 0; 
+            background: white; 
+            border: 2px solid #000; 
+            min-width: 150px; 
+            z-index: 1000;
+            padding: 10px;
+        }
+        .dropdown.show { display: block !important; }
+        .test-btn { margin: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Menu Debug - Minimal Version</h1>
+    
+    <button onclick="alert('Basic JS works!')" class="test-btn" style="background: green; color: white;">Basic Test</button>
+    <button onclick="testFunction()" class="test-btn" style="background: blue; color: white;">Function Test</button>
+    
+    <div class="menu-bar">
+        <div class="nav-group">
+            <button class="nav-btn" onclick="toggleMenu('file-dropdown')">📁 File</button>
+            <div class="dropdown" id="file-dropdown">
+                <div>New File</div>
+                <div>Open File</div>
+                <div>Save File</div>
+            </div>
+        </div>
+        
+        <div class="nav-group">
+            <button class="nav-btn" onclick="toggleMenu('edit-dropdown')">✏️ Edit</button>
+            <div class="dropdown" id="edit-dropdown">
+                <div>Undo</div>
+                <div>Redo</div>
+                <div>Cut</div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="log" style="background: #f9f9f9; padding: 10px; margin: 10px 0; height: 200px; overflow-y: scroll; font-family: monospace; font-size: 12px;"></div>
+    
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += timestamp + ': ' + message + '<br>';
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function testFunction() {
+            log('✅ Function test works!');
+            alert('Function test successful!');
+        }
+        
+        function toggleMenu(dropdownId) {
+            log('🔧 toggleMenu called for: ' + dropdownId);
+            
+            const dropdown = document.getElementById(dropdownId);
+            if (!dropdown) {
+                log('❌ Dropdown not found: ' + dropdownId);
+                return;
+            }
+            
+            // Close all dropdowns first
+            const allDropdowns = document.querySelectorAll('.dropdown');
+            allDropdowns.forEach(dd => {
+                if (dd.id !== dropdownId) {
+                    dd.classList.remove('show');
+                    dd.style.display = 'none';
+                }
+            });
+            
+            // Toggle current dropdown
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+                dropdown.style.display = 'none';
+                log('📦 Closed: ' + dropdownId);
+            } else {
+                dropdown.classList.add('show');
+                dropdown.style.display = 'block';
+                log('📂 Opened: ' + dropdownId);
+                
+                setTimeout(() => {
+                    const rect = dropdown.getBoundingClientRect();
+                    log('📏 Size: ' + rect.width + 'x' + rect.height + ' at ' + rect.top + ',' + rect.left);
+                }, 100);
+            }
+        }
+        
+        // Initialize
+        log('🚀 Minimal menu debug page loaded');
+        console.log('🚀 Minimal page JavaScript is running');
+    </script>
+</body>
+</html>

@@ -129,3 +129,364 @@ footer {
         font-size: 1.5rem;
     }
 }
+
+/* ===========================================
+   TABS SYSTEM STYLES
+   =========================================== */
+
+.tabs-container {
+    background-color: #f1f3f4;
+    border-bottom: 1px solid #dadce0;
+    width: calc(100% - 20px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: block;
+    visibility: visible;
+    position: fixed;
+    top: 48px;
+    left: 20px;
+    right: 0;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+/* Adjust tabs position when menu is collapsed */
+.menu-bar.collapsed ~ .editor-container .tabs-container {
+    top: 8px !important;
+}
+
+/* Adjust tabs width when file explorer is expanded */
+.file-explorer:hover ~ * .tabs-container,
+.file-explorer.pinned ~ * .tabs-container,
+body:has(.file-explorer:hover) .tabs-container,
+body:has(.file-explorer.pinned) .tabs-container {
+    left: 240px !important;
+    width: calc(100% - 240px) !important;
+}
+
+/* Ensure tabs stay properly positioned during menu hover */
+.menu-bar.collapsed:hover ~ .editor-container .tabs-container,
+.menu-bar.collapsed.hover ~ .editor-container .tabs-container {
+    top: 48px !important;
+}
+
+.tab-bar {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 2px 0;
+    padding: 0 8px;
+    min-height: 36px;
+    background-color: #f8f9fa;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+.tab-bar::-webkit-scrollbar {
+    height: 6px;
+}
+
+.tab-bar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tab-bar::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+}
+
+.tab {
+    display: inline-block;
+    vertical-align: bottom;
+    background-color: #e9ecef;
+    border: 1px solid #dadce0;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    margin: 0 1px;
+    padding: 8px 12px;
+    cursor: pointer;
+    user-select: none;
+    min-width: 120px;
+    max-width: 220px;
+    position: relative;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    height: 32px;
+    white-space: nowrap;
+    line-height: 16px;
+    text-align: left;
+}
+
+/* Tabs with close buttons need extra padding on the right */
+.tab.closable {
+    padding-right: 32px;
+}
+
+/* Ensure close button doesn't interfere with tab text */
+.tab.closable .tab-title {
+    margin-right: 24px;
+}
+
+.tab:hover {
+    background: linear-gradient(to bottom, #ffffff 0%, #f5f5f5 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.tab.active {
+    background: white;
+    border-color: #1a73e8;
+    border-bottom: 2px solid white;
+    z-index: 3;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    height: 34px;
+    margin-top: -2px;
+}
+
+.tab.modified {
+    border-left: 3px solid #ffc107;
+}
+
+.tab.modified .tab-title::after {
+    content: '●';
+    color: #ffc107;
+    margin-left: 4px;
+    font-size: 12px;
+}
+
+.tab-title {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: #495057;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+}
+
+.tab.active .tab-title {
+    color: #212529;
+    font-weight: 600;
+}
+
+.tab-close {
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    color: #5f6368;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 50%;
+    line-height: 1;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    opacity: 0.7;
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.tab:hover .tab-close {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.tab-close:hover {
+    background-color: #ea4335 !important;
+    color: white !important;
+    transform: translateY(-50%) scale(1.1);
+    opacity: 1 !important;
+}
+
+.tab-close:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.tab.active .tab-close:hover {
+    background-color: #ea4335 !important;
+    color: white !important;
+}
+
+.new-tab-btn {
+    background: none;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #5f6368;
+    cursor: pointer;
+    padding: 6px 10px;
+    margin-left: 12px;
+    transition: all 0.15s ease;
+    display: inline-block;
+    width: 32px;
+    height: 28px;
+    text-align: center;
+    vertical-align: bottom;
+    line-height: 16px;
+}
+
+.new-tab-btn:hover {
+    background-color: #f1f3f4;
+    color: #1a73e8;
+    border-color: #1a73e8;
+    transform: scale(1.1);
+}
+
+.new-tab-btn:active {
+    transform: scale(0.95);
+    background-color: #e8f0fe;
+}
+
+/* File Explorer Tree Styles */
+.tree-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin: 1px 0;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+.tree-item:hover {
+    background-color: #f0f0f0;
+}
+
+.tree-item.selected {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.tree-item.folder {
+    font-weight: 500;
+}
+
+.tree-item.file {
+    padding-left: 20px;
+}
+
+.tree-item.root-user {
+    padding-left: 8px !important;
+    font-weight: 600;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    border-left: 3px solid #007bff;
+}
+
+.tree-item.root-user:hover {
+    background-color: #e9ecef;
+}
+
+.tree-item.project {
+    padding-left: 24px;
+    margin-left: 12px;
+    border-left: 2px solid #e0e0e0;
+}
+
+.tree-children {
+    margin-left: 16px;
+    border-left: 1px solid #e0e0e0;
+    padding-left: 8px;
+}
+
+.tree-children.hidden {
+    display: none;
+}
+
+.folder-toggle {
+    margin-right: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.folder-icon, .file-icon {
+    margin-right: 6px;
+    font-size: 14px;
+}
+
+.folder-name, .file-name {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.folder-name {
+    color: #555;
+}
+
+.file-name {
+    color: #333;
+}
+
+/* Tab dropdown menu for tab context menu */
+.tab-context-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 150px;
+    padding: 4px 0;
+    display: none;
+}
+
+.tab-context-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+    color: #495057;
+    transition: background-color 0.2s ease;
+}
+
+.tab-context-menu button:hover {
+    background-color: #f8f9fa;
+}
+
+.tab-context-menu button:disabled {
+    color: #adb5bd;
+    cursor: not-allowed;
+}
+
+.tab-context-menu button:disabled:hover {
+    background-color: transparent;
+}
+
+/* Mobile responsive tabs */
+@media (max-width: 768px) {
+    .tab {
+        min-width: 80px;
+        max-width: 120px;
+        padding: 6px 8px;
+    }
+    
+    .tab-title {
+        font-size: 12px;
+    }
+    
+    .new-tab-btn {
+        min-width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+}

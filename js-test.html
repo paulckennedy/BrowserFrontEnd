@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Test</title>
+</head>
+<body>
+    <h1>JavaScript Execution Test</h1>
+    <p id="status">Checking JavaScript...</p>
+    <button onclick="alert('JavaScript works!')">Test Alert</button>
+    <button onclick="testFunction()">Test Function</button>
+    <div id="output"></div>
+    
+    <script>
+        console.log('JavaScript is executing!');
+        document.getElementById('status').textContent = 'JavaScript is working!';
+        document.getElementById('status').style.color = 'green';
+        
+        function testFunction() {
+            console.log('Test function called!');
+            document.getElementById('output').innerHTML = '<p style="color: blue;">Function executed successfully!</p>';
+        }
+        
+        // Also test after delay
+        setTimeout(function() {
+            console.log('Delayed execution works!');
+            document.getElementById('output').innerHTML += '<p style="color: purple;">Delayed execution works!</p>';
+        }, 1000);
+    </script>
+</body>
+</html>

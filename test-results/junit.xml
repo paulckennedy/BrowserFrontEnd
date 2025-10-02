@@ -1,0 +1,322 @@
+<testsuites id="" name="" tests="5" failures="2" skipped="0" errors="0" time="43.21322599999999">
+<testsuite name="basic-functionality.spec.js" timestamp="2025-10-02T00:47:28.139Z" hostname="chromium" tests="1" failures="0" skipped="0" time="2.395" errors="0">
+<testcase name="WYSIWYG Markdown Editor - Basic Functionality › should load the application successfully" classname="basic-functionality.spec.js" time="2.395">
+<system-out>
+<![CDATA[BROWSER: Branding configuration loaded: {application: Object, ui: Object, assets: Object, metadata: Object}
+BROWSER: Branding loaded and applied successfully
+BROWSER: Body classes after immediate force: no-tabs
+BROWSER: Starting WYSIWYGEditor initialization
+BROWSER: Step 0: Clearing localStorage and sessionStorage
+BROWSER: Cleared all localStorage and sessionStorage
+BROWSER: Step 1: Setting up elements
+BROWSER: Step 2: Elements setup complete, wysiwygEditor: true
+BROWSER: Step 3: Setting up event listeners
+BROWSER: Step 4: Setting up keyboard shortcuts
+BROWSER: Step 5: Setting up toolbar buttons
+BROWSER: Step 6: Initializing auto-save
+BROWSER: Step 7: Initializing menu functionality
+BROWSER: Initializing menu functionality...
+BROWSER: New file button found: true
+BROWSER: Step 8: Initializing database connection
+BROWSER: Database connection initialized
+BROWSER: Step 9: Loading documents
+BROWSER: loadDocuments: Allowing profile content in first tab
+BROWSER: loadDocuments - WYSIWYG content preview: 
+                        <!-- Content will be loaded by JavaScript -->
+                    
+BROWSER: loadDocuments - Source content preview: 
+BROWSER: Step 10: Updating stats and status
+BROWSER: Explorer initialized in collapsed state
+BROWSER: Step 11: Initializing tab system
+BROWSER: Updating editor visibility: hide (0 tabs)
+BROWSER: Documents: []
+BROWSER: Current body classes before: no-tabs
+BROWSER: Added no-tabs class to body, should show gray background
+BROWSER: Body classList after changes: no-tabs
+BROWSER: Background color should now be gray with red border
+BROWSER: Tab system initialized with no tabs - clean start
+BROWSER: File tree initialized
+BROWSER: Step 11.5: Force no-tabs state immediately
+BROWSER: Added no-tabs class to body: no-tabs
+BROWSER: Step 12: Clean start - no default content to load
+BROWSER: Clean start initialized - user can open files from explorer
+BROWSER: WYSIWYG Editor initialized successfully
+BROWSER: WYSIWYGEditor initialized and available globally {editor: true, wysiwygEditor: true}
+BROWSER: 🎯 READY: Editor initialized, ready for user to select files
+BROWSER: AI Integration initialized successfully
+BROWSER: AI Integration is ready! {aiIntegration: AIIntegration}
+BROWSER: Example AI Prompt Generated: {template: I need to add {feature_name} to the BrowserFrontEn…ionality, 4) Responsive design, 5) Accessibility., examples: Object}
+BROWSER: Available AI Prompt Categories: [system, development, content, analysis, testing, deployment, maintenance]
+BROWSER: Opening file: My Profile (profile.md)
+BROWSER: Creating tab element for tab-1 with name My Profile
+BROWSER: Tab bar found: true
+BROWSER: New tab button found: true
+BROWSER: Created tab element (default: false): <div class="tab closable" data-tab-id="tab-1"><span class="tab-title">My Profile</span><button class="tab-close" title="Close tab" data-tab-id="tab-1">×</button></div>
+BROWSER: Tab inserted into DOM. Current tabs in bar: 1
+BROWSER: Loading document content: My Profile
+BROWSER: Content preview: # My Profile
+
+👤 **Developer & Creator**
+
+## About Me
+
+Welcome to my digital workspace! I'm a passio...
+BROWSER: Loaded content into WYSIWYG editor, HTML length: 1459
+BROWSER: Switched to tab: tab-1
+BROWSER: Updating editor visibility: show (1 tabs)
+BROWSER: Documents: [tab-1]
+BROWSER: Current body classes before: no-tabs
+BROWSER: Added has-tabs class, showing editor components
+BROWSER: Body classList: has-tabs
+BROWSER: Created new tab: My Profile (tab-1)
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="basic-functionality.spec.js" timestamp="2025-10-02T00:47:28.139Z" hostname="firefox" tests="1" failures="0" skipped="0" time="5.281" errors="0">
+<testcase name="WYSIWYG Markdown Editor - Basic Functionality › should load the application successfully" classname="basic-functionality.spec.js" time="5.281">
+<system-out>
+<![CDATA[BROWSER: AI Integration initialized successfully
+BROWSER: AI Integration is ready! JSHandle@object
+BROWSER: Example AI Prompt Generated: JSHandle@object
+BROWSER: Available AI Prompt Categories: Array
+BROWSER: Branding configuration loaded: JSHandle@object
+BROWSER: Branding loaded and applied successfully
+BROWSER: Body classes after immediate force: no-tabs
+BROWSER: Starting WYSIWYGEditor initialization
+BROWSER: Step 0: Clearing localStorage and sessionStorage
+BROWSER: Cleared all localStorage and sessionStorage
+BROWSER: Step 1: Setting up elements
+BROWSER: Step 2: Elements setup complete, wysiwygEditor: true
+BROWSER: Step 3: Setting up event listeners
+BROWSER: Step 4: Setting up keyboard shortcuts
+BROWSER: Step 5: Setting up toolbar buttons
+BROWSER: Step 6: Initializing auto-save
+BROWSER: Step 7: Initializing menu functionality
+BROWSER: Initializing menu functionality...
+BROWSER: New file button found: true
+BROWSER: Step 8: Initializing database connection
+BROWSER: Database connection initialized
+BROWSER: Step 9: Loading documents
+BROWSER: loadDocuments: Allowing profile content in first tab
+BROWSER: loadDocuments - WYSIWYG content preview: 
+                        <!-- Content will be loaded by JavaScript -->
+                    
+BROWSER: loadDocuments - Source content preview: 
+BROWSER: Step 10: Updating stats and status
+BROWSER: Explorer initialized in collapsed state
+BROWSER: Step 11: Initializing tab system
+BROWSER: Updating editor visibility: hide (0 tabs)
+BROWSER: Documents: Array
+BROWSER: Current body classes before: no-tabs
+BROWSER: Added no-tabs class to body, should show gray background
+BROWSER: Body classList after changes: no-tabs
+BROWSER: Background color should now be gray with red border
+BROWSER: Tab system initialized with no tabs - clean start
+BROWSER: File tree initialized
+BROWSER: Step 11.5: Force no-tabs state immediately
+BROWSER: Added no-tabs class to body: no-tabs
+BROWSER: Step 12: Clean start - no default content to load
+BROWSER: Clean start initialized - user can open files from explorer
+BROWSER: WYSIWYG Editor initialized successfully
+BROWSER: WYSIWYGEditor initialized and available globally JSHandle@object
+BROWSER: 🎯 READY: Editor initialized, ready for user to select files
+BROWSER: Opening file: My Profile (profile.md)
+BROWSER: Creating tab element for tab-1 with name My Profile
+BROWSER: Tab bar found: true
+BROWSER: New tab button found: true
+BROWSER: Created tab element (default: false): <div class="tab closable" data-tab-id="tab-1"><span class="tab-title">My Profile</span><button class="tab-close" title="Close tab" data-tab-id="tab-1">×</button></div>
+BROWSER: Tab inserted into DOM. Current tabs in bar: 1
+BROWSER: Loading document content: My Profile
+BROWSER: Content preview: # My Profile
+
+👤 **Developer & Creator**
+
+## About Me
+
+Welcome to my digital workspace! I'm a passio...
+BROWSER: Loaded content into WYSIWYG editor, HTML length: 1459
+BROWSER: Switched to tab: tab-1
+BROWSER: Updating editor visibility: show (1 tabs)
+BROWSER: Documents: Array
+BROWSER: Current body classes before: no-tabs
+BROWSER: Added has-tabs class, showing editor components
+BROWSER: Body classList: has-tabs
+BROWSER: Created new tab: My Profile (tab-1)
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="basic-functionality.spec.js" timestamp="2025-10-02T00:47:28.139Z" hostname="webkit" tests="1" failures="1" skipped="0" time="10.499" errors="0">
+<testcase name="WYSIWYG Markdown Editor - Basic Functionality › should load the application successfully" classname="basic-functionality.spec.js" time="10.499">
+<failure message="basic-functionality.spec.js:48:7 should load the application successfully" type="FAILURE">
+<![CDATA[  [webkit] › basic-functionality.spec.js:48:7 › WYSIWYG Markdown Editor - Basic Functionality › should load the application successfully 
+
+    Test timeout of 10000ms exceeded while running "beforeEach" hook.
+
+      2 |
+      3 | test.describe('WYSIWYG Markdown Editor - Basic Functionality', () => {
+    > 4 |   test.beforeEach(async ({ page }) => {
+        |        ^
+      5 |     await page.goto('/');
+      6 |     
+      7 |     // Add console listener to capture browser logs
+        at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:4:8
+
+    Error: page.waitForFunction: Test timeout of 10000ms exceeded.
+
+      10 |     
+      11 |     // Wait for the WYSIWYG editor to be available globally (initialization complete)
+    > 12 |     await page.waitForFunction(
+         |                ^
+      13 |       () => window.WYSIWYGEditor !== undefined,
+      14 |       {},
+      15 |       { timeout: 30000 }
+        at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:12:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-webkit/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-webkit/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-webkit/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|basic-functionality-WYSIWY-e99fb-he-application-successfully-webkit/test-failed-1.png]]
+
+[[ATTACHMENT|basic-functionality-WYSIWY-e99fb-he-application-successfully-webkit/video.webm]]
+
+[[ATTACHMENT|basic-functionality-WYSIWY-e99fb-he-application-successfully-webkit/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="basic-functionality.spec.js" timestamp="2025-10-02T00:47:28.139Z" hostname="Mobile Chrome" tests="1" failures="0" skipped="0" time="2.723" errors="0">
+<testcase name="WYSIWYG Markdown Editor - Basic Functionality › should load the application successfully" classname="basic-functionality.spec.js" time="2.723">
+<system-out>
+<![CDATA[BROWSER: AI Integration initialized successfully
+BROWSER: AI Integration is ready! {aiIntegration: AIIntegration}
+BROWSER: Example AI Prompt Generated: {template: I need to add {feature_name} to the BrowserFrontEn…ionality, 4) Responsive design, 5) Accessibility., examples: Object}
+BROWSER: Available AI Prompt Categories: [system, development, content, analysis, testing, deployment, maintenance]
+BROWSER: Branding configuration loaded: {application: Object, ui: Object, assets: Object, metadata: Object}
+BROWSER: Branding loaded and applied successfully
+BROWSER: Body classes after immediate force: no-tabs
+BROWSER: Starting WYSIWYGEditor initialization
+BROWSER: Step 0: Clearing localStorage and sessionStorage
+BROWSER: Cleared all localStorage and sessionStorage
+BROWSER: Step 1: Setting up elements
+BROWSER: Step 2: Elements setup complete, wysiwygEditor: true
+BROWSER: Step 3: Setting up event listeners
+BROWSER: Step 4: Setting up keyboard shortcuts
+BROWSER: Step 5: Setting up toolbar buttons
+BROWSER: Step 6: Initializing auto-save
+BROWSER: Step 7: Initializing menu functionality
+BROWSER: Initializing menu functionality...
+BROWSER: New file button found: true
+BROWSER: Step 8: Initializing database connection
+BROWSER: Database connection initialized
+BROWSER: Step 9: Loading documents
+BROWSER: loadDocuments: Allowing profile content in first tab
+BROWSER: loadDocuments - WYSIWYG content preview: 
+                        <!-- Content will be loaded by JavaScript -->
+                    
+BROWSER: loadDocuments - Source content preview: 
+BROWSER: Step 10: Updating stats and status
+BROWSER: Explorer initialized in collapsed state
+BROWSER: Step 11: Initializing tab system
+BROWSER: Updating editor visibility: hide (0 tabs)
+BROWSER: Documents: []
+BROWSER: Current body classes before: no-tabs
+BROWSER: Added no-tabs class to body, should show gray background
+BROWSER: Body classList after changes: no-tabs
+BROWSER: Background color should now be gray with red border
+BROWSER: Tab system initialized with no tabs - clean start
+BROWSER: File tree initialized
+BROWSER: Step 11.5: Force no-tabs state immediately
+BROWSER: Added no-tabs class to body: no-tabs
+BROWSER: Step 12: Clean start - no default content to load
+BROWSER: Clean start initialized - user can open files from explorer
+BROWSER: WYSIWYG Editor initialized successfully
+BROWSER: WYSIWYGEditor initialized and available globally {editor: true, wysiwygEditor: true}
+BROWSER: 🎯 READY: Editor initialized, ready for user to select files
+BROWSER: Opening file: My Profile (profile.md)
+BROWSER: Creating tab element for tab-1 with name My Profile
+BROWSER: Tab bar found: true
+BROWSER: New tab button found: true
+BROWSER: Created tab element (default: false): <div class="tab closable" data-tab-id="tab-1"><span class="tab-title">My Profile</span><button class="tab-close" title="Close tab" data-tab-id="tab-1">×</button></div>
+BROWSER: Tab inserted into DOM. Current tabs in bar: 1
+BROWSER: Loading document content: My Profile
+BROWSER: Content preview: # My Profile
+
+👤 **Developer & Creator**
+
+## About Me
+
+Welcome to my digital workspace! I'm a passio...
+BROWSER: Loaded content into WYSIWYG editor, HTML length: 1459
+BROWSER: Switched to tab: tab-1
+BROWSER: Updating editor visibility: show (1 tabs)
+BROWSER: Documents: [tab-1]
+BROWSER: Current body classes before: no-tabs
+BROWSER: Added has-tabs class, showing editor components
+BROWSER: Body classList: has-tabs
+BROWSER: Created new tab: My Profile (tab-1)
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="basic-functionality.spec.js" timestamp="2025-10-02T00:47:28.139Z" hostname="Mobile Safari" tests="1" failures="1" skipped="0" time="10.415" errors="0">
+<testcase name="WYSIWYG Markdown Editor - Basic Functionality › should load the application successfully" classname="basic-functionality.spec.js" time="10.415">
+<failure message="basic-functionality.spec.js:48:7 should load the application successfully" type="FAILURE">
+<![CDATA[  [Mobile Safari] › basic-functionality.spec.js:48:7 › WYSIWYG Markdown Editor - Basic Functionality › should load the application successfully 
+
+    Test timeout of 10000ms exceeded while running "beforeEach" hook.
+
+      2 |
+      3 | test.describe('WYSIWYG Markdown Editor - Basic Functionality', () => {
+    > 4 |   test.beforeEach(async ({ page }) => {
+        |        ^
+      5 |     await page.goto('/');
+      6 |     
+      7 |     // Add console listener to capture browser logs
+        at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:4:8
+
+    Error: page.waitForFunction: Test timeout of 10000ms exceeded.
+
+      10 |     
+      11 |     // Wait for the WYSIWYG editor to be available globally (initialization complete)
+    > 12 |     await page.waitForFunction(
+         |                ^
+      13 |       () => window.WYSIWYGEditor !== undefined,
+      14 |       {},
+      15 |       { timeout: 30000 }
+        at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:12:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ../test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-Mobile-Safari/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-Mobile-Safari/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-Mobile-Safari/error-context.md
+]]>
+</failure>
+<system-out>
+<![CDATA[
+[[ATTACHMENT|basic-functionality-WYSIWY-e99fb-he-application-successfully-Mobile-Safari/test-failed-1.png]]
+
+[[ATTACHMENT|basic-functionality-WYSIWY-e99fb-he-application-successfully-Mobile-Safari/video.webm]]
+
+[[ATTACHMENT|basic-functionality-WYSIWY-e99fb-he-application-successfully-Mobile-Safari/error-context.md]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+</testsuites>
