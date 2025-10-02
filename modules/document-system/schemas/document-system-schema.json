@@ -1,0 +1,290 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "document-system-schema",
+  "title": "Document Management System Schema",
+  "description": "Schema for the entire document system, including users, markdown documents, and LLM prompts.",
+  "type": "object",
+  "properties": {
+    "users": {
+      "type": "array",
+      "description": "List of user nodes.",
+      "items": {
+        "$ref": "#/definitions/user_node"
+      }
+    },
+    "markdown_documents": {
+      "type": "array",
+      "description": "List of all markdown document nodes, including source content and LLM responses.",
+      "items": {
+        "$ref": "#/definitions/markdown_document"
+      }
+    },
+    "resources": {
+      "type": "array",
+      "description": "List of all resource nodes, including external content and references.",
+      "items": {
+        "$ref": "#/definitions/resource_node"
+      }
+    }
+  },
+  "required": [
+    "users",
+    "markdown_documents",
+    "resources"
+  ],
+  "definitions": {
+    "hash_key": {
+      "type": "string",
+      "description": "A 256-character (64-digit hexadecimal) hash key used for all unique identifiers.",
+      "pattern": "^[0-9a-fA-F]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 date-time string."
+    },
+    "prompt_node": {
+      "type": "object",
+      "description": "Metadata for an LLM prompt executed against a source document.",
+      "properties": {
+        "prompt_id": {
+          "$ref": "#/definitions/hash_key"
+        },
+        "owner_user_id": {
+          "$ref": "#/definitions/hash_key"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "pending",
+            "failed"
+          ],
+          "description": "The current status of the prompt job."
+        },
+        "source_markdown_id": {
+          "$ref": "#/definitions/hash_key"
+        },
+        "response_markdown_id": {
+          "$ref": "#/definitions/hash_key"
+        },
+        "prompt_text": {
+          "type": "string",
+          "description": "The natural language query sent to the LLM."
+        },
+        "resources_array": {
+          "type": "array",
+          "description": "Array of resource IDs associated with this prompt.",
+          "items": {
+            "$ref": "#/definitions/hash_key"
+          }
+        },
+        "created_at": {
+          "$ref": "#/definitions/timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/timestamp"
+        }
+      },
+      "required": [
+        "prompt_id",
+        "owner_user_id",
+        "status",
+        "source_markdown_id",
+        "response_markdown_id",
+        "prompt_text",
+        "resources_array",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "markdown_document": {
+      "type": "object",
+      "description": "A document containing content chunks and related metadata.",
+      "properties": {
+        "markdown_id": {
+          "$ref": "#/definitions/hash_key"
+        },
+        "owner_user_id": {
+          "$ref": "#/definitions/hash_key"
+        },
+        "summary": {
+          "type": "string",
+          "description": "A short summary of the content."
+        },
+        "categories": {
+          "type": "array",
+          "description": "List of descriptive tags for the document.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "chunk_ids": {
+          "type": "array",
+          "description": "Ordered list of IDs for content chunks (stored in the vector DB) used for reassembly.",
+          "items": {
+            "$ref": "#/definitions/hash_key"
+          }
+        },
+        "nested_prompts": {
+          "type": "array",
+          "description": "Full prompt nodes that were executed against this document (required for all markdown nodes).",
+          "items": {
+            "$ref": "#/definitions/prompt_node"
+          }
+        },
+        "prompt_source_id": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/hash_key"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The ID of the prompt that generated this document (null for original documents). This allows tracing the document lineage."
+        },
+        "resources_array": {
+          "type": "array",
+          "description": "Array of resource IDs associated with this markdown document.",
+          "items": {
+            "$ref": "#/definitions/hash_key"
+          }
+        },
+        "created_at": {
+          "$ref": "#/definitions/timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/timestamp"
+        }
+      },
+      "required": [
+        "markdown_id",
+        "owner_user_id",
+        "summary",
+        "categories",
+        "chunk_ids",
+        "nested_prompts",
+        "resources_array",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "user_node": {
+      "type": "object",
+      "description": "Information about a user in the system.",
+      "properties": {
+        "user_id": {
+          "$ref": "#/definitions/hash_key"
+        },
+        "detailed_description": {
+          "type": "string",
+          "description": "Free text describing user characteristics."
+        },
+        "personalization_prompts": {
+          "type": "array",
+          "description": "Prompts defining user preferences for LLM searches/generations.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "resources_array": {
+          "type": "array",
+          "description": "Array of resource IDs associated with this user.",
+          "items": {
+            "$ref": "#/definitions/hash_key"
+          }
+        },
+        "created_at": {
+          "$ref": "#/definitions/timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/timestamp"
+        }
+      },
+      "required": [
+        "user_id",
+        "detailed_description",
+        "personalization_prompts",
+        "resources_array",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "resource_node": {
+      "type": "object",
+      "description": "A resource node containing external content references and metadata.",
+      "properties": {
+        "resource_content_id": {
+          "$ref": "#/definitions/hash_key"
+        },
+        "content_type": {
+          "type": "string",
+          "description": "MIME type or content classification of the resource.",
+          "examples": [
+            "text/plain",
+            "image/jpeg",
+            "application/pdf",
+            "video/mp4",
+            "application/json",
+            "text/html"
+          ]
+        },
+        "user_id": {
+          "$ref": "#/definitions/hash_key"
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the resource content."
+        },
+        "prompt_id": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/hash_key"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "ID of the prompt that generated or requested this resource (null for manually added resources)."
+        },
+        "categories": {
+          "type": "array",
+          "description": "List of descriptive tags for the resource.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "external_location_locator": {
+          "type": "string",
+          "description": "URL, file path, or other locator for accessing the external resource.",
+          "format": "uri"
+        },
+        "resources_array": {
+          "type": "array",
+          "description": "Array of related resource IDs that are associated with this resource.",
+          "items": {
+            "$ref": "#/definitions/hash_key"
+          }
+        },
+        "created_at": {
+          "$ref": "#/definitions/timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/timestamp"
+        }
+      },
+      "required": [
+        "resource_content_id",
+        "content_type",
+        "user_id",
+        "description",
+        "categories",
+        "external_location_locator",
+        "resources_array",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}
