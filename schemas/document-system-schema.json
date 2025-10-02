@@ -108,6 +108,10 @@
         "owner_user_id": {
           "$ref": "#/definitions/hash_key"
         },
+        "subject": {
+          "type": "string",
+          "description": "The title/subject of the document, used in file explorer and tab titles."
+        },
         "summary": {
           "type": "string",
           "description": "A short summary of the content."
@@ -161,6 +165,7 @@
       "required": [
         "markdown_id",
         "owner_user_id",
+        "subject",
         "summary",
         "categories",
         "chunk_ids",

@@ -1,0 +1,120 @@
+{
+  "users": [
+    {
+      "user_id": "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890abcdef1234567890123456789012345678901234567890123456789012345",
+      "username": "johndoe",
+      "email": "john.doe@example.com",
+      "full_name": "John Doe",
+      "preferences": {
+        "theme": "dark",
+        "language": "en",
+        "notifications": true,
+        "autosave": true,
+        "editor_font_size": 14,
+        "vim_mode": false
+      },
+      "created_at": "2024-01-15T10:30:00Z",
+      "last_active": "2024-12-02T14:22:30Z"
+    }
+  ],
+  "markdown_documents": [
+    {
+      "markdown_id": "b2c3d4e5f6789012345678901234567890123456789012345678901234567890abcdef1234567890123456789012345678901234567890123456789012345678",
+      "subject": "Welcome",
+      "summary": "Getting started with the markdown editor - welcome document",
+      "categories": ["welcome", "tutorial", "getting-started"],
+      "resources_array": [],
+      "owner_user_id": "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890abcdef1234567890123456789012345678901234567890123456789012345",
+      "nested_prompts": [],
+      "prompt_source_id": null,
+      "chunk_ids": ["chunk001", "chunk002"],
+      "created_at": "2024-01-15T10:35:00Z",
+      "updated_at": "2024-12-02T09:15:22Z"
+    },
+    {
+      "markdown_id": "c3d4e5f6789012345678901234567890123456789012345678901234567890abcdef1234567890123456789012345678901234567890123456789012345678901",
+      "subject": "Planning",
+      "summary": "Project planning and task management document",
+      "categories": ["project", "planning", "tasks"],
+      "resources_array": ["res001", "res002"],
+      "owner_user_id": "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890abcdef1234567890123456789012345678901234567890123456789012345",
+      "nested_prompts": ["prompt001"],
+      "prompt_source_id": null,
+      "chunk_ids": ["chunk003", "chunk004", "chunk005"],
+      "created_at": "2024-01-15T11:00:00Z",
+      "updated_at": "2024-12-02T13:45:18Z"
+    },
+    {
+      "markdown_id": "d4e5f6789012345678901234567890123456789012345678901234567890abcdef1234567890123456789012345678901234567890123456789012345678901234",
+      "subject": "API Doc",
+      "summary": "API documentation for the document system integration",
+      "categories": ["documentation", "api", "technical"],
+      "resources_array": ["res003"],
+      "owner_user_id": "a1b2c3d4e5f6789012345678901234567890123456789012345678901234567890abcdef1234567890123456789012345678901234567890123456789012345",
+      "nested_prompts": ["prompt002", "prompt003"],
+      "prompt_source_id": null,
+      "chunk_ids": ["chunk006", "chunk007", "chunk008", "chunk009"],
+      "created_at": "2024-01-16T09:20:00Z",
+      "updated_at": "2024-12-02T14:20:45Z"
+    }
+  ],
+  "resources": [
+    {
+      "resource_id": "res001",
+      "url": "https://example.com/project-diagram.png",
+      "type": "image",
+      "title": "Project Architecture Diagram",
+      "description": "Visual overview of the system architecture",
+      "metadata": {
+        "fileSize": 245760,
+        "mimeType": "image/png",
+        "lastModified": "2024-01-15T11:05:00Z",
+        "width": 1920,
+        "height": 1080
+      },
+      "access_permissions": "public",
+      "created_at": "2024-01-15T11:05:00Z",
+      "updated_at": "2024-01-15T11:05:00Z"
+    },
+    {
+      "resource_id": "res002",
+      "url": "https://docs.example.com/api-reference",
+      "type": "link",
+      "title": "API Reference Documentation",
+      "description": "Complete API documentation with examples",
+      "metadata": {
+        "lastChecked": "2024-12-02T08:00:00Z",
+        "status": "active"
+      },
+      "access_permissions": "public",
+      "created_at": "2024-01-15T11:10:00Z",
+      "updated_at": "2024-12-02T08:00:00Z"
+    },
+    {
+      "resource_id": "res003",
+      "url": "/uploads/schema-examples.json",
+      "type": "file",
+      "title": "Schema Examples",
+      "description": "JSON examples for document system schemas",
+      "metadata": {
+        "fileSize": 15360,
+        "mimeType": "application/json",
+        "lastModified": "2024-01-16T09:25:00Z"
+      },
+      "access_permissions": "private",
+      "created_at": "2024-01-16T09:25:00Z",
+      "updated_at": "2024-01-16T09:25:00Z"
+    }
+  ],
+  "example_content": {
+    "chunk001": "# Welcome to MarkdownEditor\n\nWelcome to your new markdown editor! This powerful tool helps you create, edit, and manage your documents with ease.\n\n## Features\n\n- **Live Preview**: See your markdown rendered in real-time\n- **Auto-save**: Your work is automatically saved as you type",
+    "chunk002": "- **Document Management**: Organize your documents with categories and tags\n- **AI Integration**: Get help writing and improving your content\n- **Schema Validation**: Ensure your documents follow proper structure\n\n## Getting Started\n\n1. Start typing in the editor\n2. Use the file menu to create new documents\n3. Explore the tools menu for additional features\n\nHappy writing! 📝",
+    "chunk003": "# Project Planning Document\n\n## Overview\n\nThis document outlines the planning and task management for our current project.\n\n## Goals\n\n- [ ] Complete document system integration\n- [ ] Implement AI-powered content suggestions\n- [ ] Add collaborative editing features",
+    "chunk004": "## Timeline\n\n### Phase 1: Foundation (Week 1-2)\n- Set up document schema\n- Integrate with backend APIs\n- Basic CRUD operations\n\n### Phase 2: Enhancement (Week 3-4)\n- AI integration\n- Advanced search\n- User management",
+    "chunk005": "### Phase 3: Polish (Week 5-6)\n- Performance optimization\n- UI/UX improvements\n- Testing and deployment\n\n## Resources\n\nSee attached architecture diagram and API documentation for technical details.",
+    "chunk006": "# Document System API Documentation\n\n## Overview\n\nThis API provides endpoints for managing documents, users, and resources in the markdown editor system.\n\n## Authentication\n\nAll API requests require authentication using Bearer tokens:\n\n```\nAuthorization: Bearer <your-token>\n```",
+    "chunk007": "## Document Endpoints\n\n### GET /api/documents/markdown/:id\n\nRetrieve a markdown document by ID.\n\n**Response:**\n```json\n{\n  \"markdown_id\": \"...\",\n  \"summary\": \"...\",\n  \"categories\": [...],\n  \"chunk_ids\": [...]\n}\n```",
+    "chunk008": "### POST /api/documents/batch-update\n\nUpdate multiple documents in a single request.\n\n**Request Body:**\n```json\n{\n  \"updates\": [\n    {\n      \"document_id\": \"...\",\n      \"node\": {...},\n      \"is_new\": false\n    }\n  ]\n}\n```",
+    "chunk009": "## Vector Database Endpoints\n\n### GET /api/vector/chunks/:id\n\nRetrieve chunk content by ID.\n\n### POST /api/vector/chunks\n\nStore new chunk content.\n\n**Request Body:**\n```json\n{\n  \"chunk_id\": \"...\",\n  \"document_id\": \"...\",\n  \"content\": \"...\",\n  \"order\": 0\n}\n```\n\nFor more examples, see the attached schema examples file."
+  }
+}
