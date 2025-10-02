@@ -78,19 +78,8 @@
 
     <!-- Main Editor Container -->
     <main class="editor-container" id="editor-container">
-        <!-- Browser-in-Browser Window -->
-        <div class="browser-window">
-            <!-- Address Bar (hidden for now, keeping for future use) -->
-            <div class="address-bar" style="display: none;">
-                <div class="url-container">
-                    <span class="protocol">md://</span>
-                    <input type="text" class="url-input" id="document-path" placeholder="untitled.md" readonly>
-                    <button class="browser-btn" id="external-link-btn" title="Open links externally">🔗</button>
-                </div>
-            </div>
-            
-            <!-- Editor Content Area -->
-            <div class="editor-content">
+        <!-- Editor Content Area -->
+        <div class="editor-content">
                 <!-- File Explorer Sidebar -->
                 <aside class="file-explorer collapsed" id="file-explorer">
                     <div class="explorer-header">
@@ -207,7 +196,6 @@
                 <span id="last-saved" class="status-item">Saved just now</span>
                 <span id="sync-status" class="status-item">⚡ Auto-save ON</span>
                 <span id="conversion-mode-indicator" class="conversion-mode-indicator" title="Manual conversion - use Ctrl+Enter to convert markdown">MANUAL</span>
-            </div>
         </div>
     </main>
 
