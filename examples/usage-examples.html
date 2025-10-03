@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Editor Component - Usage Examples</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #24292e;
+        }
+        
+        .example {
+            margin: 40px 0;
+            padding: 20px;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            background: #f6f8fa;
+        }
+        
+        .example h3 {
+            margin-top: 0;
+            color: #0366d6;
+        }
+        
+        .code-block {
+            background: #24292e;
+            color: #e1e4e8;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        
+        .demo-editor {
+            margin: 20px 0;
+        }
+        
+        .config-panel {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .config-panel button, .config-panel select {
+            padding: 6px 12px;
+            border: 1px solid #d0d7de;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .config-panel button:hover, .config-panel select:hover {
+            background: #f6f8fa;
+        }
+        
+        .output {
+            background: white;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 16px 0;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Markdown Editor Component Usage Examples</h1>
+    
+    <p>This page demonstrates how to use the reusable Markdown Editor component in different scenarios and frameworks.</p>
+    
+    <!-- Basic Usage Example -->
+    <div class="example">
+        <h3>1. Basic Usage - Vanilla HTML</h3>
+        <p>Simply include the component script and use the custom element:</p>
+        
+        <div class="code-block">
+&lt;!-- Include the component --&gt;
+&lt;script src="components/markdown-editor-component.js"&gt;&lt;/script&gt;
+
+&lt;!-- Use the component --&gt;
+&lt;markdown-editor 
+    mode="wysiwyg" 
+    height="400px"
+    content="# Welcome to Markdown Editor\n\nStart writing your content here..."&gt;
+&lt;/markdown-editor&gt;
+        </div>
+        
+        <div class="demo-editor">
+            <markdown-editor 
+                id="basic-editor"
+                mode="wysiwyg" 
+                height="300px"
+                content="# Welcome to Markdown Editor&#10;&#10;Start writing your content here...">
+            </markdown-editor>
+        </div>
+    </div>
+    
+    <!-- Configuration Example -->
+    <div class="example">
+        <h3>2. Advanced Configuration</h3>
+        <p>Configure the editor with various options:</p>
+        
+        <div class="config-panel">
+            <select id="mode-select">
+                <option value="wysiwyg">WYSIWYG Mode</option>
+                <option value="markdown">Markdown Mode</option>
+                <option value="split">Split Mode</option>
+            </select>
+            
+            <select id="theme-select">
+                <option value="default">Default Theme</option>
+                <option value="dark">Dark Theme</option>
+                <option value="minimal">Minimal Theme</option>
+            </select>
+            
+            <button onclick="toggleToolbar()">Toggle Toolbar</button>
+            <button onclick="toggleMenuBar()">Toggle Menu Bar</button>
+            <button onclick="setContent()">Set Sample Content</button>
+            <button onclick="getContent()">Get Content</button>
+        </div>
+        
+        <div class="demo-editor">
+            <markdown-editor 
+                id="advanced-editor"
+                mode="wysiwyg"
+                theme="default"
+                height="350px"
+                show-toolbar="true"
+                show-menubar="true"
+                show-statusbar="true">
+            </markdown-editor>
+        </div>
+        
+        <div class="output" id="content-output">Content will appear here...</div>
+    </div>
+    
+    <!-- React Integration Example -->
+    <div class="example">
+        <h3>3. React Integration</h3>
+        <p>How to use the component in a React application:</p>
+        
+        <div class="code-block">
+import React, { useRef, useEffect, useState } from 'react';
+import 'path/to/markdown-editor-component.js';
+
+function MarkdownEditorReact({ initialContent, onContentChange }) {
+    const editorRef = useRef(null);
+    const [content, setContent] = useState(initialContent || '');
+    
+    useEffect(() => {
+        const editor = editorRef.current;
+        
+        if (editor) {
+            // Set initial content
+            editor.setContent(content);
+            
+            // Listen for content changes
+            const handleContentChange = (e) => {
+                const newContent = e.detail.content;
+                setContent(newContent);
+                onContentChange?.(newContent);
+            };
+            
+            editor.addEventListener('content-change', handleContentChange);
+            
+            return () => {
+                editor.removeEventListener('content-change', handleContentChange);
+            };
+        }
+    }, []);
+    
+    return (
+        &lt;markdown-editor
+            ref={editorRef}
+            mode="wysiwyg"
+            height="400px"
+            autosave="true"
+        /&gt;
+    );
+}
+
+export default MarkdownEditorReact;
+        </div>
+    </div>
+    
+    <!-- Vue Integration Example -->
+    <div class="example">
+        <h3>4. Vue.js Integration</h3>
+        <p>Using the component in Vue.js:</p>
+        
+        <div class="code-block">
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;markdown-editor
+      ref="editor"
+      :mode="mode"
+      :theme="theme"
+      :height="height"
+      @content-change="handleContentChange"
+      @save="handleSave"
+    /&gt;
+    
+    &lt;button @click="saveContent"&gt;Save&lt;/button&gt;
+    &lt;button @click="loadContent"&gt;Load&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+import 'path/to/markdown-editor-component.js';
+
+export default {
+  name: 'MarkdownEditorVue',
+  data() {
+    return {
+      mode: 'wysiwyg',
+      theme: 'default',
+      height: '400px',
+      content: ''
+    };
+  },
+  methods: {
+    handleContentChange(event) {
+      this.content = event.detail.content;
+      this.$emit('content-change', this.content);
+    },
+    
+    handleSave(event) {
+      console.log('Saving content:', event.detail.content);
+      // Implement your save logic
+    },
+    
+    saveContent() {
+      const content = this.$refs.editor.save();
+      console.log('Manual save:', content);
+    },
+    
+    loadContent() {
+      const sampleContent = '# Loaded Content\n\nThis content was loaded dynamically.';
+      this.$refs.editor.setContent(sampleContent);
+    }
+  }
+};
+&lt;/script&gt;
+        </div>
+    </div>
+    
+    <!-- JavaScript API Example -->
+    <div class="example">
+        <h3>5. JavaScript API Usage</h3>
+        <p>Programmatic control of the editor:</p>
+        
+        <div class="config-panel">
+            <button onclick="insertSampleText()">Insert Text</button>
+            <button onclick="changeTheme()">Change Theme</button>
+            <button onclick="toggleMode()">Toggle Mode</button>
+            <button onclick="focusEditor()">Focus Editor</button>
+            <button onclick="exportContent()">Export Content</button>
+        </div>
+        
+        <div class="demo-editor">
+            <markdown-editor 
+                id="api-editor"
+                mode="split"
+                height="350px">
+            </markdown-editor>
+        </div>
+        
+        <div class="code-block">
+// Get reference to the editor
+const editor = document.getElementById('api-editor');
+
+// Wait for editor to be ready
+editor.addEventListener('editor-ready', () => {
+    console.log('Editor is ready!');
+});
+
+// Listen for content changes
+editor.addEventListener('content-change', (e) => {
+    console.log('Content changed:', e.detail.content);
+});
+
+// Programmatic control
+editor.setContent('# API Control\n\nThis content was set via JavaScript API.');
+editor.configure({ theme: 'dark', mode: 'markdown' });
+editor.insertText('\n\nAdditional text inserted!');
+editor.focus();
+
+// Get current content
+const content = editor.getContent();
+        </div>
+    </div>
+    
+    <!-- Framework Integration Guide -->
+    <div class="example">
+        <h3>6. Framework Integration Guide</h3>
+        
+        <h4>Angular Integration:</h4>
+        <div class="code-block">
+// app.module.ts
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
+@NgModule({
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  // ... other config
+})
+
+// component.ts
+import { Component, ViewChild, ElementRef } from '@angular/core';
+import 'path/to/markdown-editor-component.js';
+
+@Component({
+  selector: 'app-editor',
+  template: `
+    &lt;markdown-editor 
+      #editor
+      mode="wysiwyg"
+      (content-change)="onContentChange($event)"&gt;
+    &lt;/markdown-editor&gt;
+  `
+})
+export class EditorComponent {
+  @ViewChild('editor') editor!: ElementRef;
+  
+  onContentChange(event: any) {
+    console.log('Content:', event.detail.content);
+  }
+}
+        </div>
+        
+        <h4>Svelte Integration:</h4>
+        <div class="code-block">
+&lt;script&gt;
+  import 'path/to/markdown-editor-component.js';
+  
+  let editorElement;
+  let content = '';
+  
+  function handleContentChange(event) {
+    content = event.detail.content;
+  }
+&lt;/script&gt;
+
+&lt;markdown-editor
+  bind:this={editorElement}
+  mode="wysiwyg"
+  height="400px"
+  on:content-change={handleContentChange}
+/&gt;
+        </div>
+    </div>
+    
+    <!-- Include the component -->
+    <script src="components/markdown-editor-component.js"></script>
+    
+    <!-- Demo functionality -->
+    <script>
+        // Configuration handlers for advanced example
+        document.getElementById('mode-select').addEventListener('change', (e) => {
+            const editor = document.getElementById('advanced-editor');
+            editor.setAttribute('mode', e.target.value);
+        });
+        
+        document.getElementById('theme-select').addEventListener('change', (e) => {
+            const editor = document.getElementById('advanced-editor');
+            editor.setAttribute('theme', e.target.value);
+        });
+        
+        function toggleToolbar() {
+            const editor = document.getElementById('advanced-editor');
+            const current = editor.getAttribute('show-toolbar') !== 'false';
+            editor.setAttribute('show-toolbar', !current);
+        }
+        
+        function toggleMenuBar() {
+            const editor = document.getElementById('advanced-editor');
+            const current = editor.getAttribute('show-menubar') !== 'false';
+            editor.setAttribute('show-menubar', !current);
+        }
+        
+        function setContent() {
+            const editor = document.getElementById('advanced-editor');
+            const sampleContent = `# Sample Document
+
+This is a **sample document** with various *formatting* elements:
+
+## Features
+
+- **Bold text**
+- *Italic text*  
+- \`Inline code\`
+- [Links](https://example.com)
+
+## Code Block
+
+\`\`\`javascript
+function hello() {
+    console.log("Hello, World!");
+}
+\`\`\`
+
+> This is a blockquote with some important information.
+
+### Table Example
+
+| Feature | Status |
+|---------|--------|
+| WYSIWYG | ✅ Ready |
+| Markdown | ✅ Ready |
+| Themes | ✅ Ready |`;
+            
+            editor.setContent(sampleContent);
+        }
+        
+        function getContent() {
+            const editor = document.getElementById('advanced-editor');
+            const content = editor.getContent();
+            document.getElementById('content-output').innerHTML = 
+                `<strong>Current Content:</strong><br><pre>${content}</pre>`;
+        }
+        
+        // API example handlers
+        function insertSampleText() {
+            const editor = document.getElementById('api-editor');
+            editor.insertText('\n\n**Inserted via API:** ' + new Date().toLocaleTimeString());
+        }
+        
+        function changeTheme() {
+            const editor = document.getElementById('api-editor');
+            const themes = ['default', 'dark', 'minimal'];
+            const current = editor.getAttribute('theme') || 'default';
+            const currentIndex = themes.indexOf(current);
+            const nextTheme = themes[(currentIndex + 1) % themes.length];
+            editor.setAttribute('theme', nextTheme);
+        }
+        
+        function toggleMode() {
+            const editor = document.getElementById('api-editor');
+            const modes = ['wysiwyg', 'markdown', 'split'];
+            const current = editor.getAttribute('mode') || 'wysiwyg';
+            const currentIndex = modes.indexOf(current);
+            const nextMode = modes[(currentIndex + 1) % modes.length];
+            editor.setAttribute('mode', nextMode);
+        }
+        
+        function focusEditor() {
+            const editor = document.getElementById('api-editor');
+            editor.focus();
+        }
+        
+        function exportContent() {
+            const editor = document.getElementById('api-editor');
+            const content = editor.getContent();
+            
+            // Create download
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'exported-content.md';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Listen for editor events
+        document.addEventListener('DOMContentLoaded', () => {
+            const editors = document.querySelectorAll('markdown-editor');
+            editors.forEach(editor => {
+                editor.addEventListener('editor-ready', (e) => {
+                    console.log('Editor ready:', e.target.id);
+                });
+                
+                editor.addEventListener('content-change', (e) => {
+                    console.log('Content changed in:', e.target.id);
+                });
+                
+                editor.addEventListener('save', (e) => {
+                    console.log('Save triggered in:', e.target.id);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

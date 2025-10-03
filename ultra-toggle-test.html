@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra Simple Toggle Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="editor-styles.css">
+    <style>
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10000;
+            max-width: 300px;
+        }
+        .test-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .status-line {
+            margin: 5px 0;
+            padding: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h4>🚨 Ultra Toggle Test</h4>
+        <div class="status-line">Menu: <span id="menu-state">Loading...</span></div>
+        <div class="status-line">Explorer: <span id="explorer-state">Loading...</span></div>
+        <button class="test-btn" onclick="forceMenuToggle()">Force Menu</button>
+        <button class="test-btn" onclick="forceExplorerToggle()">Force Explorer</button>
+        <div id="log" style="margin-top: 10px; font-size: 10px; max-height: 150px; overflow-y: auto;"></div>
+    </div>
+
+    <!-- Menu Bar (starts collapsed) -->
+    <header class="menu-bar collapsed" id="menu-bar">
+        <div class="menu-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 20px;">
+            <nav class="main-nav" style="display: flex; align-items: center; gap: 5px;">
+                <button style="background: #e0e0e0; color: black; padding: 8px 16px; margin: 2px; border: 1px solid #ccc;">📁 File</button>
+                <button style="background: #e0e0e0; color: black; padding: 8px 16px; margin: 2px; border: 1px solid #ccc;">✏️ Edit</button>
+            </nav>
+            
+            <div class="logo" style="position: absolute; left: 50%; transform: translateX(-50%);">📝 Ultra Test</div>
+            
+            <div class="menu-controls">
+                <button class="menu-toggle" id="menu-toggle" style="background: #007acc; color: white; border: none; padding: 8px 12px; border-radius: 3px; cursor: pointer;">⚡</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="editor-container" id="editor-container">
+        <div class="editor-content">
+            <!-- File Explorer (starts collapsed) -->
+            <aside class="file-explorer collapsed" id="file-explorer">
+                <div class="explorer-header">
+                    <h3>Files</h3>
+                    <button class="explorer-toggle" id="explorer-toggle" title="Pin/Unpin Explorer" style="background: #007acc; color: white; border: none; padding: 5px 8px; border-radius: 3px; cursor: pointer;">📌</button>
+                </div>
+                <div class="file-tree" id="file-tree">
+                    <div style="padding: 8px; border-bottom: 1px solid #eee;">📄 test1.md</div>
+                    <div style="padding: 8px; border-bottom: 1px solid #eee;">📄 test2.md</div>
+                    <div style="padding: 8px; border-bottom: 1px solid #eee;">📄 test3.md</div>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <div class="wysiwyg-editor-container" style="flex: 1;">
+                <div style="padding: 30px; background: white; height: calc(100vh - 100px); overflow-y: auto;">
+                    <h1>🚨 Ultra Simple Toggle Test</h1>
+                    <p><strong>Purpose:</strong> Test basic menu and explorer toggle functionality with minimal interference.</p>
+                    
+                    <h2>Test Instructions:</h2>
+                    <ol>
+                        <li><strong>Menu Toggle:</strong> Click the <code>⚡</code> button in the top-right corner</li>
+                        <li><strong>Explorer Toggle:</strong> Click the <code>📌</code> button in the file explorer header</li>
+                        <li><strong>Visual Check:</strong> Look for clear differences between collapsed/expanded states</li>
+                        <li><strong>Console:</strong> Check browser console for detailed logs</li>
+                    </ol>
+                    
+                    <h2>Expected Results:</h2>
+                    <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #007acc; margin: 15px 0;">
+                        <h3>Menu Bar:</h3>
+                        <ul>
+                            <li><strong>Collapsed:</strong> Very thin bar at top (8px height)</li>
+                            <li><strong>Expanded:</strong> Full menu bar visible with File, Edit buttons</li>
+                        </ul>
+                        
+                        <h3>File Explorer:</h3>
+                        <ul>
+                            <li><strong>Collapsed:</strong> Thin sidebar (20px width)</li>
+                            <li><strong>Pinned:</strong> Full sidebar visible with file list</li>
+                            <li><strong>Button:</strong> Changes between 📌 (pin) and 📍 (unpin)</li>
+                        </ul>
+                    </div>
+                    
+                    <h2>Troubleshooting:</h2>
+                    <ul>
+                        <li>If nothing happens when clicking, check the test panel for "Force" buttons</li>
+                        <li>Look at browser console for error messages</li>
+                        <li>The status in the test panel should update when states change</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Load ONLY the ultra toggle fix -->
+    <script src="ultra-toggle-fix.js"></script>
+    
+    <script>
+        // Minimal test script
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logEl.innerHTML += `<div>${time}: ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[TEST] ${message}`);
+        }
+        
+        function updateStatus() {
+            const menuBar = document.getElementById('menu-bar');
+            const fileExplorer = document.getElementById('file-explorer');
+            
+            const menuState = menuBar?.classList.contains('collapsed') ? 'Collapsed' : 'Expanded';
+            const explorerState = fileExplorer?.classList.contains('pinned') ? 'Pinned' : 
+                                 fileExplorer?.classList.contains('collapsed') ? 'Collapsed' : 'Expanded';
+            
+            document.getElementById('menu-state').textContent = menuState;
+            document.getElementById('explorer-state').textContent = explorerState;
+        }
+        
+        function forceMenuToggle() {
+            log('Force menu toggle requested');
+            const menuBar = document.getElementById('menu-bar');
+            if (menuBar) {
+                menuBar.classList.toggle('collapsed');
+                log('Menu toggled manually');
+                updateStatus();
+            }
+        }
+        
+        function forceExplorerToggle() {
+            log('Force explorer toggle requested');
+            const fileExplorer = document.getElementById('file-explorer');
+            const toggleBtn = document.getElementById('explorer-toggle');
+            
+            if (fileExplorer) {
+                if (fileExplorer.classList.contains('pinned')) {
+                    fileExplorer.classList.remove('pinned');
+                    fileExplorer.classList.add('collapsed');
+                    if (toggleBtn) {
+                        toggleBtn.textContent = '📌';
+                        toggleBtn.title = 'Pin Explorer';
+                    }
+                    log('Explorer unpinned manually');
+                } else {
+                    fileExplorer.classList.add('pinned');
+                    fileExplorer.classList.remove('collapsed');
+                    if (toggleBtn) {
+                        toggleBtn.textContent = '📍';
+                        toggleBtn.title = 'Unpin Explorer';
+                    }
+                    log('Explorer pinned manually');
+                }
+                updateStatus();
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            log('DOM loaded');
+            updateStatus();
+            setInterval(updateStatus, 1000);
+        });
+        
+        // Log all clicks for debugging
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'menu-toggle') {
+                log('Menu toggle button clicked!');
+            } else if (e.target.id === 'explorer-toggle') {
+                log('Explorer toggle button clicked!');
+            }
+        });
+        
+        log('Test script loaded');
+    </script>
+</body>
+</html>

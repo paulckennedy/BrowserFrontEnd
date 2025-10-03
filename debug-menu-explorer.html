@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu & Explorer Debug Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="editor-styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            z-index: 10000;
+            min-width: 300px;
+        }
+        .debug-item {
+            margin: 5px 0;
+            font-size: 12px;
+        }
+        .debug-button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .debug-button:hover {
+            background: #005a9e;
+        }
+    </style>
+</head>
+<body>
+    <!-- Debug Panel -->
+    <div class="debug-panel" id="debug-panel">
+        <div style="font-weight: bold; margin-bottom: 10px;">🔧 Debug Panel</div>
+        <div class="debug-item">Menu Bar: <span id="menu-status">Unknown</span></div>
+        <div class="debug-item">File Explorer: <span id="explorer-status">Unknown</span></div>
+        <div class="debug-item">WYSIWYG Editor: <span id="editor-status">Unknown</span></div>
+        <div style="margin-top: 10px;">
+            <button class="debug-button" onclick="debugToggleMenu()">Toggle Menu</button>
+            <button class="debug-button" onclick="debugToggleExplorer()">Toggle Explorer</button>
+            <button class="debug-button" onclick="debugCheckElements()">Check Elements</button>
+            <button class="debug-button" onclick="debugInspectEvents()">Check Events</button>
+        </div>
+        <div class="debug-item" id="debug-log" style="margin-top: 10px; max-height: 200px; overflow-y: auto; font-size: 10px;"></div>
+    </div>
+
+    <!-- Collapsing Menu Bar -->
+    <header class="menu-bar collapsed" id="menu-bar">
+        <div class="menu-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 20px;">
+            <!-- Menu items on far left -->
+            <nav class="main-nav" style="display: flex; align-items: center; gap: 5px;">
+                <!-- File button -->
+                <div style="display: inline-block; position: relative;">
+                    <button id="file-menu" onclick="simpleToggle('file-dropdown')" style="background: #e0e0e0; color: black; padding: 8px 16px; margin: 2px; border: 1px solid #ccc;">📁 File</button>
+                    <div id="file-dropdown" style="display: none; position: fixed; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 99999;">
+                        <button style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: white;">New File</button>
+                        <button style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: white;">Open File</button>
+                        <button style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: white;">Save File</button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Centered title -->
+            <div class="logo" style="position: absolute; left: 50%; transform: translateX(-50%);">
+                📝 Debug Test
+            </div>
+            
+            <div class="menu-controls">
+                <button class="menu-toggle" id="menu-toggle">⚡</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Editor Container -->
+    <main class="editor-container" id="editor-container">
+        <!-- Editor Content Area -->
+        <div class="editor-content">
+            <!-- File Explorer Sidebar -->
+            <aside class="file-explorer collapsed" id="file-explorer">
+                <div class="explorer-header">
+                    <h3>Documents</h3>
+                    <button class="explorer-toggle" id="explorer-toggle" title="Pin/Unpin Explorer">📌</button>
+                </div>
+                <div class="file-tree" id="file-tree">
+                    <div>Sample Document 1</div>
+                    <div>Sample Document 2</div>
+                    <div>Sample Document 3</div>
+                </div>
+            </aside>
+            
+            <!-- WYSIWYG Editor -->
+            <div class="wysiwyg-editor-container">
+                <div style="padding: 20px; height: calc(100vh - 100px); background: white; border: 1px solid #ddd;">
+                    <h1>Menu & Explorer Debug Test</h1>
+                    <p>This page tests the menu bar and file explorer toggle functionality.</p>
+                    
+                    <h2>Expected Behavior:</h2>
+                    <ul>
+                        <li><strong>Menu Toggle (⚡):</strong> Should expand/collapse the menu bar</li>
+                        <li><strong>Explorer Toggle (📌):</strong> Should pin/unpin the file explorer</li>
+                        <li><strong>Hover Effects:</strong> Menu and explorer should expand on hover when collapsed</li>
+                    </ul>
+                    
+                    <h2>Debug Instructions:</h2>
+                    <ol>
+                        <li>Check the debug panel in the top-right corner</li>
+                        <li>Click the toggle buttons to test functionality</li>
+                        <li>Use debug panel buttons to inspect elements and events</li>
+                        <li>Hover over collapsed menu/explorer to test hover effects</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Include WYSIWYG editor script -->
+    <script src="wysiwyg-editor.js"></script>
+    
+    <!-- Menu functionality script -->
+    <script>
+        // Menu dropdown toggle function  
+        function simpleToggle(dropdownId) {
+            debugLog('simpleToggle called for: ' + dropdownId);
+            const dropdown = document.getElementById(dropdownId);
+            if (!dropdown) {
+                debugLog('ERROR: Dropdown not found: ' + dropdownId);
+                return;
+            }
+            
+            // Close all other dropdowns first
+            const allDropdowns = document.querySelectorAll('div[id$="-dropdown"]');
+            allDropdowns.forEach(dd => {
+                if (dd.id !== dropdownId) {
+                    dd.style.display = 'none';
+                }
+            });
+            
+            // Toggle current dropdown
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+                debugLog('Closed dropdown: ' + dropdownId);
+            } else {
+                // Position dropdown below its button
+                const button = dropdown.parentElement.querySelector('button');
+                if (button) {
+                    const buttonRect = button.getBoundingClientRect();
+                    dropdown.style.cssText = 'display: block !important; position: fixed !important; background: white !important; border: 1px solid #ccc !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important; padding: 5px !important; z-index: 99999 !important; top: ' + (buttonRect.bottom + 5) + 'px !important; left: ' + buttonRect.left + 'px !important; min-width: 150px !important;';
+                    debugLog('Opened dropdown: ' + dropdownId);
+                }
+            }
+        }
+        
+        window.simpleToggle = simpleToggle;
+        
+        // Debug functions
+        function debugLog(message) {
+            const logElement = document.getElementById('debug-log');
+            if (logElement) {
+                const time = new Date().toLocaleTimeString();
+                logElement.innerHTML += `<div>[${time}] ${message}</div>`;
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+            console.log('[DEBUG]', message);
+        }
+        
+        function debugUpdateStatus() {
+            const menuBar = document.getElementById('menu-bar');
+            const fileExplorer = document.getElementById('file-explorer');
+            const editor = window.WYSIWYGEditor;
+            
+            document.getElementById('menu-status').textContent = menuBar ? 
+                (menuBar.classList.contains('collapsed') ? 'Collapsed' : 'Expanded') : 'Not Found';
+            
+            document.getElementById('explorer-status').textContent = fileExplorer ? 
+                (fileExplorer.classList.contains('collapsed') ? 
+                    (fileExplorer.classList.contains('pinned') ? 'Collapsed (Pinned)' : 'Collapsed') : 
+                    'Expanded') : 'Not Found';
+            
+            document.getElementById('editor-status').textContent = editor ? 'Loaded' : 'Not Loaded';
+        }
+        
+        function debugToggleMenu() {
+            debugLog('Manual menu toggle requested');
+            const editor = window.WYSIWYGEditor;
+            if (editor && typeof editor.toggleMenu === 'function') {
+                editor.toggleMenu();
+                debugLog('Called editor.toggleMenu()');
+            } else {
+                // Fallback manual toggle
+                const menuBar = document.getElementById('menu-bar');
+                if (menuBar) {
+                    menuBar.classList.toggle('collapsed');
+                    debugLog('Manual menu toggle completed');
+                } else {
+                    debugLog('ERROR: Menu bar not found');
+                }
+            }
+            debugUpdateStatus();
+        }
+        
+        function debugToggleExplorer() {
+            debugLog('Manual explorer toggle requested');
+            const editor = window.WYSIWYGEditor;
+            if (editor && typeof editor.toggleExplorerPinFixed === 'function') {
+                editor.toggleExplorerPinFixed();
+                debugLog('Called editor.toggleExplorerPinFixed()');
+            } else {
+                // Fallback manual toggle
+                const fileExplorer = document.getElementById('file-explorer');
+                if (fileExplorer) {
+                    const wasPinned = fileExplorer.classList.contains('pinned');
+                    if (wasPinned) {
+                        fileExplorer.classList.remove('pinned');
+                        fileExplorer.classList.add('collapsed');
+                    } else {
+                        fileExplorer.classList.add('pinned');
+                        fileExplorer.classList.remove('collapsed');
+                    }
+                    debugLog('Manual explorer toggle completed');
+                } else {
+                    debugLog('ERROR: File explorer not found');
+                }
+            }
+            debugUpdateStatus();
+        }
+        
+        function debugCheckElements() {
+            debugLog('=== Element Check ===');
+            const elements = {
+                'menu-bar': document.getElementById('menu-bar'),
+                'menu-toggle': document.getElementById('menu-toggle'),
+                'file-explorer': document.getElementById('file-explorer'),
+                'explorer-toggle': document.getElementById('explorer-toggle')
+            };
+            
+            Object.entries(elements).forEach(([name, element]) => {
+                if (element) {
+                    debugLog(`✓ ${name}: Found, classes: ${element.className}`);
+                } else {
+                    debugLog(`✗ ${name}: NOT FOUND`);
+                }
+            });
+            
+            debugLog('WYSIWYG Editor: ' + (window.WYSIWYGEditor ? 'Loaded' : 'Not Loaded'));
+        }
+        
+        function debugInspectEvents() {
+            debugLog('=== Event Inspection ===');
+            const menuToggle = document.getElementById('menu-toggle');
+            const explorerToggle = document.getElementById('explorer-toggle');
+            
+            if (menuToggle) {
+                debugLog('Menu toggle button found');
+                // Try to trigger click programmatically
+                menuToggle.click();
+                debugLog('Programmatic click sent to menu toggle');
+            } else {
+                debugLog('Menu toggle button NOT found');
+            }
+            
+            if (explorerToggle) {
+                debugLog('Explorer toggle button found');
+                // Try to trigger click programmatically
+                explorerToggle.click();
+                debugLog('Programmatic click sent to explorer toggle');
+            } else {
+                debugLog('Explorer toggle button NOT found');
+            }
+        }
+        
+        // Initialize debug panel
+        document.addEventListener('DOMContentLoaded', () => {
+            debugLog('DOM Content Loaded');
+            debugUpdateStatus();
+            
+            // Update status every 2 seconds
+            setInterval(debugUpdateStatus, 2000);
+            
+            // Check for WYSIWYG editor initialization
+            setTimeout(() => {
+                if (window.WYSIWYGEditor) {
+                    debugLog('WYSIWYG Editor detected');
+                    debugLog('Editor methods available: ' + Object.getOwnPropertyNames(window.WYSIWYGEditor.__proto__).join(', '));
+                } else {
+                    debugLog('WYSIWYG Editor not found after 3 seconds');
+                }
+                debugUpdateStatus();
+            }, 3000);
+        });
+        
+        // Log clicks on menu and explorer toggle buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'menu-toggle') {
+                debugLog('Menu toggle button clicked');
+            } else if (e.target.id === 'explorer-toggle') {
+                debugLog('Explorer toggle button clicked');
+            }
+        });
+        
+        debugLog('Debug script loaded');
+    </script>
+</body>
+</html>

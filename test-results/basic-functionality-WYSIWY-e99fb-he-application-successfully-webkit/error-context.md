@@ -1,0 +1,83 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - navigation [ref=e5]:
+        - button "📁 File" [ref=e7] [cursor=pointer]
+        - button "✏️ Edit" [ref=e9] [cursor=pointer]
+        - button "👁️ View" [ref=e11] [cursor=pointer]
+        - button "🛠️ Tools" [ref=e13] [cursor=pointer]
+      - generic [ref=e14]: 📝 MarkdownEditor
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: 💾
+          - generic [ref=e18]: Saved
+        - button "⚡" [ref=e19]
+  - main [ref=e20]:
+    - generic [ref=e22]:
+      - complementary [ref=e23]:
+        - generic [ref=e24]:
+          - heading "Documents" [level=3] [ref=e25]
+          - button "📌" [ref=e26]
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29]: �
+            - generic [ref=e30]: My Profile
+          - generic [ref=e31]:
+            - generic [ref=e32]: 📄
+            - generic [ref=e33]: Markdown Editor Project
+          - generic [ref=e34]:
+            - generic [ref=e35]: 📄
+            - generic [ref=e36]: Web Portfolio
+          - generic [ref=e37]:
+            - generic [ref=e38]: 📄
+            - generic [ref=e39]: Task Manager App
+          - generic [ref=e40]:
+            - generic [ref=e41]: 📄
+            - generic [ref=e42]: Blog Platform
+          - generic [ref=e43]:
+            - generic [ref=e44]: 📄
+            - generic [ref=e45]: E-commerce Site
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - generic [ref=e48]:
+            - button "B" [ref=e49]:
+              - strong [ref=e50]: B
+            - button "I" [ref=e51]:
+              - emphasis [ref=e52]: I
+            - button "~~S~~" [ref=e53]
+            - button "</>" [ref=e54]
+          - generic [ref=e55]:
+            - button "H1" [ref=e56]
+            - button "H2" [ref=e57]
+            - button "H3" [ref=e58]
+            - button "❝" [ref=e59]
+          - generic [ref=e60]:
+            - button "• List" [ref=e61]
+            - button "1. List" [ref=e62]
+            - button "☐ Task" [ref=e63]
+          - generic [ref=e64]:
+            - button "🔗" [ref=e65]
+            - button "🖼️" [ref=e66]
+            - button "📋" [ref=e67]
+            - 'button "{ }" [ref=e68]'
+          - generic [ref=e69]:
+            - button "⚡" [ref=e70]
+            - button "⛶" [ref=e71]
+        - textbox [ref=e73]
+        - generic [ref=e74]:
+          - generic [ref=e75]: 0 words
+          - generic [ref=e76]: 0 characters
+          - generic [ref=e77]: Line 1, Col 1
+          - generic [ref=e78]: WYSIWYG Mode
+    - generic [ref=e79]:
+      - generic [ref=e80]:
+        - generic [ref=e81]: 🟢 Connected
+        - generic [ref=e82]: 📄 untitled.md
+      - generic [ref=e83]:
+        - generic [ref=e84]: Saved just now
+        - generic [ref=e85]: ⚡ Auto-save ON
+        - generic "Manual conversion - use Ctrl+Enter to convert markdown" [ref=e86]: MANUAL
+```

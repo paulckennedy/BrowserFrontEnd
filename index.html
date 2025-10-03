@@ -7,6 +7,7 @@
     <meta name="description" content="A sophisticated browser-in-browser markdown editor with live editing, auto-save, and database storage">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="editor-styles.css">
+    <script src="branding/branding.js"></script>
 </head>
 <body>
     <!-- Collapsing Menu Bar -->
@@ -27,7 +28,7 @@
                 
                 <!-- Edit button -->
                 <div style="display: inline-block; position: relative;">
-                    <button onclick="simpleToggle('edit-dropdown')" style="background: #e0e0e0; color: black; padding: 8px 16px; margin: 2px; border: 1px solid #ccc; position: relative; z-index: 10000; pointer-events: auto; cursor: pointer;">✏️ Edit</button>
+                    <button id="edit-menu" onclick="simpleToggle('edit-dropdown')" style="background: #e0e0e0; color: black; padding: 8px 16px; margin: 2px; border: 1px solid #ccc; position: relative; z-index: 10000; pointer-events: auto; cursor: pointer;">✏️ Edit</button>
                     <div id="edit-dropdown" style="display: none; position: fixed; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 99999; min-width: 150px; flex-direction: column;">
                         <button style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: white; cursor: pointer;">Undo</button>
                         <button style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: white; cursor: pointer;">Redo</button>
@@ -77,19 +78,8 @@
 
     <!-- Main Editor Container -->
     <main class="editor-container" id="editor-container">
-        <!-- Browser-in-Browser Window -->
-        <div class="browser-window">
-            <!-- Address Bar -->
-            <div class="address-bar">
-                <div class="url-container">
-                    <span class="protocol">md://</span>
-                    <input type="text" class="url-input" id="document-path" placeholder="untitled.md" readonly>
-                    <button class="browser-btn" id="external-link-btn" title="Open links externally">🔗</button>
-                </div>
-            </div>
-            
-            <!-- Editor Content Area -->
-            <div class="editor-content">
+        <!-- Editor Content Area -->
+        <div class="editor-content">
                 <!-- File Explorer Sidebar -->
                 <aside class="file-explorer collapsed" id="file-explorer">
                     <div class="explorer-header">
@@ -97,12 +87,20 @@
                         <button class="explorer-toggle" id="explorer-toggle" title="Pin/Unpin Explorer">📌</button>
                     </div>
                     <div class="file-tree" id="file-tree">
-                        <div class="loading-files">Loading documents...</div>
+                        <!-- Documents will be populated dynamically -->
                     </div>
                 </aside>
                 
                 <!-- WYSIWYG Editor -->
                 <div class="wysiwyg-editor-container">
+                    <!-- Tabs Container -->
+                    <div class="tabs-container" id="tabs-container">
+                        <div class="tab-bar" id="tab-bar">
+                            <!-- Tabs will be created dynamically when files are opened -->
+                            <button class="new-tab-btn" id="new-tab-btn" title="New tab" style="display: none;">+</button>
+                        </div>
+                    </div>
+                    
                     <div class="editor-toolbar">
                         <div class="toolbar-group">
                             <button class="toolbar-btn" id="bold-btn" title="Bold (Ctrl+B)"><strong>B</strong></button>
@@ -139,31 +137,7 @@
                          contenteditable="true" 
                          spellcheck="true"
                          data-placeholder="Start writing your markdown document...">
-                        <h1>Welcome to MarkdownEditor</h1>
-                        <p>This is a powerful browser-in-browser WYSIWYG markdown editor with:</p>
-                        <ul>
-                            <li>💾 <strong>Auto-save functionality</strong> - Changes saved automatically</li>
-                            <li>🔄 <strong>Live WYSIWYG editing</strong> - Edit formatted text directly</li>
-                            <li>🗂️ <strong>Database storage</strong> - Documents stored in PostgreSQL</li>
-                            <li>🎨 <strong>Rich formatting</strong> - Full markdown support</li>
-                            <li>🤖 <strong>AI integration</strong> - Smart writing assistance</li>
-                        </ul>
-                        <h2>Getting Started</h2>
-                        <ol>
-                            <li>Start typing in this editor</li>
-                            <li>Your changes are automatically saved</li>
-                            <li>Use the toolbar for quick formatting</li>
-                            <li>Toggle source view to see raw markdown</li>
-                        </ol>
-                        <h2>Features</h2>
-                        <h3>WYSIWYG Editing</h3>
-                        <p>Every keystroke is captured and auto-saved, similar to Obsidian's workflow with visual editing.</p>
-                        <h3>Database Integration</h3>
-                        <p>All documents are stored in a PostgreSQL database via SQL agent.</p>
-                        <h3>AI-Powered</h3>
-                        <p>Integrated AI assistance for writing, editing, and content generation.</p>
-                        <hr>
-                        <p><em>Happy writing! 📝</em></p>
+                        <!-- Content will be loaded by JavaScript -->
                     </div>
                     
                     <!-- Source Editor (Hidden by default) -->
@@ -191,12 +165,13 @@
             <div class="status-right">
                 <span id="last-saved" class="status-item">Saved just now</span>
                 <span id="sync-status" class="status-item">⚡ Auto-save ON</span>
-            </div>
+                <span id="conversion-mode-indicator" class="conversion-mode-indicator" title="Manual conversion - use Ctrl+Enter to convert markdown">MANUAL</span>
         </div>
     </main>
 
     <script src="ai-integration.js"></script>
     <script src="wysiwyg-editor.js"></script>
+    <script src="ultra-toggle-fix.js"></script>
     <script src="script.js"></script>
     
     <!-- Menu functionality script -->
@@ -241,6 +216,67 @@
         }
     });
 
+    // Menu bar expand/collapse functionality
+    function expandMenuBar() {
+        const menuBar = document.getElementById('menu-bar');
+        if (menuBar) {
+            menuBar.classList.remove('collapsed');
+        }
+    }
+    
+    function collapseMenuBar() {
+        const menuBar = document.getElementById('menu-bar');
+        if (menuBar) {
+            menuBar.classList.add('collapsed');
+        }
+    }
+    
+    window.expandMenuBar = expandMenuBar;
+    window.collapseMenuBar = collapseMenuBar;
+
+    // Status bar update functions
+    function updateStatusBar(type, message) {
+        const statusElements = {
+            connection: document.getElementById('connection-status'),
+            document: document.getElementById('document-status'),
+            saved: document.getElementById('last-saved'),
+            sync: document.getElementById('sync-status')
+        };
+        
+        if (statusElements[type]) {
+            statusElements[type].textContent = message;
+        }
+    }
+    
+    function updateAutoSaveStatus(isPaused) {
+        const syncStatus = document.getElementById('sync-status');
+        if (syncStatus) {
+            if (isPaused) {
+                syncStatus.innerHTML = '⏸️ Auto-save paused (editing...)';
+            } else {
+                syncStatus.innerHTML = '⚡ Auto-save ON';
+            }
+        }
+    }
+    
+    function updateConversionMode(isAuto) {
+        const indicator = document.getElementById('conversion-mode-indicator');
+        if (indicator) {
+            if (isAuto) {
+                indicator.textContent = 'AUTO';
+                indicator.className = 'conversion-mode-indicator auto';
+                indicator.title = 'Auto conversion - markdown converts as you type';
+            } else {
+                indicator.textContent = 'MANUAL';
+                indicator.className = 'conversion-mode-indicator';
+                indicator.title = 'Manual conversion - use Ctrl+Enter to convert markdown';
+            }
+        }
+    }
+    
+    window.updateStatusBar = updateStatusBar;
+    window.updateAutoSaveStatus = updateAutoSaveStatus;
+    window.updateConversionMode = updateConversionMode;
 
     </script>
 </body>

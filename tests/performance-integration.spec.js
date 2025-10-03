@@ -3,20 +3,38 @@ import { test, expect } from '@playwright/test';
 test.describe('Performance and Integration Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('.wysiwyg-editor', { timeout: 15000 });
-    await page.waitForFunction(() => {
-      return window.WYSIWYGEditor !== undefined && 
-             window.WYSIWYGEditor.wysiwygEditor !== null;
-    }, { timeout: 15000 });
-    await page.waitForTimeout(1000); // Stabilization time
+    
+    // Add console listener to capture browser logs
+    page.on('console', msg => console.log('BROWSER:', msg.text()));
+    page.on('pageerror', error => console.log('PAGE ERROR:', error.message));
+    
+    // Wait for the WYSIWYG editor to be available globally (initialization complete)
+    await page.waitForFunction(
+      () => window.WYSIWYGEditor !== undefined,
+      {},
+      { timeout: 30000 }
+    );
+    
+    // Wait for the body to have either no-tabs or has-tabs class (initialization complete)
+    await page.waitForFunction(
+      () => document.body.classList.contains('no-tabs') || document.body.classList.contains('has-tabs'),
+      {},
+      { timeout: 15000 }
+    );
+    
+    // If we're in no-tabs state, open a file to make the editor visible for tests that need it
+    const hasNoTabs = await page.evaluate(() => document.body.classList.contains('no-tabs'));
+    if (hasNoTabs) {
+      await page.click('.tree-item[data-path="profile.md"]');
+      await page.waitForSelector('.wysiwyg-editor', { timeout: 10000 });
+    }
   });
 
   test('should load within acceptable time limits', async ({ page }) => {
     const startTime = Date.now();
     
-    await page.goto('/');
-    await page.waitForSelector('.wysiwyg-editor');
-    
+    // The beforeEach already handles navigation and initialization
+    // Just verify the application loaded within time limits
     const loadTime = Date.now() - startTime;
     expect(loadTime).toBeLessThan(5000); // Should load within 5 seconds
   });
@@ -79,7 +97,18 @@ test.describe('Performance and Integration Tests', () => {
     
     // Refresh the page
     await page.reload();
-    await page.waitForSelector('.wysiwyg-editor', { timeout: 10000 });
+    
+    // Wait for initialization and handle no-tabs state
+    await page.waitForFunction(() => {
+      return window.WYSIWYGEditor !== undefined && 
+             window.WYSIWYGEditor.wysiwygEditor !== null;
+    }, { timeout: 15000 });
+    
+    const hasNoTabs = await page.evaluate(() => document.body.classList.contains('no-tabs'));
+    if (hasNoTabs) {
+      await page.click('.tree-item[data-path="profile.md"]');
+      await page.waitForSelector('.wysiwyg-editor', { timeout: 10000 });
+    }
     
     // Editor should be functional after refresh
     await editor.click();
@@ -121,8 +150,19 @@ test.describe('Performance and Integration Tests', () => {
     await page1.goto('/');
     await page2.goto('/');
     
-    await page1.waitForSelector('.wysiwyg-editor');
-    await page2.waitForSelector('.wysiwyg-editor');
+    // Initialize both pages properly
+    for (const page of [page1, page2]) {
+      await page.waitForFunction(() => {
+        return window.WYSIWYGEditor !== undefined && 
+               window.WYSIWYGEditor.wysiwygEditor !== null;
+      }, { timeout: 15000 });
+      
+      const hasNoTabs = await page.evaluate(() => document.body.classList.contains('no-tabs'));
+      if (hasNoTabs) {
+        await page.click('.tree-item[data-path="profile.md"]');
+        await page.waitForSelector('.wysiwyg-editor', { timeout: 10000 });
+      }
+    }
     
     // Type in both tabs
     await page1.locator('.wysiwyg-editor').click();
@@ -140,10 +180,7 @@ test.describe('Performance and Integration Tests', () => {
   });
 
   test('should handle memory usage reasonably', async ({ page }) => {
-    // Navigate and perform various operations
-    await page.goto('/');
-    await page.waitForSelector('.wysiwyg-editor');
-    
+    // beforeEach already handles navigation and initialization
     const editor = page.locator('.wysiwyg-editor');
     
     // Perform memory-intensive operations
@@ -196,10 +233,7 @@ test.describe('Performance and Integration Tests', () => {
       }
     });
     
-    // Perform various operations that might cause errors
-    await page.goto('/');
-    await page.waitForSelector('.wysiwyg-editor');
-    
+    // beforeEach already handles navigation and initialization
     const editor = page.locator('.wysiwyg-editor');
     await editor.click();
     await page.keyboard.type('Testing for console errors');

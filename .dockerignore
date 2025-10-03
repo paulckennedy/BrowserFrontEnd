@@ -18,6 +18,10 @@ yarn-error.log*
 *.swo
 *~
 
+# Exclude problematic nginx config files (we use specific ones)
+default.conf
+nginx.conf
+
 # OS generated files
 .DS_Store
 .DS_Store?

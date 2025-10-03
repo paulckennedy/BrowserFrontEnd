@@ -8,18 +8,22 @@ class WYSIWYGEditor {
         this.wysiwygEditor = null;
         this.sourceEditor = null;
         this.isSourceMode = false;
-        this.currentDocument = {
-            id: null,
-            name: 'untitled.md',
-            content: '',
-            lastSaved: null,
-            isDirty: false
-        };
+        
+        // Document System Integration
+        this.documentSystem = null;
+        this.schemaValidator = null;
+        this.hashGenerator = null;
+        
+        // Multi-document support
+        this.documents = new Map(); // Map of tab-id -> document
+        this.activeTabId = null; // Start with no active tab
+        this.tabCounter = 1; // For generating unique tab IDs
+        this.currentDocument = null; // No default document
         this.autoSaveTimer = null;
-        this.autoSaveDelay = 2000; // Default delay when not editing
-        this.editingDelay = 5000; // Longer delay while actively editing
+        this.autoSaveDelay = 3000; // Default delay when not editing (increased for performance)
+        this.editingDelay = 8000; // Longer delay while actively editing (increased for performance)
         this.pauseTimer = null; // Timer to detect when editing has paused
-        this.pauseDelay = 1500; // Time to wait before considering editing paused
+        this.pauseDelay = 2000; // Time to wait before considering editing paused (increased)
         this.isActivelyEditing = false;
         this.autoSaveEnabled = true;
         this.linkAutoComplete = {
@@ -54,6 +58,41 @@ class WYSIWYGEditor {
         this.shortcuts = new Map();
         this.toolbarButtons = new Map();
         this.externalLinksEnabled = true;
+        
+        // Markdown Extension Shortcuts Integration
+        this.markdownExtensions = null;
+        this.extensionIntegration = null;
+        this.shortcutProcessingEnabled = true;
+        this.lastProcessedContent = '';
+        
+        // Performance optimization: throttle expensive operations
+        this.throttledUpdateStats = this.throttle(() => this.updateStats(), 300);
+        this.throttledMarkdownShortcuts = this.throttle((e) => this.handleMarkdownShortcuts(e), 100);
+        this.throttledProcessShortcuts = this.throttle(() => this.processMarkdownShortcuts(), 1000);
+    }
+
+    /**
+     * Throttle function to limit how often a function can be called
+     */
+    throttle(func, limit) {
+        let lastFunc;
+        let lastRan;
+        return function() {
+            const context = this;
+            const args = arguments;
+            if (!lastRan) {
+                func.apply(context, args);
+                lastRan = Date.now();
+            } else {
+                clearTimeout(lastFunc);
+                lastFunc = setTimeout(function() {
+                    if ((Date.now() - lastRan) >= limit) {
+                        func.apply(context, args);
+                        lastRan = Date.now();
+                    }
+                }, limit - (Date.now() - lastRan));
+            }
+        }
     }
 
     /**
@@ -61,23 +100,62 @@ class WYSIWYGEditor {
      */
     async init() {
         try {
+            console.log('Step 0: Clearing localStorage and sessionStorage');
+            localStorage.clear();
+            sessionStorage.clear();
+            console.log('Cleared all localStorage and sessionStorage');
+            
+            console.log('Step 1: Setting up elements');
             this.setupElements();
+            console.log('Step 2: Elements setup complete, wysiwygEditor:', !!this.wysiwygEditor);
+            
+            console.log('Step 3: Setting up event listeners');
             this.setupEventListeners();
+            
+            console.log('Step 4: Setting up keyboard shortcuts');
             this.setupKeyboardShortcuts();
+            
+            console.log('Step 5: Setting up toolbar buttons');
             this.setupToolbarButtons();
+            
+            console.log('Step 6: Initializing auto-save');
             this.initializeAutoSave();
+            
+            console.log('Step 7: Initializing menu functionality');
             this.initializeMenuFunctionality();
+            
+            console.log('Step 8: Initializing document schema system');
+            await this.initializeDocumentSystem();
+            
+            console.log('Step 9: Initializing database connection');
             await this.initializeDatabaseConnection();
+            
+            console.log('Step 10: Loading documents');
             await this.loadDocuments();
             
-            console.log('WYSIWYG Editor initialized successfully');
+            console.log('Step 11: Updating stats and status');
             this.updateStats();
             this.updateStatus('Ready');
             this.initializeExplorerState();
             
+            console.log('Step 12: Initializing tab system');
+            this.initializeTabSystem();
+            
+            console.log('Step 12.5: Force no-tabs state immediately');
+            // Force the no-tabs state immediately
+            document.body.classList.add('no-tabs');
+            console.log('Added no-tabs class to body:', document.body.classList.toString());
+            
+            console.log('Step 12.7: Initializing markdown extension shortcuts');
+            await this.initializeMarkdownExtensions();
+            
+            console.log('Step 13: Clean start - no default content to load');
+            console.log('Clean start initialized - user can open files from explorer');
+            
+            console.log('WYSIWYG Editor initialized successfully');
             return true;
         } catch (error) {
-            console.error('Failed to initialize WYSIWYG Editor:', error);
+            console.error('Failed to initialize WYSIWYG Editor at step:', error);
             this.updateStatus('Initialization failed', 'error');
             return false;
         }
@@ -164,12 +242,24 @@ class WYSIWYGEditor {
         this.shortcuts.set('cmd+k', () => this.insertLink());
         
         // Save
-        this.shortcuts.set('ctrl+s', (e) => { e.preventDefault(); this.saveDocument(); });
+        this.shortcuts.set('ctrl+s', (_e) => { _e.preventDefault(); this.saveDocument(); });
         this.shortcuts.set('cmd+s', (e) => { e.preventDefault(); this.saveDocument(); });
         
         // Source toggle
         this.shortcuts.set('ctrl+shift+m', () => this.toggleSourceMode());
         this.shortcuts.set('cmd+shift+m', () => this.toggleSourceMode());
+        
+        // Tab management shortcuts
+        this.shortcuts.set('ctrl+t', (e) => { e.preventDefault(); this.createNewTab('Untitled'); });
+        this.shortcuts.set('cmd+t', (e) => { e.preventDefault(); this.createNewTab('Untitled'); });
+        this.shortcuts.set('ctrl+w', (e) => { e.preventDefault(); this.closeCurrentTab().catch(err => console.error('Error closing tab:', err)); });
+        this.shortcuts.set('cmd+w', (e) => { e.preventDefault(); this.closeCurrentTab().catch(err => console.error('Error closing tab:', err)); });
+        this.shortcuts.set('ctrl+tab', (e) => { e.preventDefault(); this.switchToNextTab(); });
+        this.shortcuts.set('cmd+option+right', (e) => { e.preventDefault(); this.switchToNextTab(); });
+        this.shortcuts.set('ctrl+shift+tab', (e) => { e.preventDefault(); this.switchToPreviousTab(); });
+        this.shortcuts.set('cmd+option+left', (e) => { e.preventDefault(); this.switchToPreviousTab(); });
+        
+        // Conversion mode toggle (registered later in initializeAutoSave)
     }
 
     /**
@@ -202,6 +292,9 @@ class WYSIWYGEditor {
         // View controls
         this.setupToolbarButton('source-btn', () => this.toggleSourceMode());
         this.setupToolbarButton('fullscreen-btn', () => this.toggleFullscreen());
+        
+        // Markdown Extension Shortcuts (if available)
+        this.setupMarkdownExtensionButtons();
     }
 
     /**
@@ -225,10 +318,17 @@ class WYSIWYGEditor {
     handleWYSIWYGInput(e) {
         this.markDocumentDirty();
         this.handleEditingState();
-        this.updateStats();
         
-        // Handle special markdown-like input patterns
-        this.handleMarkdownShortcuts(e);
+        // Throttle expensive operations for better performance
+        this.throttledUpdateStats();
+        
+        // Handle special markdown-like input patterns (throttled)
+        this.throttledMarkdownShortcuts(e);
+        
+        // Process markdown extension shortcuts (throttled)
+        if (this.shortcutProcessingEnabled) {
+            this.throttledProcessShortcuts();
+        }
     }
 
     /**
@@ -765,15 +865,15 @@ class WYSIWYGEditor {
         // Don't show if already visible or if we're editing
         if (this.markdownTooltip.isVisible || this.isActivelyEditing) return;
         
-        const markdown = this.getMarkdownForElement(element);
-        if (!markdown || markdown.trim() === '') return;
+        const markdownData = this.getMarkdownForElement(element);
+        if (!markdownData || !markdownData.markdown || markdownData.markdown.trim() === '') return;
         
         // Create tooltip element
         const tooltip = document.createElement('div');
         tooltip.className = 'markdown-tooltip';
         tooltip.innerHTML = `
             <div class="tooltip-header">Markdown:</div>
-            <code class="tooltip-content">${this.escapeHtml(markdown)}</code>
+            <code class="tooltip-content">${this.escapeHtml(markdownData.markdown)}</code>
         `;
         
         // Position tooltip
@@ -1119,7 +1219,13 @@ class WYSIWYGEditor {
      * Update the conversion mode indicator
      */
     updateConversionModeIndicator() {
-        // Find or create the conversion mode indicator
+        // Use the global function from index.html if available
+        if (window.updateConversionMode) {
+            window.updateConversionMode(this.autoConversion.enabled);
+            return;
+        }
+        
+        // Fallback: Find or create the conversion mode indicator
         let indicator = document.getElementById('conversion-mode-indicator');
         if (!indicator) {
             indicator = document.createElement('span');
@@ -1127,7 +1233,7 @@ class WYSIWYGEditor {
             indicator.className = 'conversion-mode-indicator';
             
             // Add to status bar
-            const statusBar = document.querySelector('.status-bar');
+            const statusBar = document.querySelector('.status-bar .status-right');
             if (statusBar) {
                 statusBar.appendChild(indicator);
             }
@@ -1843,7 +1949,7 @@ class WYSIWYGEditor {
         
         // Mark as actively editing
         this.isActivelyEditing = true;
-        this.updateAutoSaveStatus('⏸️ Auto-save paused (editing...)');
+        this.updateAutoSaveStatusDisplay(true);
         
         // Clear existing timers
         if (this.autoSaveTimer) {
@@ -1857,7 +1963,7 @@ class WYSIWYGEditor {
         this.pauseTimer = setTimeout(() => {
             this.isActivelyEditing = false;
             this.scheduleAutoSave();
-            this.updateAutoSaveStatus('⚡ Auto-save ON');
+            this.updateAutoSaveStatusDisplay(false);
         }, this.pauseDelay);
         
         // Schedule auto-save with longer delay while editing
@@ -1868,6 +1974,20 @@ class WYSIWYGEditor {
                 this.saveDocument();
             }
         }, this.editingDelay);
+    }
+    
+    /**
+     * Update auto-save status display
+     */
+    updateAutoSaveStatusDisplay(isPaused) {
+        // Use global function if available
+        if (window.updateAutoSaveStatus) {
+            window.updateAutoSaveStatus(isPaused);
+            return;
+        }
+        
+        // Fallback to direct update
+        this.updateAutoSaveStatus(isPaused ? '⏸️ Auto-save paused (editing...)' : '⚡ Auto-save ON');
     }
     
     /**
@@ -1925,6 +2045,8 @@ class WYSIWYGEditor {
     markDocumentDirty() {
         this.currentDocument.isDirty = true;
         this.updateStatus('Unsaved changes', 'warning');
+        // Update tab visual state to show modified indicator
+        this.updateTabBar();
     }
 
     /**
@@ -1939,16 +2061,59 @@ class WYSIWYGEditor {
                 ? this.sourceEditor.value 
                 : this.htmlToMarkdown(this.wysiwygEditor.innerHTML);
             
-            this.currentDocument.content = content;
-            this.currentDocument.lastSaved = new Date().toISOString();
-            this.currentDocument.isDirty = false;
+            // Update current document with tabs support
+            if (this.activeTabId && this.documents.has(this.activeTabId)) {
+                const currentDoc = this.documents.get(this.activeTabId);
+                currentDoc.content = content;
+                currentDoc.lastSaved = new Date().toISOString();
+                currentDoc.isDirty = false;
+                
+                // Update schema document if available
+                if (currentDoc.schemaDocument && this.schemaValidator) {
+                    try {
+                        // Update schema document with new content and timestamp
+                        currentDoc.schemaDocument.updated_at = new Date().toISOString();
+                        
+                        // Extract title from content for subject update
+                        const titleMatch = content.match(/^#\s+(.+)$/m);
+                        if (titleMatch) {
+                            const newSubject = titleMatch[1].trim();
+                            if (newSubject !== currentDoc.schemaDocument.subject) {
+                                currentDoc.schemaDocument.subject = newSubject;
+                                console.log(`📝 Updated subject to: "${newSubject}"`);
+                            }
+                        }
+                        
+                        // Validate updated document
+                        const validation = this.schemaValidator.validate(currentDoc.schemaDocument);
+                        if (validation.valid) {
+                            console.log(`✅ Schema document validated successfully`);
+                        } else {
+                            console.warn(`⚠️ Schema validation warnings:`, validation.errors);
+                        }
+                    } catch (error) {
+                        console.error('Error updating schema document:', error);
+                    }
+                }
+                
+                // Update tab visual state
+                this.updateTabBar();
+            } else if (this.currentDocument) {
+                // Fallback for non-tabs mode
+                this.currentDocument.content = content;
+                this.currentDocument.lastSaved = new Date().toISOString();
+                this.currentDocument.isDirty = false;
+            }
             
             // Save to database or localStorage
             if (this.sqlAgent) {
-                await this.sqlAgent.saveDocument(this.currentDocument);
+                const docToSave = this.activeTabId && this.documents.has(this.activeTabId) 
+                    ? this.documents.get(this.activeTabId) 
+                    : this.currentDocument;
+                await this.sqlAgent.saveDocument(docToSave);
             } else {
                 localStorage.setItem('markdown-editor-content', content);
-                localStorage.setItem('markdown-editor-last-saved', this.currentDocument.lastSaved);
+                localStorage.setItem('markdown-editor-last-saved', new Date().toISOString());
             }
             
             // Refresh WYSIWYG display to show updated markdown formatting
@@ -2064,6 +2229,51 @@ class WYSIWYGEditor {
     }
 
     /**
+     * Initialize document schema system
+     */
+    async initializeDocumentSystem() {
+        try {
+            console.log('Initializing document schema system...');
+            
+            // Load schema from file
+            const schemaResponse = await fetch('/schemas/document-system-schema.json');
+            if (!schemaResponse.ok) {
+                throw new Error(`Failed to load schema: ${schemaResponse.status}`);
+            }
+            this.documentSchema = await schemaResponse.json();
+            console.log('Document schema loaded successfully');
+            
+            // Initialize schema validator (simplified for browser)
+            this.schemaValidator = {
+                validate: (document) => this.validateDocumentStructure(document),
+                isValid: (document) => {
+                    try {
+                        return this.validateDocumentStructure(document).valid;
+                    } catch (error) {
+                        return false;
+                    }
+                }
+            };
+            
+            // Initialize hash generator (simplified for browser)
+            this.hashGenerator = {
+                generateDocumentId: () => this.generateHash(),
+                generateUserId: () => this.generateHash()
+            };
+            
+            console.log('Document schema system initialized successfully');
+            this.updateStatus('Schema system ready', 'success');
+        } catch (error) {
+            console.error('Failed to initialize document schema system:', error);
+            // Continue without schema validation for now
+            this.documentSchema = null;
+            this.schemaValidator = null;
+            this.hashGenerator = null;
+            this.updateStatus('Schema system unavailable', 'warning');
+        }
+    }
+
+    /**
      * Initialize database connection (placeholder)
      */
     async initializeDatabaseConnection() {
@@ -2072,16 +2282,309 @@ class WYSIWYGEditor {
     }
 
     /**
-     * Load documents (placeholder)
+     * Validate document structure against schema
+     */
+    validateDocumentStructure(document) {
+        if (!this.documentSchema) {
+            return { valid: true, errors: [] };
+        }
+        
+        const errors = [];
+        const schema = this.documentSchema.definitions.markdown_document;
+        
+        // Check required fields
+        const required = schema.required || [];
+        for (const field of required) {
+            if (!(field in document)) {
+                errors.push(`Missing required field: ${field}`);
+            }
+        }
+        
+        // Validate subject field specifically
+        if (document.subject) {
+            if (typeof document.subject !== 'string') {
+                errors.push('Subject must be a string');
+            } else if (document.subject.length > 100) {
+                errors.push('Subject must be 100 characters or less');
+            }
+        }
+        
+        // Validate hash fields (basic validation)
+        const hashFields = ['markdown_id', 'owner_user_id'];
+        for (const field of hashFields) {
+            if (document[field] && !this.isValidHash(document[field])) {
+                errors.push(`Invalid hash format for ${field}`);
+            }
+        }
+        
+        return {
+            valid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    /**
+     * Generate a hash ID (simplified browser version)
+     */
+    generateHash() {
+        // Simple hash generation for browser environment
+        const chars = '0123456789abcdef';
+        let result = '';
+        for (let i = 0; i < 64; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return result;
+    }
+
+    /**
+     * Validate hash format
+     */
+    isValidHash(hash) {
+        return typeof hash === 'string' && 
+               hash.length === 64 && 
+               /^[0-9a-fA-F]{64}$/.test(hash);
+    }
+
+    /**
+     * Create a new document with schema compliance
+     */
+    createSchemaCompliantDocument(subject, content = '', metadata = {}) {
+        if (!this.schemaValidator) {
+            console.warn('Schema validator not available, creating basic document');
+            return {
+                id: this.generateHash(),
+                subject: subject,
+                content: content,
+                ...metadata
+            };
+        }
+        
+        const document = {
+            markdown_id: this.hashGenerator.generateDocumentId(),
+            owner_user_id: metadata.owner_user_id || this.generateHash(),
+            subject: subject,
+            summary: metadata.summary || `Document: ${subject}`,
+            categories: metadata.categories || [],
+            chunk_ids: [], // Will be populated when saved
+            nested_prompts: [],
+            prompt_source_id: null,
+            resources_array: metadata.resources_array || [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        
+        const validation = this.schemaValidator.validate(document);
+        if (!validation.valid) {
+            console.warn('Document validation failed:', validation.errors);
+            // Continue anyway but log the issues
+        }
+        
+        return document;
+    }
+
+    /**
+     * Load documents from example data with schema validation
      */
     async loadDocuments() {
-        // Load from localStorage for now
-        const savedContent = localStorage.getItem('markdown-editor-content');
-        if (savedContent) {
-            this.wysiwygEditor.innerHTML = this.markdownToHTML(savedContent);
-            this.currentDocument.content = savedContent;
+        try {
+            console.log('Loading documents with schema validation...');
+            
+            // Load example documents
+            const response = await fetch('/example-documents.json');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.markdown_documents && Array.isArray(data.markdown_documents)) {
+                    console.log(`Found ${data.markdown_documents.length} example documents`);
+                    
+                    // Validate each document against schema
+                    for (const doc of data.markdown_documents) {
+                        if (this.schemaValidator) {
+                            const validation = this.schemaValidator.validate(doc);
+                            if (validation.valid) {
+                                console.log(`✅ Document "${doc.subject}" is schema compliant`);
+                            } else {
+                                console.warn(`⚠️ Document "${doc.subject}" has validation issues:`, validation.errors);
+                            }
+                        }
+                    }
+                    
+                    // Store documents and chunks for potential use
+                    this.exampleDocuments = data.markdown_documents;
+                    this.chunks = data.chunks || [];
+                    
+                    // Create chunks lookup for easier access
+                    this.chunksMap = {};
+                    this.chunks.forEach(chunk => {
+                        this.chunksMap[chunk.chunk_id] = chunk;
+                    });
+                    
+                    console.log(`Loaded ${this.chunks.length} content chunks`);
+                } else {
+                    console.log('No example documents found in expected format');
+                }
+            } else {
+                console.log('No example-documents.json file found, starting with empty state');
+            }
+        } catch (error) {
+            console.error('Error loading example documents:', error);
+        }
+        
+        // Populate file tree with example documents
+        if (this.exampleDocuments && this.exampleDocuments.length > 0) {
+            this.populateFileTreeFromSchema();
+        }
+        
+        console.log('Document loading completed - ready for user interaction');
+    }
+
+    /**
+     * Populate file tree from schema documents
+     */
+    populateFileTreeFromSchema() {
+        const fileTree = document.getElementById('file-tree');
+        if (!fileTree || !this.exampleDocuments) {
+            return;
+        }
+        
+        console.log(`Populating file tree with ${this.exampleDocuments.length} schema documents`);
+        
+        // Clear existing content
+        fileTree.innerHTML = '';
+        
+        // Build hierarchical structure
+        const treeStructure = this.buildTreeStructure(this.exampleDocuments);
+        
+        // Render the tree structure
+        this.renderTreeNodes(treeStructure, fileTree);
+        
+        console.log('✅ File tree populated with schema documents (hierarchical)');
+    }
+
+    /**
+     * Build hierarchical tree structure from documents
+     */
+    buildTreeStructure(documents) {
+        const tree = new Map();
+        
+        for (const doc of documents) {
+            const pathParts = doc.subject.split(' / ');
+            let currentLevel = tree;
+            let currentPath = '';
+            
+            for (let i = 0; i < pathParts.length; i++) {
+                const part = pathParts[i].trim();
+                const isLast = i === pathParts.length - 1;
+                currentPath = currentPath ? `${currentPath} / ${part}` : part;
+                
+                if (!currentLevel.has(part)) {
+                    currentLevel.set(part, {
+                        name: part,
+                        fullPath: currentPath,
+                        children: new Map(),
+                        document: null,
+                        isFolder: !isLast
+                    });
+                }
+                
+                const node = currentLevel.get(part);
+                
+                if (isLast) {
+                    // This is a leaf document
+                    node.document = doc;
+                    node.isFolder = false;
+                } else {
+                    // This is a folder, but check if we have a parent document with this exact name
+                    const parentDoc = documents.find(d => d.subject === currentPath);
+                    if (parentDoc) {
+                        node.document = parentDoc;
+                    }
+                    node.isFolder = true;
+                }
+                
+                currentLevel = node.children;
+            }
+        }
+        
+        return tree;
+    }
+
+    /**
+     * Render tree nodes recursively
+     */
+    renderTreeNodes(treeMap, parentElement, level = 0) {
+        for (const [name, node] of treeMap) {
+            const treeItem = document.createElement('div');
+            treeItem.className = 'tree-item';
+            treeItem.style.paddingLeft = `${level * 20 + 10}px`;
+            
+            if (node.isFolder) {
+                // Create folder node (always expanded, no toggle)
+                treeItem.classList.add('folder');
+                treeItem.dataset.path = `folder-${node.fullPath}`;
+                
+                const folderIcon = document.createElement('span');
+                folderIcon.className = 'folder-icon';
+                folderIcon.textContent = '�'; // Always open folder icon
+                
+                const folderName = document.createElement('span');
+                folderName.className = 'folder-name';
+                folderName.textContent = name;
+                
+                treeItem.appendChild(folderIcon);
+                treeItem.appendChild(folderName);
+                
+                parentElement.appendChild(treeItem);
+                
+                // Create container for children (always visible)
+                const childContainer = document.createElement('div');
+                childContainer.className = 'tree-children';
+                childContainer.style.display = 'block'; // Always visible
+                
+                // Render children
+                this.renderTreeNodes(node.children, childContainer, level + 1);
+                
+                parentElement.appendChild(childContainer);
+                
+                // Check if folder has a direct document (parent document)
+                if (node.document) {
+                    // Make folder clickable to open its document
+                    treeItem.classList.add('schema-document');
+                    treeItem.dataset.schemaId = node.document.markdown_id;
+                    treeItem.dataset.path = `schema-doc-${node.document.markdown_id}`;
+                    
+                    // Add categories as tooltip
+                    if (node.document.categories && node.document.categories.length > 0) {
+                        treeItem.title = `Categories: ${node.document.categories.join(', ')}`;
+                    }
+                }
+                
+            } else if (node.document) {
+                // Create file node
+                treeItem.classList.add('file', 'schema-document');
+                treeItem.dataset.path = `schema-doc-${node.document.markdown_id}`;
+                treeItem.dataset.schemaId = node.document.markdown_id;
+                
+                const fileIcon = document.createElement('span');
+                fileIcon.className = 'file-icon';
+                fileIcon.textContent = '📄';
+                
+                const fileName = document.createElement('span');
+                fileName.className = 'file-name';
+                fileName.textContent = name;
+                
+                // Add categories as tooltip
+                if (node.document.categories && node.document.categories.length > 0) {
+                    treeItem.title = `Categories: ${node.document.categories.join(', ')}`;
+                }
+                
+                treeItem.appendChild(fileIcon);
+                treeItem.appendChild(fileName);
+                parentElement.appendChild(treeItem);
+            }
         }
     }
+
+
 
     /**
      * Initialize explorer state
@@ -2108,6 +2611,780 @@ class WYSIWYGEditor {
      */
     setupFileExplorerEvents() {
         // File explorer functionality
+    }
+
+    // ===========================================
+    // TAB MANAGEMENT SYSTEM
+    // ===========================================
+
+    /**
+     * Initialize tab system
+     */
+    initializeTabSystem() {
+        // Start with no tabs - user will open files as needed
+        this.activeTabId = null;
+        this.currentDocument = null;
+        
+        this.setupTabEventListeners();
+        this.updateTabBar();
+        this.updateEditorVisibility();
+        console.log('Tab system initialized with no tabs - clean start');
+        
+        // Initialize file tree
+        this.initializeFileTree();
+    }
+
+    /**
+     * Initialize file tree functionality
+     */
+    initializeFileTree() {
+        const fileTree = document.getElementById('file-tree');
+        if (!fileTree) return;
+
+        // Handle tree item clicks (both folders and files can be documents)
+        fileTree.addEventListener('click', (e) => {
+            const treeItem = e.target.closest('.tree-item.schema-document');
+            
+            if (treeItem) {
+                e.preventDefault();
+                this.openFileFromTree(treeItem);
+            }
+        });
+        
+        console.log('File tree initialized');
+    }
+
+
+
+    /**
+     * Open file from tree view
+     */
+    openFileFromTree(fileElement) {
+        const filePath = fileElement.dataset.path;
+        const fileName = fileElement.querySelector('.file-name').textContent;
+        
+        console.log(`Opening file: ${fileName} (${filePath})`);
+        
+        // Check if this file is already open in a tab
+        for (const [tabId, doc] of this.documents.entries()) {
+            if (doc.path === filePath || (doc.name === fileName && doc.path)) {
+                console.log(`File ${fileName} is already open in tab ${tabId}, switching to it`);
+                this.switchToTab(tabId);
+                
+                // Update visual selection
+                const allItems = document.querySelectorAll('.tree-item');
+                allItems.forEach(item => item.classList.remove('selected'));
+                fileElement.classList.add('selected');
+                return; // Don't create a new tab
+            }
+        }
+        
+        // File is not open, proceed with creating new tab
+        // Remove selection from all items
+        const allItems = document.querySelectorAll('.tree-item');
+        allItems.forEach(item => item.classList.remove('selected'));
+        
+        // Select current item
+        fileElement.classList.add('selected');
+        
+        // Try to find document in example data first
+        let documentContent = '';
+        let schemaDocument = null;
+        
+        // Check if this is a schema document (from populated file tree)
+        if (fileElement.dataset.schemaId && this.exampleDocuments) {
+            const schemaId = fileElement.dataset.schemaId;
+            schemaDocument = this.exampleDocuments.find(doc => doc.markdown_id === schemaId);
+            
+            if (schemaDocument) {
+                console.log(`Loading schema document: ${schemaDocument.subject}`);
+                documentContent = this.loadDocumentContent(schemaDocument);
+            }
+        } else if (this.exampleDocuments) {
+            // Legacy: Look for document by subject/filename match
+            const matchingDoc = this.exampleDocuments.find(doc => 
+                doc.subject === fileName || 
+                doc.subject === fileName.replace(/\.md$/, '') ||
+                fileName.includes(doc.subject)
+            );
+            
+            if (matchingDoc) {
+                console.log(`Found matching document in example data: ${matchingDoc.subject}`);
+                schemaDocument = matchingDoc;
+                documentContent = `# ${matchingDoc.subject}\n\n${matchingDoc.summary}\n\n**Categories:** ${matchingDoc.categories.join(', ')}\n\n**Created:** ${new Date(matchingDoc.created_at).toLocaleDateString()}\n\n---\n\nStart editing this document...`;
+            }
+        }
+        
+        // Fallback to mock content if no schema document found
+        if (!documentContent) {
+            documentContent = this.getMockFileContent(filePath, fileName);
+        }
+        
+        const tabId = this.createNewTab(fileName, documentContent);
+        
+        // Update the document path and schema info in the tab
+        if (this.documents.has(tabId)) {
+            const doc = this.documents.get(tabId);
+            doc.path = filePath;
+            if (schemaDocument) {
+                doc.schemaDocument = schemaDocument;
+                doc.isDirty = false; // Not dirty since it's loaded from schema
+                console.log(`✅ Loaded schema document: ${schemaDocument.subject}`);
+            }
+        }
+    }
+
+    /**
+     * Load document content from schema and chunks
+     */
+    loadDocumentContent(schemaDocument) {
+        let content = '';
+        
+        // Load content from chunks if available
+        if (schemaDocument.chunk_ids && schemaDocument.chunk_ids.length > 0 && this.chunksMap) {
+            // Combine all chunks for this document in order
+            const chunks = [];
+            for (const chunkId of schemaDocument.chunk_ids) {
+                const chunk = this.chunksMap[chunkId];
+                if (chunk) {
+                    chunks.push(chunk.markdown_chunk);
+                }
+            }
+            
+            if (chunks.length > 0) {
+                content = chunks.join('\n\n');
+                console.log(`✅ Loaded ${chunks.length} content chunks for: ${schemaDocument.subject}`);
+            }
+        }
+        
+        // Fallback to basic template if no chunks found
+        if (!content) {
+            content = `# ${schemaDocument.subject}\n\n${schemaDocument.summary}\n\n**Categories:** ${schemaDocument.categories.join(', ')}\n\n**Created:** ${new Date(schemaDocument.created_at).toLocaleDateString()}\n**Updated:** ${new Date(schemaDocument.updated_at).toLocaleDateString()}\n\n---\n\nThis document is loaded from the schema system. You can edit it and the changes will be validated against the document schema.\n\nStart editing here...`;
+            console.log(`⚠️ No chunks found for ${schemaDocument.subject}, using template`);
+        }
+        
+        return content;
+    }
+
+    /**
+     * Get mock content for different file types
+     */
+    getMockFileContent(filePath, fileName) {
+        const mockContents = {};
+        
+        return mockContents[filePath] || `# ${fileName}\n\nThis is a new document.\n\nStart writing your content here...`;
+    }
+
+    /**
+     * Setup tab event listeners
+     */
+    setupTabEventListeners() {
+        const tabBar = document.getElementById('tab-bar');
+        const newTabBtn = document.getElementById('new-tab-btn');
+
+        if (newTabBtn) {
+            newTabBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('New tab button clicked');
+                this.createNewTab();
+            });
+        }
+
+        if (tabBar) {
+            // Event delegation for tab clicks and close buttons
+            tabBar.addEventListener('click', (e) => {
+                const target = e.target;
+                const closeBtn = target.closest('.tab-close');
+                const tab = target.closest('.tab');
+                
+                console.log('Tab click - Target:', target.tagName, 'CloseBtn:', !!closeBtn, 'Tab:', tab?.dataset.tabId);
+                
+                if (closeBtn && tab) {
+                    // Close button clicked
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('CLOSING TAB:', tab.dataset.tabId);
+                    this.closeTab(tab.dataset.tabId).catch(err => console.error('Error closing tab:', err));
+                } else if (tab && !closeBtn) {
+                    // Tab body clicked (not close button)
+                    e.preventDefault();
+                    console.log('SWITCHING TO TAB:', tab.dataset.tabId);
+                    this.switchToTab(tab.dataset.tabId);
+                }
+            });
+            
+            // Add separate event listener specifically for close buttons
+            tabBar.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab-close')) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    const tab = e.target.closest('.tab');
+                    if (tab) {
+                        console.log('DIRECT CLOSE BUTTON CLICK:', tab.dataset.tabId);
+                        this.closeTab(tab.dataset.tabId).catch(err => console.error('Error closing tab:', err));
+                    }
+                }
+            }, true); // Use capture phase
+
+            // Right-click context menu for tabs
+            tabBar.addEventListener('contextmenu', (e) => {
+                const tab = e.target.closest('.tab');
+                if (tab) {
+                    e.preventDefault();
+                    this.showTabContextMenu(e, tab.dataset.tabId);
+                }
+            });
+        }
+
+        // Keyboard shortcuts for tabs
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.code) {
+                    case 'KeyT':
+                        if (!e.shiftKey) {
+                            e.preventDefault();
+                            this.createNewTab();
+                        }
+                        break;
+                    case 'KeyW':
+                        e.preventDefault();
+                        this.closeCurrentTab();
+                        break;
+                    case 'Tab':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            this.switchToPreviousTab();
+                        } else {
+                            this.switchToNextTab();
+                        }
+                        break;
+                }
+            }
+        });
+    }
+
+    /**
+     * Create a new tab
+     */
+    createNewTab(name = null, content = '') {
+        const tabId = `tab-${this.tabCounter++}`;
+        const tabName = name || `untitled-${this.tabCounter - 1}.md`;
+        
+        // Create schema-compliant document if schema system is available
+        let schemaDocument = null;
+        if (this.schemaValidator && this.hashGenerator) {
+            try {
+                // Extract subject from filename (remove .md extension)
+                const subject = tabName.replace(/\.md$/, '');
+                schemaDocument = this.createSchemaCompliantDocument(subject, content);
+                console.log(`✅ Created schema-compliant document for "${subject}"`);
+            } catch (error) {
+                console.warn('Failed to create schema-compliant document:', error);
+            }
+        }
+        
+        // Create editor document (maintains backward compatibility)
+        const newDocument = {
+            id: tabId,
+            name: tabName,
+            content: content,
+            lastSaved: null,
+            isDirty: false,
+            // Add schema document if available
+            schemaDocument: schemaDocument
+        };
+        
+        this.documents.set(tabId, newDocument);
+        
+        // Create tab element
+        this.createTabElement(tabId, tabName);
+        
+        // Switch to new tab
+        this.switchToTab(tabId);
+        this.updateEditorVisibility();
+        
+        this.updateStatus(`New tab created: ${tabName}`, 'success');
+        console.log(`Created new tab: ${tabName} (${tabId})`);
+        return tabId;
+    }
+
+    /**
+     * Create tab DOM element
+     */
+    createTabElement(tabId, name) {
+        const tabBar = document.getElementById('tab-bar');
+        const newTabBtn = document.getElementById('new-tab-btn');
+        
+        console.log(`Creating tab element for ${tabId} with name ${name}`);
+        console.log(`Tab bar found:`, !!tabBar);
+        console.log(`New tab button found:`, !!newTabBtn);
+        
+        if (!tabBar || !newTabBtn) {
+            console.error('Tab bar or new tab button not found');
+            return;
+        }
+        
+        const tab = document.createElement('div');
+        const isDefaultTab = tabId === 'default';
+        tab.className = isDefaultTab ? 'tab' : 'tab closable';
+        tab.dataset.tabId = tabId;
+        
+        // Only show close button for non-default tabs
+        const closeButtonHtml = isDefaultTab ? '' : '<button class="tab-close" title="Close tab">×</button>';
+        
+        // Create elements separately for better control
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'tab-title';
+        titleSpan.textContent = name;
+        tab.appendChild(titleSpan);
+        
+        // Add close button if not default tab
+        if (!isDefaultTab) {
+            const closeButton = document.createElement('button');
+            closeButton.className = 'tab-close';
+            closeButton.setAttribute('title', 'Close tab');
+            closeButton.textContent = '×';
+            closeButton.setAttribute('data-tab-id', tabId); // Add for easier identification
+            tab.appendChild(closeButton);
+        }
+        
+        console.log(`Created tab element (default: ${isDefaultTab}):`, tab.outerHTML);
+        
+        // Insert before the new tab button
+        tabBar.insertBefore(tab, newTabBtn);
+        
+        console.log(`Tab inserted into DOM. Current tabs in bar:`, tabBar.querySelectorAll('.tab').length);
+        
+        // Scroll to show the new tab
+        setTimeout(() => {
+            tab.scrollIntoView({ behavior: 'smooth', inline: 'nearest' });
+        }, 100);
+    }
+
+    /**
+     * Close a tab
+     */
+    async closeTab(tabId) {
+        console.log(`Attempting to close tab: ${tabId}`);
+        console.log(`Current documents:`, Array.from(this.documents.keys()));
+        
+        // Allow closing all tabs for clean state
+        
+        const doc = this.documents.get(tabId);
+        
+        // Auto-save if document has unsaved changes
+        if (doc && doc.isDirty) {
+            console.log(`Auto-saving document "${doc.name}" before closing...`);
+            try {
+                // Temporarily switch to this tab to save it
+                const originalActiveTab = this.activeTabId;
+                this.activeTabId = tabId;
+                this.currentDocument = doc;
+                
+                await this.saveDocument();
+                
+                // Restore original active tab
+                this.activeTabId = originalActiveTab;
+                this.currentDocument = this.documents.get(originalActiveTab);
+                
+                console.log(`Document "${doc.name}" auto-saved successfully`);
+            } catch (error) {
+                console.error(`Failed to auto-save document "${doc.name}":`, error);
+                const confirmClose = confirm(`Failed to save "${doc.name}". Close anyway?`);
+                if (!confirmClose) return;
+            }
+        }
+        
+        // Find and remove tab element FIRST (before removing from documents)
+        const tabBar = document.getElementById('tab-bar');
+        const tabElement = tabBar ? tabBar.querySelector(`[data-tab-id="${tabId}"]`) : null;
+        
+        console.log(`Found tab bar:`, tabBar);
+        console.log(`Found tab element:`, tabElement);
+        console.log(`Tab element attributes:`, tabElement ? tabElement.outerHTML : 'null');
+        
+        if (tabElement) {
+            console.log(`Removing tab element...`);
+            tabElement.parentNode.removeChild(tabElement);
+            console.log(`Tab element removed from DOM`);
+        } else {
+            console.error(`Could not find tab element for ${tabId} in tab bar`);
+            // Try alternative removal methods
+            const allTabs = document.querySelectorAll('.tab');
+            console.log(`All tabs found:`, allTabs.length);
+            allTabs.forEach((tab, index) => {
+                console.log(`Tab ${index}:`, tab.dataset.tabId, tab.outerHTML.substring(0, 100));
+                if (tab.dataset.tabId === tabId) {
+                    console.log(`Found matching tab, removing...`);
+                    tab.remove();
+                }
+            });
+        }
+        
+        // Remove from documents
+        this.documents.delete(tabId);
+        console.log(`Removed from documents. Remaining:`, Array.from(this.documents.keys()));
+        
+        // Switch to another tab if this was active
+        if (this.activeTabId === tabId) {
+            const remainingTabs = Array.from(this.documents.keys());
+            if (remainingTabs.length > 0) {
+                this.switchToTab(remainingTabs[0]);
+            } else {
+                // No tabs left - clear active state
+                this.activeTabId = null;
+                this.currentDocument = null;
+                console.log('No tabs remaining - cleared active state');
+            }
+        }
+        
+        this.updateEditorVisibility();
+        console.log(`Successfully closed tab: ${tabId}`);
+    }
+
+    /**
+     * Close current active tab
+     */
+    closeCurrentTab() {
+        this.closeTab(this.activeTabId);
+    }
+
+    /**
+     * Switch to a specific tab
+     */
+    switchToTab(tabId) {
+        if (!this.documents.has(tabId)) {
+            console.error(`Tab ${tabId} not found`);
+            return;
+        }
+        
+        // Save current document content before switching
+        if (this.activeTabId && this.documents.has(this.activeTabId)) {
+            this.saveCurrentDocumentContent();
+        }
+        
+        // Update active tab
+        this.activeTabId = tabId;
+        this.currentDocument = this.documents.get(tabId);
+        
+        // Update UI
+        this.updateTabBar();
+        this.loadDocumentContent();
+        this.updateDocumentTitle();
+        
+        console.log(`Switched to tab: ${tabId}`);
+    }
+
+    /**
+     * Switch to next tab
+     */
+    switchToNextTab() {
+        const tabIds = Array.from(this.documents.keys());
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+        const nextIndex = (currentIndex + 1) % tabIds.length;
+        this.switchToTab(tabIds[nextIndex]);
+    }
+
+    /**
+     * Switch to previous tab
+     */
+    switchToPreviousTab() {
+        const tabIds = Array.from(this.documents.keys());
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+        const prevIndex = currentIndex === 0 ? tabIds.length - 1 : currentIndex - 1;
+        this.switchToTab(tabIds[prevIndex]);
+    }
+
+    /**
+     * Update tab bar visual state
+     */
+    updateTabBar() {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            const tabId = tab.dataset.tabId;
+            const document = this.documents.get(tabId);
+            
+            // Update active state
+            if (tabId === this.activeTabId) {
+                tab.classList.add('active');
+            } else {
+                tab.classList.remove('active');
+            }
+            
+            // Update modified state
+            if (document && document.isDirty) {
+                tab.classList.add('modified');
+            } else {
+                tab.classList.remove('modified');
+            }
+            
+            // Update title
+            const titleElement = tab.querySelector('.tab-title');
+            if (titleElement && document) {
+                titleElement.textContent = document.name;
+            }
+        });
+    }
+
+    /**
+     * Get branding configuration value
+     */
+    getBranding(path) {
+        if (window.BrandingManager && window.BrandingManager.isLoaded()) {
+            return window.BrandingManager.get(path);
+        }
+        return null;
+    }
+
+    /**
+     * Get branded asset path
+     */
+    getBrandedAsset(assetKey) {
+        if (window.BrandingManager && window.BrandingManager.isLoaded()) {
+            return window.BrandingManager.getAssetPath(assetKey);
+        }
+        return null;
+    }
+
+    /**
+     * Update editor visibility based on whether tabs are open
+     */
+    updateEditorVisibility() {
+        const body = document.body;
+        const editorContainer = document.querySelector('.wysiwyg-editor-container');
+        const tabsContainer = document.getElementById('tabs-container');
+        const tabBar = document.getElementById('tab-bar');
+        const wysiwygEditor = document.getElementById('wysiwyg-editor');
+        const sourceEditor = document.querySelector('.markdown-source-editor');
+        const toolbar = document.querySelector('.editor-toolbar');
+        const statusBar = document.querySelector('.status-bar');
+        
+        const hasOpenTabs = this.documents.size > 0;
+        
+        console.log(`Updating editor visibility: ${hasOpenTabs ? 'show' : 'hide'} (${this.documents.size} tabs)`);
+        console.log('Documents:', Array.from(this.documents.keys()));
+        console.log('Current body classes before:', body.classList.toString());
+        
+        if (hasOpenTabs) {
+            // Show all editor components by adding has-tabs class
+            body.classList.remove('no-tabs');
+            body.classList.add('has-tabs');
+            console.log('Added has-tabs class, showing editor components');
+            console.log('Body classList:', body.classList.toString());
+        } else {
+            // Hide all editor components and show gray background
+            body.classList.remove('has-tabs');
+            body.classList.add('no-tabs');
+            console.log('Added no-tabs class to body, should show gray background');
+            console.log('Body classList after changes:', body.classList.toString());
+            console.log('Background color should now be gray with red border');
+            
+            // Clear any content
+            if (wysiwygEditor) wysiwygEditor.innerHTML = '';
+            if (sourceEditor) sourceEditor.value = '';
+        }
+    }
+
+    /**
+     * Switch to next tab
+     */
+    switchToNextTab() {
+        const tabIds = Array.from(this.documents.keys());
+        if (tabIds.length <= 1) return;
+        
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+        const nextIndex = (currentIndex + 1) % tabIds.length;
+        this.switchToTab(tabIds[nextIndex]);
+    }
+
+    /**
+     * Switch to previous tab
+     */
+    switchToPreviousTab() {
+        const tabIds = Array.from(this.documents.keys());
+        if (tabIds.length <= 1) return;
+        
+        const currentIndex = tabIds.indexOf(this.activeTabId);
+        const prevIndex = currentIndex === 0 ? tabIds.length - 1 : currentIndex - 1;
+        this.switchToTab(tabIds[prevIndex]);
+    }
+
+    /**
+     * Close current tab (helper for keyboard shortcuts)
+     */
+    async closeCurrentTab() {
+        if (this.activeTabId) {
+            await this.closeTab(this.activeTabId);
+        }
+    }
+
+    /**
+     * Save all open documents
+     */
+    async saveAllDocuments() {
+        for (const [tabId, document] of this.documents) {
+            if (document.isDirty) {
+                // Temporarily switch to this document to save it
+                const originalActiveTab = this.activeTabId;
+                this.activeTabId = tabId;
+                this.currentDocument = document;
+                
+                try {
+                    await this.saveDocument();
+                } catch (error) {
+                    console.error(`Failed to save document ${document.name}:`, error);
+                }
+                
+                // Restore original active tab
+                this.activeTabId = originalActiveTab;
+                this.currentDocument = this.documents.get(originalActiveTab);
+            }
+        }
+        
+        this.updateTabBar();
+        this.updateStatus('All documents saved', 'success');
+    }
+
+    /**
+     * Save current document content from editor
+     */
+    saveCurrentDocumentContent() {
+        if (this.wysiwygEditor && this.currentDocument) {
+            const content = this.isSourceMode ? 
+                this.sourceEditor.value : 
+                this.htmlToMarkdown(this.wysiwygEditor.innerHTML);
+            
+            if (content !== this.currentDocument.content) {
+                this.currentDocument.content = content;
+                this.currentDocument.isDirty = true;
+            }
+        }
+    }
+
+    /**
+     * Load document content into editor
+     */
+    loadDocumentContent() {
+        if (this.wysiwygEditor && this.currentDocument) {
+            console.log('Loading document content:', this.currentDocument.name);
+            console.log('Content preview:', this.currentDocument.content.substring(0, 100) + '...');
+            
+            if (this.isSourceMode && this.sourceEditor) {
+                this.sourceEditor.value = this.currentDocument.content;
+                console.log('Loaded content into source editor');
+            } else {
+                const htmlContent = this.markdownToHTML(this.currentDocument.content);
+                this.wysiwygEditor.innerHTML = htmlContent;
+                console.log('Loaded content into WYSIWYG editor, HTML length:', htmlContent.length);
+            }
+        } else {
+            console.warn('Cannot load document content - missing editor or document:', {
+                hasWysiwygEditor: !!this.wysiwygEditor,
+                hasCurrentDocument: !!this.currentDocument
+            });
+        }
+    }
+
+    /**
+     * Update document title in status bar
+     */
+    updateDocumentTitle() {
+        const documentStatus = document.getElementById('document-status');
+        if (documentStatus && this.currentDocument) {
+            documentStatus.textContent = `📄 ${this.currentDocument.name}`;
+        }
+    }
+
+    /**
+     * Show tab context menu
+     */
+    showTabContextMenu(event, tabId) {
+        // Remove existing context menu
+        const existingMenu = document.querySelector('.tab-context-menu');
+        if (existingMenu) {
+            existingMenu.remove();
+        }
+        
+        const menu = document.createElement('div');
+        menu.className = 'tab-context-menu';
+        menu.style.left = event.pageX + 'px';
+        menu.style.top = event.pageY + 'px';
+        menu.style.display = 'block';
+        
+        const document = this.documents.get(tabId);
+        const isOnlyTab = this.documents.size === 1;
+        
+        menu.innerHTML = `
+            <button onclick="window.WYSIWYGEditor.createNewTab()" title="Ctrl+T">New Tab</button>
+            <button onclick="window.WYSIWYGEditor.closeTab('${tabId}')" ${isOnlyTab ? 'disabled' : ''} title="Ctrl+W">Close Tab</button>
+            <button onclick="window.WYSIWYGEditor.closeOtherTabs('${tabId}')" ${isOnlyTab ? 'disabled' : ''}>Close Other Tabs</button>
+            <button onclick="window.WYSIWYGEditor.closeTabsToRight('${tabId}')">Close Tabs to Right</button>
+            <button onclick="window.WYSIWYGEditor.renameTab('${tabId}')">Rename Tab</button>
+        `;
+        
+        document.body.appendChild(menu);
+        
+        // Close menu when clicking outside
+        setTimeout(() => {
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            document.addEventListener('click', closeMenu);
+        }, 100);
+    }
+
+    /**
+     * Close all tabs except the specified one
+     */
+    closeOtherTabs(keepTabId) {
+        const tabIds = Array.from(this.documents.keys());
+        tabIds.forEach(tabId => {
+            if (tabId !== keepTabId) {
+                this.closeTab(tabId);
+            }
+        });
+    }
+
+    /**
+     * Close all tabs to the right of the specified tab
+     */
+    closeTabsToRight(tabId) {
+        const tabElements = Array.from(document.querySelectorAll('.tab'));
+        const targetIndex = tabElements.findIndex(tab => tab.dataset.tabId === tabId);
+        
+        if (targetIndex >= 0) {
+            const tabsToClose = tabElements.slice(targetIndex + 1);
+            tabsToClose.forEach(tab => {
+                this.closeTab(tab.dataset.tabId);
+            });
+        }
+    }
+
+    /**
+     * Rename a tab
+     */
+    renameTab(tabId) {
+        const document = this.documents.get(tabId);
+        if (!document) return;
+        
+        const newName = prompt('Enter new name:', document.name);
+        if (newName && newName.trim()) {
+            document.name = newName.trim();
+            this.updateTabBar();
+            this.updateDocumentTitle();
+        }
+    }
+
+    /**
+     * Escape HTML for safe insertion
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**
@@ -2163,7 +3440,7 @@ class WYSIWYGEditor {
         if (newFileBtn) {
             newFileBtn.addEventListener('click', () => {
                 console.log('New File clicked!');
-                this.newFile();
+                this.createNewTab('Untitled');
                 this.closeDropdowns();
             });
         }
@@ -2304,19 +3581,25 @@ class WYSIWYGEditor {
     enhanceMenuHover() {
         const menuBar = document.getElementById('menu-bar');
         if (menuBar) {
-            let hoverTimeout;
+            // Force initial state to be collapsed and prevent any immediate hover events
+            menuBar.className = 'menu-bar collapsed';
             
-            menuBar.addEventListener('mouseenter', () => {
-                clearTimeout(hoverTimeout);
-                menuBar.classList.add('hover');
-            });
-            
-            menuBar.addEventListener('mouseleave', () => {
-                hoverTimeout = setTimeout(() => {
-                    menuBar.classList.remove('hover');
-                    this.closeDropdowns();
-                }, 300);
-            });
+            // Use a small delay to ensure the initial state is properly set
+            setTimeout(() => {
+                let hoverTimeout;
+                
+                menuBar.addEventListener('mouseenter', () => {
+                    clearTimeout(hoverTimeout);
+                    menuBar.className = 'menu-bar hover';
+                });
+                
+                menuBar.addEventListener('mouseleave', () => {
+                    hoverTimeout = setTimeout(() => {
+                        menuBar.className = 'menu-bar collapsed';
+                        this.closeDropdowns();
+                    }, 300);
+                });
+            }, 100);
         }
     }
     
@@ -2507,14 +3790,320 @@ class WYSIWYGEditor {
             'info'
         );
     }
+    
+    /**
+     * Initialize markdown extension shortcuts system
+     */
+    async initializeMarkdownExtensions() {
+        try {
+            console.log('Initializing markdown extension shortcuts...');
+            
+            // Check if markdown extension shortcuts are available
+            if (typeof MarkdownExtensionShortcuts === 'undefined') {
+                console.log('MarkdownExtensionShortcuts not available, skipping integration');
+                return;
+            }
+            
+            // Initialize the markdown extensions system
+            this.markdownExtensions = new MarkdownExtensionShortcuts({
+                hoverDelay: 500,
+                autoProcess: true,
+                apiEndpoint: '/api/shortcuts',
+                showStatusOverview: true,
+                enableProgressTracking: true
+            });
+            
+            // Initialize editor integration if available
+            if (typeof MarkdownExtensionIntegration !== 'undefined') {
+                this.extensionIntegration = new MarkdownExtensionIntegration(this, {
+                    realTimeProcessing: true,
+                    processingDelay: 1000,
+                    autoSave: this.autoSaveEnabled
+                });
+                console.log('Markdown extension integration initialized successfully');
+            }
+            
+            console.log('Markdown extension shortcuts initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize markdown extension shortcuts:', error);
+        }
+    }
+    
+    /**
+     * Setup markdown extension toolbar buttons
+     */
+    setupMarkdownExtensionButtons() {
+        if (!this.markdownExtensions) return;
+        
+        try {
+            // Check if we have a shortcuts group in the toolbar
+            const toolbar = document.querySelector('.editor-toolbar');
+            if (!toolbar) return;
+            
+            // Create shortcuts group if it doesn't exist
+            let shortcutsGroup = toolbar.querySelector('.shortcuts-group');
+            if (!shortcutsGroup) {
+                shortcutsGroup = document.createElement('div');
+                shortcutsGroup.className = 'toolbar-group shortcuts-group';
+                shortcutsGroup.innerHTML = `
+                    <button id="ai-shortcut-btn" title="Insert AI Processing (Ctrl+Shift+A)" class="toolbar-btn">
+                        🤖
+                    </button>
+                    <button id="doc-reference-btn" title="Insert Document Reference (Ctrl+Shift+D)" class="toolbar-btn">
+                        📄
+                    </button>
+                    <button id="chart-shortcut-btn" title="Insert Chart (Ctrl+Shift+C)" class="toolbar-btn">
+                        📊
+                    </button>
+                    <button id="user-mention-btn" title="Insert User Mention (Ctrl+Shift+U)" class="toolbar-btn">
+                        👤
+                    </button>
+                    <button id="process-shortcuts-btn" title="Process All Shortcuts (Ctrl+Shift+P)" class="toolbar-btn">
+                        ⚡
+                    </button>
+                `;
+                
+                // Insert before the view controls group
+                const viewGroup = toolbar.querySelector('.view-group') || toolbar.lastElementChild;
+                toolbar.insertBefore(shortcutsGroup, viewGroup);
+            }
+            
+            // Setup button handlers
+            this.setupToolbarButton('ai-shortcut-btn', () => this.insertAIShortcut());
+            this.setupToolbarButton('doc-reference-btn', () => this.insertDocumentReference());
+            this.setupToolbarButton('chart-shortcut-btn', () => this.insertChartShortcut());
+            this.setupToolbarButton('user-mention-btn', () => this.insertUserMention());
+            this.setupToolbarButton('process-shortcuts-btn', () => this.processAllShortcuts());
+            
+            console.log('Markdown extension toolbar buttons setup complete');
+        } catch (error) {
+            console.error('Failed to setup markdown extension toolbar buttons:', error);
+        }
+    }
+    
+    /**
+     * Process markdown shortcuts in the current content
+     */
+    async processMarkdownShortcuts() {
+        if (!this.markdownExtensions || !this.currentDocument) return;
+        
+        try {
+            const content = this.getMarkdownContent();
+            
+            // Skip processing if content hasn't changed
+            if (content === this.lastProcessedContent) return;
+            this.lastProcessedContent = content;
+            
+            // Process shortcuts
+            const processedContent = await this.markdownExtensions.processMarkdown(
+                content, 
+                this.currentDocument.id || 'current-document'
+            );
+            
+            // Update the WYSIWYG editor if in WYSIWYG mode
+            if (!this.isSourceMode && processedContent !== content) {
+                const htmlContent = this.markdownToHTML(processedContent);
+                this.wysiwygEditor.innerHTML = htmlContent;
+                this.updateStats();
+            }
+            
+        } catch (error) {
+            console.error('Failed to process markdown shortcuts:', error);
+        }
+    }
+    
+    /**
+     * Process all shortcuts manually
+     */
+    processAllShortcuts() {
+        this.processMarkdownShortcuts();
+        if (this.markdownExtensions) {
+            const summary = this.markdownExtensions.getStatusSummary();
+            this.updateStatus(`Processing ${summary.total} shortcuts...`);
+        }
+    }
+    
+    /**
+     * Insert AI processing shortcut
+     */
+    insertAIShortcut() {
+        const command = prompt('Enter AI command (e.g., "summarize:doc_id" or "translate:text|lang=es"):');
+        if (command) {
+            this.insertText(`@[ai:${command}]`);
+            setTimeout(() => this.processMarkdownShortcuts(), 100);
+        }
+    }
+    
+    /**
+     * Insert document reference shortcut
+     */
+    insertDocumentReference() {
+        const docId = prompt('Enter document ID or hash:');
+        if (docId) {
+            this.insertText(`@[doc:${docId}]`);
+            setTimeout(() => this.processMarkdownShortcuts(), 100);
+        }
+    }
+    
+    /**
+     * Insert chart shortcut
+     */
+    insertChartShortcut() {
+        const chartConfig = prompt('Enter chart configuration (e.g., "data_id:type=bar" or "create:type=line|data=csv_id"):');
+        if (chartConfig) {
+            this.insertText(`@[chart:${chartConfig}]`);
+            setTimeout(() => this.processMarkdownShortcuts(), 100);
+        }
+    }
+    
+    /**
+     * Insert user mention shortcut
+     */
+    insertUserMention() {
+        const userId = prompt('Enter user ID or username:');
+        if (userId) {
+            this.insertText(`@[user:${userId}]`);
+            setTimeout(() => this.processMarkdownShortcuts(), 100);
+        }
+    }
+    
+    /**
+     * Insert text at cursor position
+     */
+    insertText(text) {
+        if (this.isSourceMode) {
+            // Insert into source editor
+            const sourceEditor = this.sourceEditor;
+            const start = sourceEditor.selectionStart;
+            const end = sourceEditor.selectionEnd;
+            const currentValue = sourceEditor.value;
+            
+            sourceEditor.value = currentValue.slice(0, start) + text + currentValue.slice(end);
+            sourceEditor.selectionStart = sourceEditor.selectionEnd = start + text.length;
+            sourceEditor.focus();
+        } else {
+            // Insert into WYSIWYG editor
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(document.createTextNode(text));
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                // Fallback: append to end
+                this.wysiwygEditor.appendChild(document.createTextNode(text));
+            }
+            this.wysiwygEditor.focus();
+        }
+        
+        // Mark document as dirty
+        this.markDocumentDirty();
+    }
+    
+    /**
+     * Get current markdown content
+     */
+    getMarkdownContent() {
+        if (this.isSourceMode) {
+            return this.sourceEditor.value;
+        } else {
+            return this.htmlToMarkdown(this.wysiwygEditor.innerHTML);
+        }
+    }
+    
+    /**
+     * Enable/disable shortcut processing
+     */
+    toggleShortcutProcessing() {
+        this.shortcutProcessingEnabled = !this.shortcutProcessingEnabled;
+        const status = this.shortcutProcessingEnabled ? 'enabled' : 'disabled';
+        this.updateStatus(`Shortcut processing ${status}`);
+    }
+    
+    /**
+     * Get markdown extensions status summary
+     */
+    getExtensionStatus() {
+        if (!this.markdownExtensions) {
+            return { available: false };
+        }
+        
+        const summary = this.markdownExtensions.getStatusSummary();
+        return {
+            available: true,
+            ...summary,
+            processing: this.shortcutProcessingEnabled
+        };
+    }
 }
 
+// Global debug function to force profile loading
+window.forceLoadProfile = function() {
+    console.log('🔧 DEBUG: Force loading profile');
+    const editor = window.WYSIWYGEditor;
+    if (editor && editor.documents) {
+        const defaultDoc = editor.documents.get('default');
+        if (defaultDoc) {
+            console.log('🔧 DEBUG: Found default doc:', defaultDoc.name, 'content length:', defaultDoc.content.length);
+            
+            const wysiwygEl = document.getElementById('wysiwyg-editor');
+            const sourceEl = document.querySelector('.markdown-source-editor');
+            
+            if (wysiwygEl) {
+                const htmlContent = editor.markdownToHTML(defaultDoc.content);
+                wysiwygEl.innerHTML = htmlContent;
+                console.log('🔧 DEBUG: Set WYSIWYG content, HTML length:', htmlContent.length);
+            }
+            
+            if (sourceEl) {
+                sourceEl.value = defaultDoc.content;
+                console.log('🔧 DEBUG: Set source content');
+            }
+        } else {
+            console.log('🔧 DEBUG: No default document found');
+            console.log('🔧 DEBUG: Available documents:', Array.from(editor.documents.keys()));
+        }
+    } else {
+        console.log('🔧 DEBUG: No editor found');
+    }
+};
+
+
+
 // Initialize the WYSIWYG editor when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOMContentLoaded fired, loading branding and forcing no-tabs state');
+    
+    // Load branding configuration first
+    if (window.BrandingManager) {
+        await window.BrandingManager.loadBranding();
+        console.log('Branding loaded and applied successfully');
+    }
+    
+    // Force no-tabs state immediately  
+    document.body.classList.add('no-tabs');
+    document.body.classList.remove('has-tabs');
+    console.log('Body classes after immediate force:', document.body.classList.toString());
+    
+    console.log('Starting WYSIWYGEditor initialization');
     const editor = new WYSIWYGEditor();
     
-    // Expose the editor instance globally for testing and external access
+    // Set the global reference immediately so tests can detect it
     window.WYSIWYGEditor = editor;
     
-    editor.init().catch(console.error);
+    // Initialize editor asynchronously
+    editor.init().then(() => {
+        console.log('WYSIWYGEditor initialized and available globally', {
+            editor: !!editor,
+            wysiwygEditor: !!editor.wysiwygEditor
+        });
+        
+        // Ready for user interaction - no auto-loading
+        console.log('🎯 READY: Editor initialized, ready for user to select files');
+        
+    }).catch(error => {
+        console.error('Failed to initialize WYSIWYGEditor:', error);
+    });
 });

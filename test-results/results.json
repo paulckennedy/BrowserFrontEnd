@@ -1,0 +1,962 @@
+{
+  "config": {
+    "configFile": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/playwright.config.js",
+    "rootDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ],
+      [
+        "junit",
+        {
+          "outputFile": "test-results/junit.xml"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 10000
+      },
+      {
+        "outputDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 10000
+      },
+      {
+        "outputDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 10000
+      },
+      {
+        "outputDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "Mobile Chrome",
+        "name": "Mobile Chrome",
+        "testDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 10000
+      },
+      {
+        "outputDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "Mobile Safari",
+        "name": "Mobile Safari",
+        "testDir": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 10000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.1",
+    "workers": 1,
+    "webServer": {
+      "command": "PORT=8080 node server.js",
+      "url": "http://localhost:8080",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "basic-functionality.spec.js",
+      "file": "basic-functionality.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "WYSIWYG Markdown Editor - Basic Functionality",
+          "file": "basic-functionality.spec.js",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load the application successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 10000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2395,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "BROWSER: Branding configuration loaded: {application: Object, ui: Object, assets: Object, metadata: Object}\n"
+                        },
+                        {
+                          "text": "BROWSER: Branding loaded and applied successfully\n"
+                        },
+                        {
+                          "text": "BROWSER: Body classes after immediate force: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Starting WYSIWYGEditor initialization\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 0: Clearing localStorage and sessionStorage\n"
+                        },
+                        {
+                          "text": "BROWSER: Cleared all localStorage and sessionStorage\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 1: Setting up elements\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 2: Elements setup complete, wysiwygEditor: true\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 3: Setting up event listeners\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 4: Setting up keyboard shortcuts\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 5: Setting up toolbar buttons\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 6: Initializing auto-save\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 7: Initializing menu functionality\n"
+                        },
+                        {
+                          "text": "BROWSER: Initializing menu functionality...\n"
+                        },
+                        {
+                          "text": "BROWSER: New file button found: true\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 8: Initializing database connection\n"
+                        },
+                        {
+                          "text": "BROWSER: Database connection initialized\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 9: Loading documents\n"
+                        },
+                        {
+                          "text": "BROWSER: loadDocuments: Allowing profile content in first tab\n"
+                        },
+                        {
+                          "text": "BROWSER: loadDocuments - WYSIWYG content preview: \n                        <!-- Content will be loaded by JavaScript -->\n                    \n"
+                        },
+                        {
+                          "text": "BROWSER: loadDocuments - Source content preview: \n"
+                        },
+                        {
+                          "text": "BROWSER: Step 10: Updating stats and status\n"
+                        },
+                        {
+                          "text": "BROWSER: Explorer initialized in collapsed state\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 11: Initializing tab system\n"
+                        },
+                        {
+                          "text": "BROWSER: Updating editor visibility: hide (0 tabs)\n"
+                        },
+                        {
+                          "text": "BROWSER: Documents: []\n"
+                        },
+                        {
+                          "text": "BROWSER: Current body classes before: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Added no-tabs class to body, should show gray background\n"
+                        },
+                        {
+                          "text": "BROWSER: Body classList after changes: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Background color should now be gray with red border\n"
+                        },
+                        {
+                          "text": "BROWSER: Tab system initialized with no tabs - clean start\n"
+                        },
+                        {
+                          "text": "BROWSER: File tree initialized\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 11.5: Force no-tabs state immediately\n"
+                        },
+                        {
+                          "text": "BROWSER: Added no-tabs class to body: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 12: Clean start - no default content to load\n"
+                        },
+                        {
+                          "text": "BROWSER: Clean start initialized - user can open files from explorer\n"
+                        },
+                        {
+                          "text": "BROWSER: WYSIWYG Editor initialized successfully\n"
+                        },
+                        {
+                          "text": "BROWSER: WYSIWYGEditor initialized and available globally {editor: true, wysiwygEditor: true}\n"
+                        },
+                        {
+                          "text": "BROWSER: 🎯 READY: Editor initialized, ready for user to select files\n"
+                        },
+                        {
+                          "text": "BROWSER: AI Integration initialized successfully\n"
+                        },
+                        {
+                          "text": "BROWSER: AI Integration is ready! {aiIntegration: AIIntegration}\n"
+                        },
+                        {
+                          "text": "BROWSER: Example AI Prompt Generated: {template: I need to add {feature_name} to the BrowserFrontEn…ionality, 4) Responsive design, 5) Accessibility., examples: Object}\n"
+                        },
+                        {
+                          "text": "BROWSER: Available AI Prompt Categories: [system, development, content, analysis, testing, deployment, maintenance]\n"
+                        },
+                        {
+                          "text": "BROWSER: Opening file: My Profile (profile.md)\n"
+                        },
+                        {
+                          "text": "BROWSER: Creating tab element for tab-1 with name My Profile\n"
+                        },
+                        {
+                          "text": "BROWSER: Tab bar found: true\n"
+                        },
+                        {
+                          "text": "BROWSER: New tab button found: true\n"
+                        },
+                        {
+                          "text": "BROWSER: Created tab element (default: false): <div class=\"tab closable\" data-tab-id=\"tab-1\"><span class=\"tab-title\">My Profile</span><button class=\"tab-close\" title=\"Close tab\" data-tab-id=\"tab-1\">×</button></div>\n"
+                        },
+                        {
+                          "text": "BROWSER: Tab inserted into DOM. Current tabs in bar: 1\n"
+                        },
+                        {
+                          "text": "BROWSER: Loading document content: My Profile\n"
+                        },
+                        {
+                          "text": "BROWSER: Content preview: # My Profile\n\n👤 **Developer & Creator**\n\n## About Me\n\nWelcome to my digital workspace! I'm a passio...\n"
+                        },
+                        {
+                          "text": "BROWSER: Loaded content into WYSIWYG editor, HTML length: 1459\n"
+                        },
+                        {
+                          "text": "BROWSER: Switched to tab: tab-1\n"
+                        },
+                        {
+                          "text": "BROWSER: Updating editor visibility: show (1 tabs)\n"
+                        },
+                        {
+                          "text": "BROWSER: Documents: [tab-1]\n"
+                        },
+                        {
+                          "text": "BROWSER: Current body classes before: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Added has-tabs class, showing editor components\n"
+                        },
+                        {
+                          "text": "BROWSER: Body classList: has-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Created new tab: My Profile (tab-1)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-02T00:47:29.312Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2d0e50e3b0c3f296fb10-7b09065a69749530e8f1",
+              "file": "basic-functionality.spec.js",
+              "line": 48,
+              "column": 7
+            },
+            {
+              "title": "should load the application successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 10000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "firefox",
+                  "projectName": "firefox",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5281,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "BROWSER: AI Integration initialized successfully\n"
+                        },
+                        {
+                          "text": "BROWSER: AI Integration is ready! JSHandle@object\n"
+                        },
+                        {
+                          "text": "BROWSER: Example AI Prompt Generated: JSHandle@object\n"
+                        },
+                        {
+                          "text": "BROWSER: Available AI Prompt Categories: Array\n"
+                        },
+                        {
+                          "text": "BROWSER: Branding configuration loaded: JSHandle@object\n"
+                        },
+                        {
+                          "text": "BROWSER: Branding loaded and applied successfully\n"
+                        },
+                        {
+                          "text": "BROWSER: Body classes after immediate force: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Starting WYSIWYGEditor initialization\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 0: Clearing localStorage and sessionStorage\n"
+                        },
+                        {
+                          "text": "BROWSER: Cleared all localStorage and sessionStorage\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 1: Setting up elements\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 2: Elements setup complete, wysiwygEditor: true\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 3: Setting up event listeners\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 4: Setting up keyboard shortcuts\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 5: Setting up toolbar buttons\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 6: Initializing auto-save\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 7: Initializing menu functionality\n"
+                        },
+                        {
+                          "text": "BROWSER: Initializing menu functionality...\n"
+                        },
+                        {
+                          "text": "BROWSER: New file button found: true\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 8: Initializing database connection\n"
+                        },
+                        {
+                          "text": "BROWSER: Database connection initialized\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 9: Loading documents\n"
+                        },
+                        {
+                          "text": "BROWSER: loadDocuments: Allowing profile content in first tab\n"
+                        },
+                        {
+                          "text": "BROWSER: loadDocuments - WYSIWYG content preview: \n                        <!-- Content will be loaded by JavaScript -->\n                    \n"
+                        },
+                        {
+                          "text": "BROWSER: loadDocuments - Source content preview: \n"
+                        },
+                        {
+                          "text": "BROWSER: Step 10: Updating stats and status\n"
+                        },
+                        {
+                          "text": "BROWSER: Explorer initialized in collapsed state\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 11: Initializing tab system\n"
+                        },
+                        {
+                          "text": "BROWSER: Updating editor visibility: hide (0 tabs)\n"
+                        },
+                        {
+                          "text": "BROWSER: Documents: Array\n"
+                        },
+                        {
+                          "text": "BROWSER: Current body classes before: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Added no-tabs class to body, should show gray background\n"
+                        },
+                        {
+                          "text": "BROWSER: Body classList after changes: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Background color should now be gray with red border\n"
+                        },
+                        {
+                          "text": "BROWSER: Tab system initialized with no tabs - clean start\n"
+                        },
+                        {
+                          "text": "BROWSER: File tree initialized\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 11.5: Force no-tabs state immediately\n"
+                        },
+                        {
+                          "text": "BROWSER: Added no-tabs class to body: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 12: Clean start - no default content to load\n"
+                        },
+                        {
+                          "text": "BROWSER: Clean start initialized - user can open files from explorer\n"
+                        },
+                        {
+                          "text": "BROWSER: WYSIWYG Editor initialized successfully\n"
+                        },
+                        {
+                          "text": "BROWSER: WYSIWYGEditor initialized and available globally JSHandle@object\n"
+                        },
+                        {
+                          "text": "BROWSER: 🎯 READY: Editor initialized, ready for user to select files\n"
+                        },
+                        {
+                          "text": "BROWSER: Opening file: My Profile (profile.md)\n"
+                        },
+                        {
+                          "text": "BROWSER: Creating tab element for tab-1 with name My Profile\n"
+                        },
+                        {
+                          "text": "BROWSER: Tab bar found: true\n"
+                        },
+                        {
+                          "text": "BROWSER: New tab button found: true\n"
+                        },
+                        {
+                          "text": "BROWSER: Created tab element (default: false): <div class=\"tab closable\" data-tab-id=\"tab-1\"><span class=\"tab-title\">My Profile</span><button class=\"tab-close\" title=\"Close tab\" data-tab-id=\"tab-1\">×</button></div>\n"
+                        },
+                        {
+                          "text": "BROWSER: Tab inserted into DOM. Current tabs in bar: 1\n"
+                        },
+                        {
+                          "text": "BROWSER: Loading document content: My Profile\n"
+                        },
+                        {
+                          "text": "BROWSER: Content preview: # My Profile\n\n👤 **Developer & Creator**\n\n## About Me\n\nWelcome to my digital workspace! I'm a passio...\n"
+                        },
+                        {
+                          "text": "BROWSER: Loaded content into WYSIWYG editor, HTML length: 1459\n"
+                        },
+                        {
+                          "text": "BROWSER: Switched to tab: tab-1\n"
+                        },
+                        {
+                          "text": "BROWSER: Updating editor visibility: show (1 tabs)\n"
+                        },
+                        {
+                          "text": "BROWSER: Documents: Array\n"
+                        },
+                        {
+                          "text": "BROWSER: Current body classes before: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Added has-tabs class, showing editor components\n"
+                        },
+                        {
+                          "text": "BROWSER: Body classList: has-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Created new tab: My Profile (tab-1)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-02T00:47:33.580Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2d0e50e3b0c3f296fb10-e39235eb13d34dcfad8e",
+              "file": "basic-functionality.spec.js",
+              "line": 48,
+              "column": 7
+            },
+            {
+              "title": "should load the application successfully",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 10000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "webkit",
+                  "projectName": "webkit",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 10499,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 10000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 10000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:4:8",
+                        "location": {
+                          "file": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js",
+                          "column": 8,
+                          "line": 4
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 2 |\u001b[39m\n \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'WYSIWYG Markdown Editor - Basic Functionality'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 5 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 6 |\u001b[39m     \n \u001b[90m 7 |\u001b[39m     \u001b[90m// Add console listener to capture browser logs\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js",
+                            "column": 8,
+                            "line": 4
+                          },
+                          "message": "\u001b[31mTest timeout of 10000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 2 |\u001b[39m\n \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'WYSIWYG Markdown Editor - Basic Functionality'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 5 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 6 |\u001b[39m     \n \u001b[90m 7 |\u001b[39m     \u001b[90m// Add console listener to capture browser logs\u001b[39m\u001b[0m\n\u001b[2m    at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:4:8\u001b[22m"
+                        },
+                        {
+                          "location": {
+                            "file": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js",
+                            "column": 16,
+                            "line": 12
+                          },
+                          "message": "Error: page.waitForFunction: Test timeout of 10000ms exceeded.\n\n\u001b[0m \u001b[90m 10 |\u001b[39m     \n \u001b[90m 11 |\u001b[39m     \u001b[90m// Wait for the WYSIWYG editor to be available globally (initialization complete)\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 12 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 13 |\u001b[39m       () \u001b[33m=>\u001b[39m window\u001b[33m.\u001b[39m\u001b[33mWYSIWYGEditor\u001b[39m \u001b[33m!==\u001b[39m undefined\u001b[33m,\u001b[39m\n \u001b[90m 14 |\u001b[39m       {}\u001b[33m,\u001b[39m\n \u001b[90m 15 |\u001b[39m       { timeout\u001b[33m:\u001b[39m \u001b[35m30000\u001b[39m }\u001b[0m\n\u001b[2m    at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:12:16\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-02T00:47:43.041Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-webkit/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-webkit/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-webkit/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js",
+                        "column": 8,
+                        "line": 4
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "2d0e50e3b0c3f296fb10-89dffd27f691260b97c0",
+              "file": "basic-functionality.spec.js",
+              "line": 48,
+              "column": 7
+            },
+            {
+              "title": "should load the application successfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 10000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Chrome",
+                  "projectName": "Mobile Chrome",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2723,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "BROWSER: AI Integration initialized successfully\n"
+                        },
+                        {
+                          "text": "BROWSER: AI Integration is ready! {aiIntegration: AIIntegration}\n"
+                        },
+                        {
+                          "text": "BROWSER: Example AI Prompt Generated: {template: I need to add {feature_name} to the BrowserFrontEn…ionality, 4) Responsive design, 5) Accessibility., examples: Object}\n"
+                        },
+                        {
+                          "text": "BROWSER: Available AI Prompt Categories: [system, development, content, analysis, testing, deployment, maintenance]\n"
+                        },
+                        {
+                          "text": "BROWSER: Branding configuration loaded: {application: Object, ui: Object, assets: Object, metadata: Object}\n"
+                        },
+                        {
+                          "text": "BROWSER: Branding loaded and applied successfully\n"
+                        },
+                        {
+                          "text": "BROWSER: Body classes after immediate force: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Starting WYSIWYGEditor initialization\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 0: Clearing localStorage and sessionStorage\n"
+                        },
+                        {
+                          "text": "BROWSER: Cleared all localStorage and sessionStorage\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 1: Setting up elements\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 2: Elements setup complete, wysiwygEditor: true\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 3: Setting up event listeners\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 4: Setting up keyboard shortcuts\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 5: Setting up toolbar buttons\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 6: Initializing auto-save\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 7: Initializing menu functionality\n"
+                        },
+                        {
+                          "text": "BROWSER: Initializing menu functionality...\n"
+                        },
+                        {
+                          "text": "BROWSER: New file button found: true\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 8: Initializing database connection\n"
+                        },
+                        {
+                          "text": "BROWSER: Database connection initialized\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 9: Loading documents\n"
+                        },
+                        {
+                          "text": "BROWSER: loadDocuments: Allowing profile content in first tab\n"
+                        },
+                        {
+                          "text": "BROWSER: loadDocuments - WYSIWYG content preview: \n                        <!-- Content will be loaded by JavaScript -->\n                    \n"
+                        },
+                        {
+                          "text": "BROWSER: loadDocuments - Source content preview: \n"
+                        },
+                        {
+                          "text": "BROWSER: Step 10: Updating stats and status\n"
+                        },
+                        {
+                          "text": "BROWSER: Explorer initialized in collapsed state\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 11: Initializing tab system\n"
+                        },
+                        {
+                          "text": "BROWSER: Updating editor visibility: hide (0 tabs)\n"
+                        },
+                        {
+                          "text": "BROWSER: Documents: []\n"
+                        },
+                        {
+                          "text": "BROWSER: Current body classes before: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Added no-tabs class to body, should show gray background\n"
+                        },
+                        {
+                          "text": "BROWSER: Body classList after changes: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Background color should now be gray with red border\n"
+                        },
+                        {
+                          "text": "BROWSER: Tab system initialized with no tabs - clean start\n"
+                        },
+                        {
+                          "text": "BROWSER: File tree initialized\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 11.5: Force no-tabs state immediately\n"
+                        },
+                        {
+                          "text": "BROWSER: Added no-tabs class to body: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Step 12: Clean start - no default content to load\n"
+                        },
+                        {
+                          "text": "BROWSER: Clean start initialized - user can open files from explorer\n"
+                        },
+                        {
+                          "text": "BROWSER: WYSIWYG Editor initialized successfully\n"
+                        },
+                        {
+                          "text": "BROWSER: WYSIWYGEditor initialized and available globally {editor: true, wysiwygEditor: true}\n"
+                        },
+                        {
+                          "text": "BROWSER: 🎯 READY: Editor initialized, ready for user to select files\n"
+                        },
+                        {
+                          "text": "BROWSER: Opening file: My Profile (profile.md)\n"
+                        },
+                        {
+                          "text": "BROWSER: Creating tab element for tab-1 with name My Profile\n"
+                        },
+                        {
+                          "text": "BROWSER: Tab bar found: true\n"
+                        },
+                        {
+                          "text": "BROWSER: New tab button found: true\n"
+                        },
+                        {
+                          "text": "BROWSER: Created tab element (default: false): <div class=\"tab closable\" data-tab-id=\"tab-1\"><span class=\"tab-title\">My Profile</span><button class=\"tab-close\" title=\"Close tab\" data-tab-id=\"tab-1\">×</button></div>\n"
+                        },
+                        {
+                          "text": "BROWSER: Tab inserted into DOM. Current tabs in bar: 1\n"
+                        },
+                        {
+                          "text": "BROWSER: Loading document content: My Profile\n"
+                        },
+                        {
+                          "text": "BROWSER: Content preview: # My Profile\n\n👤 **Developer & Creator**\n\n## About Me\n\nWelcome to my digital workspace! I'm a passio...\n"
+                        },
+                        {
+                          "text": "BROWSER: Loaded content into WYSIWYG editor, HTML length: 1459\n"
+                        },
+                        {
+                          "text": "BROWSER: Switched to tab: tab-1\n"
+                        },
+                        {
+                          "text": "BROWSER: Updating editor visibility: show (1 tabs)\n"
+                        },
+                        {
+                          "text": "BROWSER: Documents: [tab-1]\n"
+                        },
+                        {
+                          "text": "BROWSER: Current body classes before: no-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Added has-tabs class, showing editor components\n"
+                        },
+                        {
+                          "text": "BROWSER: Body classList: has-tabs\n"
+                        },
+                        {
+                          "text": "BROWSER: Created new tab: My Profile (tab-1)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-02T00:47:55.277Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "2d0e50e3b0c3f296fb10-8bc4e1107c2cd4a69f12",
+              "file": "basic-functionality.spec.js",
+              "line": 48,
+              "column": 7
+            },
+            {
+              "title": "should load the application successfully",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 10000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "Mobile Safari",
+                  "projectName": "Mobile Safari",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 10415,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 10000ms exceeded while running \"beforeEach\" hook.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 10000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n    at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:4:8",
+                        "location": {
+                          "file": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js",
+                          "column": 8,
+                          "line": 4
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 2 |\u001b[39m\n \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'WYSIWYG Markdown Editor - Basic Functionality'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 5 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 6 |\u001b[39m     \n \u001b[90m 7 |\u001b[39m     \u001b[90m// Add console listener to capture browser logs\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js",
+                            "column": 8,
+                            "line": 4
+                          },
+                          "message": "\u001b[31mTest timeout of 10000ms exceeded while running \"beforeEach\" hook.\u001b[39m\n\n\u001b[0m \u001b[90m 2 |\u001b[39m\n \u001b[90m 3 |\u001b[39m test\u001b[33m.\u001b[39mdescribe(\u001b[32m'WYSIWYG Markdown Editor - Basic Functionality'\u001b[39m\u001b[33m,\u001b[39m () \u001b[33m=>\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 4 |\u001b[39m   test\u001b[33m.\u001b[39mbeforeEach(\u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\n \u001b[90m   |\u001b[39m        \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 5 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 6 |\u001b[39m     \n \u001b[90m 7 |\u001b[39m     \u001b[90m// Add console listener to capture browser logs\u001b[39m\u001b[0m\n\u001b[2m    at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:4:8\u001b[22m"
+                        },
+                        {
+                          "location": {
+                            "file": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js",
+                            "column": 16,
+                            "line": 12
+                          },
+                          "message": "Error: page.waitForFunction: Test timeout of 10000ms exceeded.\n\n\u001b[0m \u001b[90m 10 |\u001b[39m     \n \u001b[90m 11 |\u001b[39m     \u001b[90m// Wait for the WYSIWYG editor to be available globally (initialization complete)\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 12 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForFunction(\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 13 |\u001b[39m       () \u001b[33m=>\u001b[39m window\u001b[33m.\u001b[39m\u001b[33mWYSIWYGEditor\u001b[39m \u001b[33m!==\u001b[39m undefined\u001b[33m,\u001b[39m\n \u001b[90m 14 |\u001b[39m       {}\u001b[33m,\u001b[39m\n \u001b[90m 15 |\u001b[39m       { timeout\u001b[33m:\u001b[39m \u001b[35m30000\u001b[39m }\u001b[0m\n\u001b[2m    at /home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js:12:16\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-10-02T00:47:59.908Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-Mobile-Safari/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-Mobile-Safari/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/test-results/basic-functionality-WYSIWY-e99fb-he-application-successfully-Mobile-Safari/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/p_kenned/Documents/Projects/BrowserFrontEnd/tests/basic-functionality.spec.js",
+                        "column": 8,
+                        "line": 4
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "2d0e50e3b0c3f296fb10-82e4109e5e569dd48eeb",
+              "file": "basic-functionality.spec.js",
+              "line": 48,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-10-02T00:47:27.654Z",
+    "duration": 43213.225999999995,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

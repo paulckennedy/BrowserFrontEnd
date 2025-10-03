@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Test - Direct HTML</title>
+    <style>
+        .nav-group {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .nav-btn {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        
+        .nav-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            min-width: 150px;
+        }
+        
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+        }
+        
+        .dropdown-item:hover {
+            background: #f0f0f0;
+        }
+        
+        .dropdown.show {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>Direct HTML Menu Test</h1>
+    
+    <div class="menu-bar">
+        <div class="nav-group">
+            <button class="nav-btn" onclick="toggleDropdown(0)">📁 File</button>
+            <div class="dropdown" id="dropdown-0">
+                <button class="dropdown-item">New File</button>
+                <button class="dropdown-item">Open File</button>
+                <button class="dropdown-item">Save File</button>
+            </div>
+        </div>
+        
+        <div class="nav-group">
+            <button class="nav-btn" onclick="toggleDropdown(1)">✏️ Edit</button>
+            <div class="dropdown" id="dropdown-1">
+                <button class="dropdown-item">Undo</button>
+                <button class="dropdown-item">Redo</button>
+                <button class="dropdown-item">Cut</button>
+            </div>
+        </div>
+        
+        <div class="nav-group">
+            <button class="nav-btn" onclick="toggleDropdown(2)">👁️ View</button>
+            <div class="dropdown" id="dropdown-2">
+                <button class="dropdown-item">Toggle Preview</button>
+                <button class="dropdown-item">Toggle Menu</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        console.log('Direct HTML menu test loaded');
+        
+        function toggleDropdown(index) {
+            console.log('toggleDropdown called with index:', index);
+            
+            const dropdown = document.getElementById('dropdown-' + index);
+            const allDropdowns = document.querySelectorAll('.dropdown');
+            
+            // Close all other dropdowns
+            allDropdowns.forEach((dd, i) => {
+                if (i !== index) {
+                    dd.classList.remove('show');
+                    dd.style.display = 'none';
+                }
+            });
+            
+            // Toggle current dropdown
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+                dropdown.style.display = 'none';
+                console.log('Closed dropdown', index);
+            } else {
+                dropdown.classList.add('show');
+                dropdown.style.display = 'block';
+                console.log('Opened dropdown', index);
+            }
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.nav-group')) {
+                document.querySelectorAll('.dropdown').forEach(dd => {
+                    dd.classList.remove('show');
+                    dd.style.display = 'none';
+                });
+                console.log('Closed all dropdowns (outside click)');
+            }
+        });
+        
+        console.log('Menu test script ready');
+    </script>
+</body>
+</html>

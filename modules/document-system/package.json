@@ -1,0 +1,55 @@
+{
+  "name": "@browserfrontend/document-system",
+  "version": "1.0.0",
+  "description": "A comprehensive document management system with AI integration, schema validation, and multi-project deployment support",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "npm run build:schemas && npm run build:docs",
+    "build:schemas": "node scripts/build-schemas.js",
+    "build:docs": "node scripts/build-docs.js",
+    "test": "jest",
+    "validate": "ajv validate -s schemas/document-system-schema.json -d examples/*.json",
+    "lint": "eslint src/**/*.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "document-management",
+    "markdown",
+    "ai-integration",
+    "schema-validation",
+    "vector-database",
+    "multi-project"
+  ],
+  "author": "BrowserFrontEnd Team",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "uuid": "^9.0.0",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "src/",
+    "schemas/",
+    "docs/",
+    "examples/",
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paulckennedy/BrowserFrontEnd.git",
+    "directory": "modules/document-system"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

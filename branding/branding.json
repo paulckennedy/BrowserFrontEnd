@@ -1,0 +1,42 @@
+{
+  "application": {
+    "name": "MarkdownEditor",
+    "fullName": "Browser-in-Browser Markdown Editor",
+    "tagline": "A sophisticated browser-in-browser markdown editor with live editing, auto-save, and database storage",
+    "version": "1.0.0"
+  },
+  "ui": {
+    "menuBar": {
+      "title": "🚀 Custom MarkdownEditor Pro - Your Document Workspace"
+    },
+    "emptyState": {
+      "message": "🎯 Ready to create amazing content? Pick a document to get started!",
+      "subtitle": "Select any document from the file explorer to begin your markdown journey"
+    },
+    "colors": {
+      "primary": "#e74c3c",
+      "secondary": "#c0392b",
+      "accent": "#f39c12",
+      "background": "#f4f4f4",
+      "emptyStateBackground": "#ecf0f1"
+    }
+  },
+  "assets": {
+    "logo": "branding/logo.svg",
+    "favicon": "branding/favicon.ico",
+    "loadingIcon": "branding/loading.gif",
+    "emptyStateIcon": "📁",
+    "fileIcons": {
+      "markdown": "📄",
+      "folder": "📁",
+      "user": "👤"
+    }
+  },
+  "metadata": {
+    "author": "Your Organization",
+    "description": "Professional markdown editing experience in your browser",
+    "keywords": ["markdown", "editor", "browser", "wysiwyg", "documentation"],
+    "website": "https://your-domain.com",
+    "support": "https://your-domain.com/support"
+  }
+}
