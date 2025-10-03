@@ -59,9 +59,16 @@ class WYSIWYGEditor {
         this.toolbarButtons = new Map();
         this.externalLinksEnabled = true;
         
+        // Markdown Extension Shortcuts Integration
+        this.markdownExtensions = null;
+        this.extensionIntegration = null;
+        this.shortcutProcessingEnabled = true;
+        this.lastProcessedContent = '';
+        
         // Performance optimization: throttle expensive operations
         this.throttledUpdateStats = this.throttle(() => this.updateStats(), 300);
         this.throttledMarkdownShortcuts = this.throttle((e) => this.handleMarkdownShortcuts(e), 100);
+        this.throttledProcessShortcuts = this.throttle(() => this.processMarkdownShortcuts(), 1000);
     }
 
     /**
@@ -138,6 +145,9 @@ class WYSIWYGEditor {
             // Force the no-tabs state immediately
             document.body.classList.add('no-tabs');
             console.log('Added no-tabs class to body:', document.body.classList.toString());
+            
+            console.log('Step 12.7: Initializing markdown extension shortcuts');
+            await this.initializeMarkdownExtensions();
             
             console.log('Step 13: Clean start - no default content to load');
             console.log('Clean start initialized - user can open files from explorer');
@@ -282,6 +292,9 @@ class WYSIWYGEditor {
         // View controls
         this.setupToolbarButton('source-btn', () => this.toggleSourceMode());
         this.setupToolbarButton('fullscreen-btn', () => this.toggleFullscreen());
+        
+        // Markdown Extension Shortcuts (if available)
+        this.setupMarkdownExtensionButtons();
     }
 
     /**
@@ -311,6 +324,11 @@ class WYSIWYGEditor {
         
         // Handle special markdown-like input patterns (throttled)
         this.throttledMarkdownShortcuts(e);
+        
+        // Process markdown extension shortcuts (throttled)
+        if (this.shortcutProcessingEnabled) {
+            this.throttledProcessShortcuts();
+        }
     }
 
     /**
@@ -2390,8 +2408,17 @@ class WYSIWYGEditor {
                         }
                     }
                     
-                    // Store documents for potential use
+                    // Store documents and chunks for potential use
                     this.exampleDocuments = data.markdown_documents;
+                    this.chunks = data.chunks || [];
+                    
+                    // Create chunks lookup for easier access
+                    this.chunksMap = {};
+                    this.chunks.forEach(chunk => {
+                        this.chunksMap[chunk.chunk_id] = chunk;
+                    });
+                    
+                    console.log(`Loaded ${this.chunks.length} content chunks`);
                 } else {
                     console.log('No example documents found in expected format');
                 }
@@ -2424,33 +2451,140 @@ class WYSIWYGEditor {
         // Clear existing content
         fileTree.innerHTML = '';
         
-        // Add each document as a tree item
-        for (const doc of this.exampleDocuments) {
-            const treeItem = document.createElement('div');
-            treeItem.className = 'tree-item file schema-document';
-            treeItem.dataset.path = `schema-doc-${doc.markdown_id}`;
-            treeItem.dataset.schemaId = doc.markdown_id;
+        // Build hierarchical structure
+        const treeStructure = this.buildTreeStructure(this.exampleDocuments);
+        
+        // Render the tree structure
+        this.renderTreeNodes(treeStructure, fileTree);
+        
+        console.log('✅ File tree populated with schema documents (hierarchical)');
+    }
+
+    /**
+     * Build hierarchical tree structure from documents
+     */
+    buildTreeStructure(documents) {
+        const tree = new Map();
+        
+        for (const doc of documents) {
+            const pathParts = doc.subject.split(' / ');
+            let currentLevel = tree;
+            let currentPath = '';
             
-            const fileIcon = document.createElement('span');
-            fileIcon.className = 'file-icon';
-            fileIcon.textContent = '📄';
-            
-            const fileName = document.createElement('span');
-            fileName.className = 'file-name';
-            fileName.textContent = doc.subject;
-            
-            // Add categories as tooltip
-            if (doc.categories && doc.categories.length > 0) {
-                treeItem.title = `Categories: ${doc.categories.join(', ')}`;
+            for (let i = 0; i < pathParts.length; i++) {
+                const part = pathParts[i].trim();
+                const isLast = i === pathParts.length - 1;
+                currentPath = currentPath ? `${currentPath} / ${part}` : part;
+                
+                if (!currentLevel.has(part)) {
+                    currentLevel.set(part, {
+                        name: part,
+                        fullPath: currentPath,
+                        children: new Map(),
+                        document: null,
+                        isFolder: !isLast
+                    });
+                }
+                
+                const node = currentLevel.get(part);
+                
+                if (isLast) {
+                    // This is a leaf document
+                    node.document = doc;
+                    node.isFolder = false;
+                } else {
+                    // This is a folder, but check if we have a parent document with this exact name
+                    const parentDoc = documents.find(d => d.subject === currentPath);
+                    if (parentDoc) {
+                        node.document = parentDoc;
+                    }
+                    node.isFolder = true;
+                }
+                
+                currentLevel = node.children;
             }
-            
-            treeItem.appendChild(fileIcon);
-            treeItem.appendChild(fileName);
-            fileTree.appendChild(treeItem);
         }
         
-        console.log('✅ File tree populated with schema documents');
+        return tree;
     }
+
+    /**
+     * Render tree nodes recursively
+     */
+    renderTreeNodes(treeMap, parentElement, level = 0) {
+        for (const [name, node] of treeMap) {
+            const treeItem = document.createElement('div');
+            treeItem.className = 'tree-item';
+            treeItem.style.paddingLeft = `${level * 20 + 10}px`;
+            
+            if (node.isFolder) {
+                // Create folder node (always expanded, no toggle)
+                treeItem.classList.add('folder');
+                treeItem.dataset.path = `folder-${node.fullPath}`;
+                
+                const folderIcon = document.createElement('span');
+                folderIcon.className = 'folder-icon';
+                folderIcon.textContent = '�'; // Always open folder icon
+                
+                const folderName = document.createElement('span');
+                folderName.className = 'folder-name';
+                folderName.textContent = name;
+                
+                treeItem.appendChild(folderIcon);
+                treeItem.appendChild(folderName);
+                
+                parentElement.appendChild(treeItem);
+                
+                // Create container for children (always visible)
+                const childContainer = document.createElement('div');
+                childContainer.className = 'tree-children';
+                childContainer.style.display = 'block'; // Always visible
+                
+                // Render children
+                this.renderTreeNodes(node.children, childContainer, level + 1);
+                
+                parentElement.appendChild(childContainer);
+                
+                // Check if folder has a direct document (parent document)
+                if (node.document) {
+                    // Make folder clickable to open its document
+                    treeItem.classList.add('schema-document');
+                    treeItem.dataset.schemaId = node.document.markdown_id;
+                    treeItem.dataset.path = `schema-doc-${node.document.markdown_id}`;
+                    
+                    // Add categories as tooltip
+                    if (node.document.categories && node.document.categories.length > 0) {
+                        treeItem.title = `Categories: ${node.document.categories.join(', ')}`;
+                    }
+                }
+                
+            } else if (node.document) {
+                // Create file node
+                treeItem.classList.add('file', 'schema-document');
+                treeItem.dataset.path = `schema-doc-${node.document.markdown_id}`;
+                treeItem.dataset.schemaId = node.document.markdown_id;
+                
+                const fileIcon = document.createElement('span');
+                fileIcon.className = 'file-icon';
+                fileIcon.textContent = '📄';
+                
+                const fileName = document.createElement('span');
+                fileName.className = 'file-name';
+                fileName.textContent = name;
+                
+                // Add categories as tooltip
+                if (node.document.categories && node.document.categories.length > 0) {
+                    treeItem.title = `Categories: ${node.document.categories.join(', ')}`;
+                }
+                
+                treeItem.appendChild(fileIcon);
+                treeItem.appendChild(fileName);
+                parentElement.appendChild(treeItem);
+            }
+        }
+    }
+
+
 
     /**
      * Initialize explorer state
@@ -2507,51 +2641,20 @@ class WYSIWYGEditor {
         const fileTree = document.getElementById('file-tree');
         if (!fileTree) return;
 
-        // Handle folder expand/collapse
+        // Handle tree item clicks (both folders and files can be documents)
         fileTree.addEventListener('click', (e) => {
-            const folderItem = e.target.closest('.tree-item.folder');
-            const fileItem = e.target.closest('.tree-item.file');
+            const treeItem = e.target.closest('.tree-item.schema-document');
             
-            if (folderItem) {
+            if (treeItem) {
                 e.preventDefault();
-                this.toggleFolder(folderItem);
-            } else if (fileItem) {
-                e.preventDefault();
-                this.openFileFromTree(fileItem);
+                this.openFileFromTree(treeItem);
             }
         });
         
         console.log('File tree initialized');
     }
 
-    /**
-     * Toggle folder expansion/collapse
-     */
-    toggleFolder(folderElement) {
-        const folderPath = folderElement.dataset.path;
-        const toggle = folderElement.querySelector('.folder-toggle');
-        const children = document.querySelector(`[data-parent="${folderPath}"]`);
-        
-        if (!toggle || !children) return;
-        
-        const isExpanded = folderElement.classList.contains('expanded');
-        
-        if (isExpanded) {
-            // Collapse
-            folderElement.classList.remove('expanded');
-            folderElement.classList.add('collapsed');
-            toggle.textContent = '▶';
-            children.classList.add('hidden');
-        } else {
-            // Expand
-            folderElement.classList.remove('collapsed');
-            folderElement.classList.add('expanded');
-            toggle.textContent = '▼';
-            children.classList.remove('hidden');
-        }
-        
-        console.log(`Toggled folder: ${folderPath} (${isExpanded ? 'collapsed' : 'expanded'})`);
-    }
+
 
     /**
      * Open file from tree view
@@ -2595,7 +2698,7 @@ class WYSIWYGEditor {
             
             if (schemaDocument) {
                 console.log(`Loading schema document: ${schemaDocument.subject}`);
-                documentContent = `# ${schemaDocument.subject}\n\n${schemaDocument.summary}\n\n**Categories:** ${schemaDocument.categories.join(', ')}\n\n**Created:** ${new Date(schemaDocument.created_at).toLocaleDateString()}\n**Updated:** ${new Date(schemaDocument.updated_at).toLocaleDateString()}\n\n---\n\nThis document is loaded from the schema system. You can edit it and the changes will be validated against the document schema.\n\nStart editing here...`;
+                documentContent = this.loadDocumentContent(schemaDocument);
             }
         } else if (this.exampleDocuments) {
             // Legacy: Look for document by subject/filename match
@@ -2629,6 +2732,38 @@ class WYSIWYGEditor {
                 console.log(`✅ Loaded schema document: ${schemaDocument.subject}`);
             }
         }
+    }
+
+    /**
+     * Load document content from schema and chunks
+     */
+    loadDocumentContent(schemaDocument) {
+        let content = '';
+        
+        // Load content from chunks if available
+        if (schemaDocument.chunk_ids && schemaDocument.chunk_ids.length > 0 && this.chunksMap) {
+            // Combine all chunks for this document in order
+            const chunks = [];
+            for (const chunkId of schemaDocument.chunk_ids) {
+                const chunk = this.chunksMap[chunkId];
+                if (chunk) {
+                    chunks.push(chunk.markdown_chunk);
+                }
+            }
+            
+            if (chunks.length > 0) {
+                content = chunks.join('\n\n');
+                console.log(`✅ Loaded ${chunks.length} content chunks for: ${schemaDocument.subject}`);
+            }
+        }
+        
+        // Fallback to basic template if no chunks found
+        if (!content) {
+            content = `# ${schemaDocument.subject}\n\n${schemaDocument.summary}\n\n**Categories:** ${schemaDocument.categories.join(', ')}\n\n**Created:** ${new Date(schemaDocument.created_at).toLocaleDateString()}\n**Updated:** ${new Date(schemaDocument.updated_at).toLocaleDateString()}\n\n---\n\nThis document is loaded from the schema system. You can edit it and the changes will be validated against the document schema.\n\nStart editing here...`;
+            console.log(`⚠️ No chunks found for ${schemaDocument.subject}, using template`);
+        }
+        
+        return content;
     }
 
     /**
@@ -3655,6 +3790,253 @@ class WYSIWYGEditor {
             'info'
         );
     }
+    
+    /**
+     * Initialize markdown extension shortcuts system
+     */
+    async initializeMarkdownExtensions() {
+        try {
+            console.log('Initializing markdown extension shortcuts...');
+            
+            // Check if markdown extension shortcuts are available
+            if (typeof MarkdownExtensionShortcuts === 'undefined') {
+                console.log('MarkdownExtensionShortcuts not available, skipping integration');
+                return;
+            }
+            
+            // Initialize the markdown extensions system
+            this.markdownExtensions = new MarkdownExtensionShortcuts({
+                hoverDelay: 500,
+                autoProcess: true,
+                apiEndpoint: '/api/shortcuts',
+                showStatusOverview: true,
+                enableProgressTracking: true
+            });
+            
+            // Initialize editor integration if available
+            if (typeof MarkdownExtensionIntegration !== 'undefined') {
+                this.extensionIntegration = new MarkdownExtensionIntegration(this, {
+                    realTimeProcessing: true,
+                    processingDelay: 1000,
+                    autoSave: this.autoSaveEnabled
+                });
+                console.log('Markdown extension integration initialized successfully');
+            }
+            
+            console.log('Markdown extension shortcuts initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize markdown extension shortcuts:', error);
+        }
+    }
+    
+    /**
+     * Setup markdown extension toolbar buttons
+     */
+    setupMarkdownExtensionButtons() {
+        if (!this.markdownExtensions) return;
+        
+        try {
+            // Check if we have a shortcuts group in the toolbar
+            const toolbar = document.querySelector('.editor-toolbar');
+            if (!toolbar) return;
+            
+            // Create shortcuts group if it doesn't exist
+            let shortcutsGroup = toolbar.querySelector('.shortcuts-group');
+            if (!shortcutsGroup) {
+                shortcutsGroup = document.createElement('div');
+                shortcutsGroup.className = 'toolbar-group shortcuts-group';
+                shortcutsGroup.innerHTML = `
+                    <button id="ai-shortcut-btn" title="Insert AI Processing (Ctrl+Shift+A)" class="toolbar-btn">
+                        🤖
+                    </button>
+                    <button id="doc-reference-btn" title="Insert Document Reference (Ctrl+Shift+D)" class="toolbar-btn">
+                        📄
+                    </button>
+                    <button id="chart-shortcut-btn" title="Insert Chart (Ctrl+Shift+C)" class="toolbar-btn">
+                        📊
+                    </button>
+                    <button id="user-mention-btn" title="Insert User Mention (Ctrl+Shift+U)" class="toolbar-btn">
+                        👤
+                    </button>
+                    <button id="process-shortcuts-btn" title="Process All Shortcuts (Ctrl+Shift+P)" class="toolbar-btn">
+                        ⚡
+                    </button>
+                `;
+                
+                // Insert before the view controls group
+                const viewGroup = toolbar.querySelector('.view-group') || toolbar.lastElementChild;
+                toolbar.insertBefore(shortcutsGroup, viewGroup);
+            }
+            
+            // Setup button handlers
+            this.setupToolbarButton('ai-shortcut-btn', () => this.insertAIShortcut());
+            this.setupToolbarButton('doc-reference-btn', () => this.insertDocumentReference());
+            this.setupToolbarButton('chart-shortcut-btn', () => this.insertChartShortcut());
+            this.setupToolbarButton('user-mention-btn', () => this.insertUserMention());
+            this.setupToolbarButton('process-shortcuts-btn', () => this.processAllShortcuts());
+            
+            console.log('Markdown extension toolbar buttons setup complete');
+        } catch (error) {
+            console.error('Failed to setup markdown extension toolbar buttons:', error);
+        }
+    }
+    
+    /**
+     * Process markdown shortcuts in the current content
+     */
+    async processMarkdownShortcuts() {
+        if (!this.markdownExtensions || !this.currentDocument) return;
+        
+        try {
+            const content = this.getMarkdownContent();
+            
+            // Skip processing if content hasn't changed
+            if (content === this.lastProcessedContent) return;
+            this.lastProcessedContent = content;
+            
+            // Process shortcuts
+            const processedContent = await this.markdownExtensions.processMarkdown(
+                content, 
+                this.currentDocument.id || 'current-document'
+            );
+            
+            // Update the WYSIWYG editor if in WYSIWYG mode
+            if (!this.isSourceMode && processedContent !== content) {
+                const htmlContent = this.markdownToHTML(processedContent);
+                this.wysiwygEditor.innerHTML = htmlContent;
+                this.updateStats();
+            }
+            
+        } catch (error) {
+            console.error('Failed to process markdown shortcuts:', error);
+        }
+    }
+    
+    /**
+     * Process all shortcuts manually
+     */
+    processAllShortcuts() {
+        this.processMarkdownShortcuts();
+        if (this.markdownExtensions) {
+            const summary = this.markdownExtensions.getStatusSummary();
+            this.updateStatus(`Processing ${summary.total} shortcuts...`);
+        }
+    }
+    
+    /**
+     * Insert AI processing shortcut
+     */
+    insertAIShortcut() {
+        const command = prompt('Enter AI command (e.g., "summarize:doc_id" or "translate:text|lang=es"):');
+        if (command) {
+            this.insertText(`@[ai:${command}]`);
+            setTimeout(() => this.processMarkdownShortcuts(), 100);
+        }
+    }
+    
+    /**
+     * Insert document reference shortcut
+     */
+    insertDocumentReference() {
+        const docId = prompt('Enter document ID or hash:');
+        if (docId) {
+            this.insertText(`@[doc:${docId}]`);
+            setTimeout(() => this.processMarkdownShortcuts(), 100);
+        }
+    }
+    
+    /**
+     * Insert chart shortcut
+     */
+    insertChartShortcut() {
+        const chartConfig = prompt('Enter chart configuration (e.g., "data_id:type=bar" or "create:type=line|data=csv_id"):');
+        if (chartConfig) {
+            this.insertText(`@[chart:${chartConfig}]`);
+            setTimeout(() => this.processMarkdownShortcuts(), 100);
+        }
+    }
+    
+    /**
+     * Insert user mention shortcut
+     */
+    insertUserMention() {
+        const userId = prompt('Enter user ID or username:');
+        if (userId) {
+            this.insertText(`@[user:${userId}]`);
+            setTimeout(() => this.processMarkdownShortcuts(), 100);
+        }
+    }
+    
+    /**
+     * Insert text at cursor position
+     */
+    insertText(text) {
+        if (this.isSourceMode) {
+            // Insert into source editor
+            const sourceEditor = this.sourceEditor;
+            const start = sourceEditor.selectionStart;
+            const end = sourceEditor.selectionEnd;
+            const currentValue = sourceEditor.value;
+            
+            sourceEditor.value = currentValue.slice(0, start) + text + currentValue.slice(end);
+            sourceEditor.selectionStart = sourceEditor.selectionEnd = start + text.length;
+            sourceEditor.focus();
+        } else {
+            // Insert into WYSIWYG editor
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(document.createTextNode(text));
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            } else {
+                // Fallback: append to end
+                this.wysiwygEditor.appendChild(document.createTextNode(text));
+            }
+            this.wysiwygEditor.focus();
+        }
+        
+        // Mark document as dirty
+        this.markDocumentDirty();
+    }
+    
+    /**
+     * Get current markdown content
+     */
+    getMarkdownContent() {
+        if (this.isSourceMode) {
+            return this.sourceEditor.value;
+        } else {
+            return this.htmlToMarkdown(this.wysiwygEditor.innerHTML);
+        }
+    }
+    
+    /**
+     * Enable/disable shortcut processing
+     */
+    toggleShortcutProcessing() {
+        this.shortcutProcessingEnabled = !this.shortcutProcessingEnabled;
+        const status = this.shortcutProcessingEnabled ? 'enabled' : 'disabled';
+        this.updateStatus(`Shortcut processing ${status}`);
+    }
+    
+    /**
+     * Get markdown extensions status summary
+     */
+    getExtensionStatus() {
+        if (!this.markdownExtensions) {
+            return { available: false };
+        }
+        
+        const summary = this.markdownExtensions.getStatusSummary();
+        return {
+            available: true,
+            ...summary,
+            processing: this.shortcutProcessingEnabled
+        };
+    }
 }
 
 // Global debug function to force profile loading
@@ -3687,6 +4069,8 @@ window.forceLoadProfile = function() {
         console.log('🔧 DEBUG: No editor found');
     }
 };
+
+
 
 // Initialize the WYSIWYG editor when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {

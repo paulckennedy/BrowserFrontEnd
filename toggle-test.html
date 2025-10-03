@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toggle Test - Menu & Explorer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="editor-styles.css">
+    <style>
+        .test-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 10000;
+        }
+        .test-btn {
+            display: block;
+            margin: 5px 0;
+            padding: 8px 12px;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .test-btn:hover {
+            background: #005a9e;
+        }
+        .status-display {
+            margin-top: 10px;
+            font-size: 12px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-controls">
+        <h4>🔧 Toggle Test Controls</h4>
+        <button class="test-btn" onclick="testMenuToggle()">Test Menu Toggle</button>
+        <button class="test-btn" onclick="testExplorerToggle()">Test Explorer Toggle</button>
+        <button class="test-btn" onclick="resetToDefaults()">Reset to Defaults</button>
+        <div class="status-display" id="status-display">
+            <div>Menu: <span id="menu-state">Loading...</span></div>
+            <div>Explorer: <span id="explorer-state">Loading...</span></div>
+        </div>
+    </div>
+
+    <!-- Collapsing Menu Bar -->
+    <header class="menu-bar collapsed" id="menu-bar">
+        <div class="menu-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 20px;">
+            <nav class="main-nav" style="display: flex; align-items: center; gap: 5px;">
+                <div style="display: inline-block; position: relative;">
+                    <button id="file-menu" onclick="simpleToggle('file-dropdown')" style="background: #e0e0e0; color: black; padding: 8px 16px; margin: 2px; border: 1px solid #ccc;">📁 File</button>
+                    <div id="file-dropdown" style="display: none; position: fixed; background: white; border: 1px solid #ccc; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 99999;">
+                        <button style="display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: white;">New File</button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="logo" style="position: absolute; left: 50%; transform: translateX(-50%);">
+                📝 Toggle Test
+            </div>
+            
+            <div class="menu-controls">
+                <button class="menu-toggle" id="menu-toggle">⚡</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Editor Container -->
+    <main class="editor-container" id="editor-container">
+        <div class="editor-content">
+            <!-- File Explorer Sidebar -->
+            <aside class="file-explorer collapsed" id="file-explorer">
+                <div class="explorer-header">
+                    <h3>Documents</h3>
+                    <button class="explorer-toggle" id="explorer-toggle" title="Pin/Unpin Explorer">📌</button>
+                </div>
+                <div class="file-tree" id="file-tree">
+                    <div style="padding: 10px; color: #666;">Sample File 1.md</div>
+                    <div style="padding: 10px; color: #666;">Sample File 2.md</div>
+                    <div style="padding: 10px; color: #666;">Sample File 3.md</div>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <div class="wysiwyg-editor-container">
+                <div style="padding: 30px; background: white; height: calc(100vh - 100px); overflow-y: auto;">
+                    <h1>Menu Bar & File Explorer Toggle Test</h1>
+                    
+                    <h2>🎯 Test Objectives</h2>
+                    <ul>
+                        <li><strong>Menu Toggle (⚡):</strong> Click to expand/collapse the menu bar</li>
+                        <li><strong>Explorer Toggle (📌):</strong> Click to pin/unpin the file explorer</li>
+                        <li><strong>Hover Effects:</strong> Hover over collapsed elements should show them temporarily</li>
+                    </ul>
+                    
+                    <h2>📋 Test Instructions</h2>
+                    <ol>
+                        <li>Click the <strong>⚡ menu toggle</strong> button in the top-right to expand/collapse the menu</li>
+                        <li>Click the <strong>📌 explorer toggle</strong> button in the file explorer to pin/unpin it</li>
+                        <li>When collapsed, hover over the menu bar or explorer to see hover effects</li>
+                        <li>Use the test control panel (top-right) to trigger actions programmatically</li>
+                        <li>Check the status display to see current states</li>
+                    </ol>
+                    
+                    <h2>🔍 Expected Behavior</h2>
+                    <div style="background: #f0f8ff; padding: 15px; border-left: 4px solid #007acc; margin: 15px 0;">
+                        <h3>Menu Bar States:</h3>
+                        <ul>
+                            <li><strong>Collapsed:</strong> Thin bar at top, shows ≡ indicator</li>
+                            <li><strong>Expanded:</strong> Full menu with File, Edit, View, Tools options</li>
+                            <li><strong>Hover (when collapsed):</strong> Temporarily expands on mouse over</li>
+                        </ul>
+                        
+                        <h3>File Explorer States:</h3>
+                        <ul>
+                            <li><strong>Collapsed:</strong> Thin sidebar, shows 📁 pull tab</li>
+                            <li><strong>Pinned:</strong> Always visible, toggle shows 📍</li>
+                            <li><strong>Hover (when collapsed):</strong> Temporarily expands on mouse over</li>
+                        </ul>
+                    </div>
+                    
+                    <h2>🐛 Troubleshooting</h2>
+                    <p>If toggles don't work:</p>
+                    <ul>
+                        <li>Check browser console for error messages</li>
+                        <li>Use test control panel to trigger actions manually</li>
+                        <li>Verify that menu-fix.js script is loaded</li>
+                        <li>Check network tab for failed script loads</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Load scripts -->
+    <script src="menu-fix.js"></script>
+    
+    <!-- Simple toggle for dropdown menus -->
+    <script>
+        function simpleToggle(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            if (!dropdown) return;
+            
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+            } else {
+                const button = dropdown.parentElement.querySelector('button');
+                if (button) {
+                    const buttonRect = button.getBoundingClientRect();
+                    dropdown.style.cssText = 'display: block !important; position: fixed !important; background: white !important; border: 1px solid #ccc !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important; padding: 5px !important; z-index: 99999 !important; top: ' + (buttonRect.bottom + 5) + 'px !important; left: ' + buttonRect.left + 'px !important; min-width: 150px !important;';
+                }
+            }
+        }
+        
+        // Test functions
+        function testMenuToggle() {
+            console.log('Test: Menu toggle triggered');
+            if (window.toggleMenuDirect) {
+                window.toggleMenuDirect();
+            } else {
+                document.getElementById('menu-toggle')?.click();
+            }
+            updateStatus();
+        }
+        
+        function testExplorerToggle() {
+            console.log('Test: Explorer toggle triggered');
+            if (window.toggleExplorerDirect) {
+                window.toggleExplorerDirect();
+            } else {
+                document.getElementById('explorer-toggle')?.click();
+            }
+            updateStatus();
+        }
+        
+        function resetToDefaults() {
+            console.log('Test: Resetting to defaults');
+            const menuBar = document.getElementById('menu-bar');
+            const fileExplorer = document.getElementById('file-explorer');
+            const toggleBtn = document.getElementById('explorer-toggle');
+            
+            if (menuBar) {
+                menuBar.classList.add('collapsed');
+            }
+            
+            if (fileExplorer) {
+                fileExplorer.classList.add('collapsed');
+                fileExplorer.classList.remove('pinned');
+            }
+            
+            if (toggleBtn) {
+                toggleBtn.textContent = '📌';
+                toggleBtn.title = 'Pin Explorer (stay open)';
+            }
+            
+            updateStatus();
+        }
+        
+        function updateStatus() {
+            const menuBar = document.getElementById('menu-bar');
+            const fileExplorer = document.getElementById('file-explorer');
+            
+            const menuState = menuBar?.classList.contains('collapsed') ? 'Collapsed' : 'Expanded';
+            const explorerState = fileExplorer?.classList.contains('collapsed') ? 
+                (fileExplorer?.classList.contains('pinned') ? 'Collapsed (Pinned)' : 'Collapsed') : 
+                'Expanded';
+            
+            document.getElementById('menu-state').textContent = menuState;
+            document.getElementById('explorer-state').textContent = explorerState;
+        }
+        
+        // Update status every 2 seconds
+        setInterval(updateStatus, 2000);
+        
+        // Initial status update
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(updateStatus, 500);
+        });
+        
+        console.log('Toggle test page loaded');
+    </script>
+</body>
+</html>

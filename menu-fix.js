@@ -1,9 +1,98 @@
-// Standalone menu fix - Complete override
+// Complete menu and explorer fix - handles both dropdowns and toggles
 console.log('🚀 Menu fix script starting...');
 
-// Wait for page to be fully loaded
-function initializeMenuFix() {
-    console.log('🚀 Initializing menu fix...');
+// Direct toggle functions for menu bar and file explorer
+function toggleMenuDirect() {
+    console.log('🔧 Direct menu toggle called');
+    const menuBar = document.getElementById('menu-bar');
+    if (menuBar) {
+        const wasCollapsed = menuBar.classList.contains('collapsed');
+        if (wasCollapsed) {
+            menuBar.classList.remove('collapsed');
+            console.log('🔧 Menu expanded');
+        } else {
+            menuBar.classList.add('collapsed');
+            console.log('� Menu collapsed');
+        }
+    } else {
+        console.error('🔧 Menu bar not found');
+    }
+}
+
+function toggleExplorerDirect() {
+    console.log('🔧 Direct explorer toggle called');
+    const fileExplorer = document.getElementById('file-explorer');
+    const toggleBtn = document.getElementById('explorer-toggle');
+    
+    if (fileExplorer && toggleBtn) {
+        const wasPinned = fileExplorer.classList.contains('pinned');
+        
+        if (wasPinned) {
+            // Unpin: remove pinned class and add collapsed
+            fileExplorer.classList.remove('pinned');
+            fileExplorer.classList.add('collapsed'); 
+            toggleBtn.textContent = '📌';
+            toggleBtn.title = 'Pin Explorer (stay open)';
+            console.log('🔧 Explorer unpinned');
+        } else {
+            // Pin: add pinned class and remove collapsed
+            fileExplorer.classList.add('pinned');
+            fileExplorer.classList.remove('collapsed');
+            toggleBtn.textContent = '📍';
+            toggleBtn.title = 'Unpin Explorer (auto-collapse)';
+            console.log('🔧 Explorer pinned');
+        }
+    } else {
+        console.error('🔧 File explorer or toggle button not found', {
+            fileExplorer: !!fileExplorer,
+            toggleBtn: !!toggleBtn
+        });
+    }
+}
+
+// Setup toggle button listeners
+function setupToggleListeners() {
+    console.log('🔧 Setting up toggle listeners');
+    
+    const menuToggle = document.getElementById('menu-toggle');
+    const explorerToggle = document.getElementById('explorer-toggle');
+    
+    if (menuToggle) {
+        // Remove any existing listeners by cloning the element
+        const newMenuToggle = menuToggle.cloneNode(true);
+        menuToggle.parentNode.replaceChild(newMenuToggle, menuToggle);
+        
+        newMenuToggle.addEventListener('click', (e) => {
+            console.log('🔧 Menu toggle clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            toggleMenuDirect();
+        });
+        console.log('� Menu toggle listener added');
+    } else {
+        console.error('🔧 Menu toggle button not found');
+    }
+    
+    if (explorerToggle) {
+        // Remove any existing listeners by cloning the element
+        const newExplorerToggle = explorerToggle.cloneNode(true);
+        explorerToggle.parentNode.replaceChild(newExplorerToggle, explorerToggle);
+        
+        newExplorerToggle.addEventListener('click', (e) => {
+            console.log('🔧 Explorer toggle clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            toggleExplorerDirect();
+        });
+        console.log('🔧 Explorer toggle listener added');
+    } else {
+        console.error('🔧 Explorer toggle button not found');
+    }
+}
+
+// Setup dropdown menu functionality
+function setupDropdownMenus() {
+    console.log('🚀 Setting up dropdown menus...');
     
     // Find all menu buttons and dropdowns
     const buttons = document.querySelectorAll('.nav-btn');
@@ -12,8 +101,7 @@ function initializeMenuFix() {
     console.log(`🚀 Found ${buttons.length} buttons and ${dropdowns.length} dropdowns`);
     
     if (buttons.length === 0) {
-        console.log('🚀 No buttons found, waiting...');
-        setTimeout(initializeMenuFix, 100);
+        console.log('🚀 No dropdown buttons found');
         return;
     }
     
@@ -88,7 +176,20 @@ function initializeMenuFix() {
         }
     };
     
-    console.log('🚀 Menu setup complete!');
+    console.log('🚀 Dropdown menu setup complete!');
+}
+
+// Main initialization function
+function initializeMenuFix() {
+    console.log('🚀 Initializing complete menu fix...');
+    
+    // Setup toggle button functionality
+    setupToggleListeners();
+    
+    // Setup dropdown menu functionality
+    setupDropdownMenus();
+    
+    console.log('🚀 Complete menu fix setup finished!');
 }
 
 // Try multiple initialization methods
