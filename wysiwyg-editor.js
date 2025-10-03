@@ -9,6 +9,11 @@ class WYSIWYGEditor {
         this.sourceEditor = null;
         this.isSourceMode = false;
         
+        // Document System Integration
+        this.documentSystem = null;
+        this.schemaValidator = null;
+        this.hashGenerator = null;
+        
         // Multi-document support
         this.documents = new Map(); // Map of tab-id -> document
         this.activeTabId = null; // Start with no active tab
@@ -112,26 +117,29 @@ class WYSIWYGEditor {
             console.log('Step 7: Initializing menu functionality');
             this.initializeMenuFunctionality();
             
-            console.log('Step 8: Initializing database connection');
+            console.log('Step 8: Initializing document schema system');
+            await this.initializeDocumentSystem();
+            
+            console.log('Step 9: Initializing database connection');
             await this.initializeDatabaseConnection();
             
-            console.log('Step 9: Loading documents');
+            console.log('Step 10: Loading documents');
             await this.loadDocuments();
             
-            console.log('Step 10: Updating stats and status');
+            console.log('Step 11: Updating stats and status');
             this.updateStats();
             this.updateStatus('Ready');
             this.initializeExplorerState();
             
-            console.log('Step 11: Initializing tab system');
+            console.log('Step 12: Initializing tab system');
             this.initializeTabSystem();
             
-            console.log('Step 11.5: Force no-tabs state immediately');
+            console.log('Step 12.5: Force no-tabs state immediately');
             // Force the no-tabs state immediately
             document.body.classList.add('no-tabs');
             console.log('Added no-tabs class to body:', document.body.classList.toString());
             
-            console.log('Step 12: Clean start - no default content to load');
+            console.log('Step 13: Clean start - no default content to load');
             console.log('Clean start initialized - user can open files from explorer');
             
             console.log('WYSIWYG Editor initialized successfully');
@@ -2042,6 +2050,34 @@ class WYSIWYGEditor {
                 currentDoc.lastSaved = new Date().toISOString();
                 currentDoc.isDirty = false;
                 
+                // Update schema document if available
+                if (currentDoc.schemaDocument && this.schemaValidator) {
+                    try {
+                        // Update schema document with new content and timestamp
+                        currentDoc.schemaDocument.updated_at = new Date().toISOString();
+                        
+                        // Extract title from content for subject update
+                        const titleMatch = content.match(/^#\s+(.+)$/m);
+                        if (titleMatch) {
+                            const newSubject = titleMatch[1].trim();
+                            if (newSubject !== currentDoc.schemaDocument.subject) {
+                                currentDoc.schemaDocument.subject = newSubject;
+                                console.log(`📝 Updated subject to: "${newSubject}"`);
+                            }
+                        }
+                        
+                        // Validate updated document
+                        const validation = this.schemaValidator.validate(currentDoc.schemaDocument);
+                        if (validation.valid) {
+                            console.log(`✅ Schema document validated successfully`);
+                        } else {
+                            console.warn(`⚠️ Schema validation warnings:`, validation.errors);
+                        }
+                    } catch (error) {
+                        console.error('Error updating schema document:', error);
+                    }
+                }
+                
                 // Update tab visual state
                 this.updateTabBar();
             } else if (this.currentDocument) {
@@ -2175,6 +2211,51 @@ class WYSIWYGEditor {
     }
 
     /**
+     * Initialize document schema system
+     */
+    async initializeDocumentSystem() {
+        try {
+            console.log('Initializing document schema system...');
+            
+            // Load schema from file
+            const schemaResponse = await fetch('/schemas/document-system-schema.json');
+            if (!schemaResponse.ok) {
+                throw new Error(`Failed to load schema: ${schemaResponse.status}`);
+            }
+            this.documentSchema = await schemaResponse.json();
+            console.log('Document schema loaded successfully');
+            
+            // Initialize schema validator (simplified for browser)
+            this.schemaValidator = {
+                validate: (document) => this.validateDocumentStructure(document),
+                isValid: (document) => {
+                    try {
+                        return this.validateDocumentStructure(document).valid;
+                    } catch (error) {
+                        return false;
+                    }
+                }
+            };
+            
+            // Initialize hash generator (simplified for browser)
+            this.hashGenerator = {
+                generateDocumentId: () => this.generateHash(),
+                generateUserId: () => this.generateHash()
+            };
+            
+            console.log('Document schema system initialized successfully');
+            this.updateStatus('Schema system ready', 'success');
+        } catch (error) {
+            console.error('Failed to initialize document schema system:', error);
+            // Continue without schema validation for now
+            this.documentSchema = null;
+            this.schemaValidator = null;
+            this.hashGenerator = null;
+            this.updateStatus('Schema system unavailable', 'warning');
+        }
+    }
+
+    /**
      * Initialize database connection (placeholder)
      */
     async initializeDatabaseConnection() {
@@ -2183,19 +2264,192 @@ class WYSIWYGEditor {
     }
 
     /**
-     * Load documents (placeholder)
+     * Validate document structure against schema
+     */
+    validateDocumentStructure(document) {
+        if (!this.documentSchema) {
+            return { valid: true, errors: [] };
+        }
+        
+        const errors = [];
+        const schema = this.documentSchema.definitions.markdown_document;
+        
+        // Check required fields
+        const required = schema.required || [];
+        for (const field of required) {
+            if (!(field in document)) {
+                errors.push(`Missing required field: ${field}`);
+            }
+        }
+        
+        // Validate subject field specifically
+        if (document.subject) {
+            if (typeof document.subject !== 'string') {
+                errors.push('Subject must be a string');
+            } else if (document.subject.length > 100) {
+                errors.push('Subject must be 100 characters or less');
+            }
+        }
+        
+        // Validate hash fields (basic validation)
+        const hashFields = ['markdown_id', 'owner_user_id'];
+        for (const field of hashFields) {
+            if (document[field] && !this.isValidHash(document[field])) {
+                errors.push(`Invalid hash format for ${field}`);
+            }
+        }
+        
+        return {
+            valid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    /**
+     * Generate a hash ID (simplified browser version)
+     */
+    generateHash() {
+        // Simple hash generation for browser environment
+        const chars = '0123456789abcdef';
+        let result = '';
+        for (let i = 0; i < 64; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return result;
+    }
+
+    /**
+     * Validate hash format
+     */
+    isValidHash(hash) {
+        return typeof hash === 'string' && 
+               hash.length === 64 && 
+               /^[0-9a-fA-F]{64}$/.test(hash);
+    }
+
+    /**
+     * Create a new document with schema compliance
+     */
+    createSchemaCompliantDocument(subject, content = '', metadata = {}) {
+        if (!this.schemaValidator) {
+            console.warn('Schema validator not available, creating basic document');
+            return {
+                id: this.generateHash(),
+                subject: subject,
+                content: content,
+                ...metadata
+            };
+        }
+        
+        const document = {
+            markdown_id: this.hashGenerator.generateDocumentId(),
+            owner_user_id: metadata.owner_user_id || this.generateHash(),
+            subject: subject,
+            summary: metadata.summary || `Document: ${subject}`,
+            categories: metadata.categories || [],
+            chunk_ids: [], // Will be populated when saved
+            nested_prompts: [],
+            prompt_source_id: null,
+            resources_array: metadata.resources_array || [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        
+        const validation = this.schemaValidator.validate(document);
+        if (!validation.valid) {
+            console.warn('Document validation failed:', validation.errors);
+            // Continue anyway but log the issues
+        }
+        
+        return document;
+    }
+
+    /**
+     * Load documents from example data with schema validation
      */
     async loadDocuments() {
-        // Allow default profile content to load
-        console.log('loadDocuments: Allowing profile content in first tab');
+        try {
+            console.log('Loading documents with schema validation...');
+            
+            // Load example documents
+            const response = await fetch('/example-documents.json');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.markdown_documents && Array.isArray(data.markdown_documents)) {
+                    console.log(`Found ${data.markdown_documents.length} example documents`);
+                    
+                    // Validate each document against schema
+                    for (const doc of data.markdown_documents) {
+                        if (this.schemaValidator) {
+                            const validation = this.schemaValidator.validate(doc);
+                            if (validation.valid) {
+                                console.log(`✅ Document "${doc.subject}" is schema compliant`);
+                            } else {
+                                console.warn(`⚠️ Document "${doc.subject}" has validation issues:`, validation.errors);
+                            }
+                        }
+                    }
+                    
+                    // Store documents for potential use
+                    this.exampleDocuments = data.markdown_documents;
+                } else {
+                    console.log('No example documents found in expected format');
+                }
+            } else {
+                console.log('No example-documents.json file found, starting with empty state');
+            }
+        } catch (error) {
+            console.error('Error loading example documents:', error);
+        }
         
-        // Only log current content, don't clear it
-        if (this.wysiwygEditor) {
-            console.log('loadDocuments - WYSIWYG content preview:', this.wysiwygEditor.innerHTML.substring(0, 100));
+        // Populate file tree with example documents
+        if (this.exampleDocuments && this.exampleDocuments.length > 0) {
+            this.populateFileTreeFromSchema();
         }
-        if (this.sourceEditor) {
-            console.log('loadDocuments - Source content preview:', this.sourceEditor.value.substring(0, 100));
+        
+        console.log('Document loading completed - ready for user interaction');
+    }
+
+    /**
+     * Populate file tree from schema documents
+     */
+    populateFileTreeFromSchema() {
+        const fileTree = document.getElementById('file-tree');
+        if (!fileTree || !this.exampleDocuments) {
+            return;
         }
+        
+        console.log(`Populating file tree with ${this.exampleDocuments.length} schema documents`);
+        
+        // Clear existing content
+        fileTree.innerHTML = '';
+        
+        // Add each document as a tree item
+        for (const doc of this.exampleDocuments) {
+            const treeItem = document.createElement('div');
+            treeItem.className = 'tree-item file schema-document';
+            treeItem.dataset.path = `schema-doc-${doc.markdown_id}`;
+            treeItem.dataset.schemaId = doc.markdown_id;
+            
+            const fileIcon = document.createElement('span');
+            fileIcon.className = 'file-icon';
+            fileIcon.textContent = '📄';
+            
+            const fileName = document.createElement('span');
+            fileName.className = 'file-name';
+            fileName.textContent = doc.subject;
+            
+            // Add categories as tooltip
+            if (doc.categories && doc.categories.length > 0) {
+                treeItem.title = `Categories: ${doc.categories.join(', ')}`;
+            }
+            
+            treeItem.appendChild(fileIcon);
+            treeItem.appendChild(fileName);
+            fileTree.appendChild(treeItem);
+        }
+        
+        console.log('✅ File tree populated with schema documents');
     }
 
     /**
@@ -2330,14 +2584,50 @@ class WYSIWYGEditor {
         // Select current item
         fileElement.classList.add('selected');
         
-        // Create new tab with the file content (mock content for now)
-        const mockContent = this.getMockFileContent(filePath, fileName);
-        const tabId = this.createNewTab(fileName, mockContent);
+        // Try to find document in example data first
+        let documentContent = '';
+        let schemaDocument = null;
         
-        // Update the document path in the tab
+        // Check if this is a schema document (from populated file tree)
+        if (fileElement.dataset.schemaId && this.exampleDocuments) {
+            const schemaId = fileElement.dataset.schemaId;
+            schemaDocument = this.exampleDocuments.find(doc => doc.markdown_id === schemaId);
+            
+            if (schemaDocument) {
+                console.log(`Loading schema document: ${schemaDocument.subject}`);
+                documentContent = `# ${schemaDocument.subject}\n\n${schemaDocument.summary}\n\n**Categories:** ${schemaDocument.categories.join(', ')}\n\n**Created:** ${new Date(schemaDocument.created_at).toLocaleDateString()}\n**Updated:** ${new Date(schemaDocument.updated_at).toLocaleDateString()}\n\n---\n\nThis document is loaded from the schema system. You can edit it and the changes will be validated against the document schema.\n\nStart editing here...`;
+            }
+        } else if (this.exampleDocuments) {
+            // Legacy: Look for document by subject/filename match
+            const matchingDoc = this.exampleDocuments.find(doc => 
+                doc.subject === fileName || 
+                doc.subject === fileName.replace(/\.md$/, '') ||
+                fileName.includes(doc.subject)
+            );
+            
+            if (matchingDoc) {
+                console.log(`Found matching document in example data: ${matchingDoc.subject}`);
+                schemaDocument = matchingDoc;
+                documentContent = `# ${matchingDoc.subject}\n\n${matchingDoc.summary}\n\n**Categories:** ${matchingDoc.categories.join(', ')}\n\n**Created:** ${new Date(matchingDoc.created_at).toLocaleDateString()}\n\n---\n\nStart editing this document...`;
+            }
+        }
+        
+        // Fallback to mock content if no schema document found
+        if (!documentContent) {
+            documentContent = this.getMockFileContent(filePath, fileName);
+        }
+        
+        const tabId = this.createNewTab(fileName, documentContent);
+        
+        // Update the document path and schema info in the tab
         if (this.documents.has(tabId)) {
             const doc = this.documents.get(tabId);
             doc.path = filePath;
+            if (schemaDocument) {
+                doc.schemaDocument = schemaDocument;
+                doc.isDirty = false; // Not dirty since it's loaded from schema
+                console.log(`✅ Loaded schema document: ${schemaDocument.subject}`);
+            }
         }
     }
 
@@ -2445,13 +2735,28 @@ class WYSIWYGEditor {
         const tabId = `tab-${this.tabCounter++}`;
         const tabName = name || `untitled-${this.tabCounter - 1}.md`;
         
-        // Create new document
+        // Create schema-compliant document if schema system is available
+        let schemaDocument = null;
+        if (this.schemaValidator && this.hashGenerator) {
+            try {
+                // Extract subject from filename (remove .md extension)
+                const subject = tabName.replace(/\.md$/, '');
+                schemaDocument = this.createSchemaCompliantDocument(subject, content);
+                console.log(`✅ Created schema-compliant document for "${subject}"`);
+            } catch (error) {
+                console.warn('Failed to create schema-compliant document:', error);
+            }
+        }
+        
+        // Create editor document (maintains backward compatibility)
         const newDocument = {
             id: tabId,
             name: tabName,
             content: content,
             lastSaved: null,
-            isDirty: false
+            isDirty: false,
+            // Add schema document if available
+            schemaDocument: schemaDocument
         };
         
         this.documents.set(tabId, newDocument);

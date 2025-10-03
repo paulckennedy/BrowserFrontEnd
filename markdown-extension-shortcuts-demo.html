@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Extension Shortcuts Demo</title>
+    <link rel="stylesheet" href="markdown-extension-shortcuts.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .demo-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+        }
+        
+        .demo-section h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .demo-section h3 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .demo-content {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .syntax-example {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .feature-card h4 {
+            color: #495057;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .status-demo {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .controls {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        
+        .controls button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 5px;
+        }
+        
+        .controls button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>Markdown Extension Shortcuts Demo</h1>
+        <p>This demonstration showcases the comprehensive markdown extension shortcuts system with enhanced document storage schema integration. Hover over shortcuts to see detailed information and available actions.</p>
+    </div>
+
+    <div class="demo-container">
+        <div class="demo-section">
+            <h2>Document Linking Shortcuts</h2>
+            
+            <h3>Document References</h3>
+            <div class="demo-content">
+                <p>Reference documents directly in your content:</p>
+                <p>
+                    See the project overview in 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="doc1" data-shortcut-type="doc">
+                        <span class="shortcut-icon">📄</span>
+                        <span class="shortcut-content">project-overview</span>
+                    </span>
+                    and check the implementation details in 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="doc2" data-shortcut-type="doc">
+                        <span class="shortcut-icon">📄</span>
+                        <span class="shortcut-content">technical-specs</span>
+                    </span>
+                </p>
+            </div>
+            
+            <div class="syntax-example">
+@[doc:hash_id]                           # Simple document link
+@[doc:hash_id:title=Custom Title]        # Link with custom title
+@[doc:hash_id:embed=preview]             # Embedded preview
+@[doc:hash_id:section=heading-name]      # Link to specific section
+            </div>
+
+            <h3>Document Collections</h3>
+            <div class="demo-content">
+                <p>Display collections of related documents:</p>
+                <p>
+                    Recent project documents: 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="col1" data-shortcut-type="collection">
+                        <span class="shortcut-icon">📚</span>
+                        <span class="shortcut-content">recent:limit=5</span>
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Resource Embedding Shortcuts</h2>
+            
+            <h3>Images and Visual Content</h3>
+            <div class="demo-content">
+                <p>Embed images and visual resources:</p>
+                <p>
+                    Architecture diagram: 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="img1" data-shortcut-type="img">
+                        <span class="shortcut-icon">🖼️</span>
+                        <span class="shortcut-content">system-architecture</span>
+                    </span>
+                    
+                    User interface mockup: 
+                    <span class="shortcut shortcut-processing" data-shortcut-id="img2" data-shortcut-type="img">
+                        <span class="shortcut-icon">🖼️</span>
+                        <span class="shortcut-content">ui-mockup:width=400</span>
+                    </span>
+                </p>
+            </div>
+
+            <h3>Charts and Data Visualization</h3>
+            <div class="demo-content">
+                <p>Interactive charts and data visualizations:</p>
+                <p>
+                    Performance metrics: 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="chart1" data-shortcut-type="chart">
+                        <span class="shortcut-icon">📊</span>
+                        <span class="shortcut-content">performance-data</span>
+                    </span>
+                    
+                    Sales trends: 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="chart2" data-shortcut-type="chart">
+                        <span class="shortcut-icon">📊</span>
+                        <span class="shortcut-content">create:type=line</span>
+                    </span>
+                </p>
+            </div>
+
+            <h3>Media Content</h3>
+            <div class="demo-content">
+                <p>Embedded video and audio content:</p>
+                <p>
+                    Product demo: 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="video1" data-shortcut-type="video">
+                        <span class="shortcut-icon">🎥</span>
+                        <span class="shortcut-content">product-demo</span>
+                    </span>
+                    
+                    Tutorial video: 
+                    <span class="shortcut shortcut-pending" data-shortcut-id="video2" data-shortcut-type="video">
+                        <span class="shortcut-icon">🎥</span>
+                        <span class="shortcut-content">tutorial:start=120</span>
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>AI Processing Shortcuts</h2>
+            
+            <h3>Content Generation</h3>
+            <div class="demo-content">
+                <p>AI-powered content generation and processing:</p>
+                <p>
+                    Document summary: 
+                    <span class="shortcut shortcut-processing" data-shortcut-id="ai1" data-shortcut-type="ai">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">summarize:doc_id</span>
+                    </span>
+                    
+                    Translation: 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="ai2" data-shortcut-type="ai">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">translate:lang=es</span>
+                    </span>
+                </p>
+            </div>
+
+            <h3>Analysis and Insights</h3>
+            <div class="demo-content">
+                <p>Advanced AI analysis capabilities:</p>
+                <p>
+                    Sentiment analysis: 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="ai3" data-shortcut-type="ai">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">analyze:sentiment</span>
+                    </span>
+                    
+                    Content classification: 
+                    <span class="shortcut shortcut-error" data-shortcut-id="ai4" data-shortcut-type="ai">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">classify:topics</span>
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Visual AI Status Scanning Demo</h2>
+            
+            <h3>AI Request Status Overview</h3>
+            <div class="demo-content">
+                <p>This document contains multiple AI requests in different states. Use the scanning features to quickly assess status:</p>
+                
+                <p><strong>Document Analysis Tasks:</strong></p>
+                <p>
+                    Generate summary: 
+                    <span class="shortcut shortcut-processing ai-request" data-shortcut-id="ai-scan-1" data-shortcut-type="ai" title="AI Request: summarize:project-doc - Processing... 45%" style="--progress-width: 45%">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">summarize:project-doc</span>
+                        <span class="ai-status-indicator">🔄</span>
+                    </span>
+                    
+                    Extract key points: 
+                    <span class="shortcut shortcut-ready ai-request" data-shortcut-id="ai-scan-2" data-shortcut-type="ai" title="AI Request: extract:key-points - Completed successfully">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">extract:key-points</span>
+                        <span class="ai-status-indicator">✅</span>
+                    </span>
+                </p>
+                
+                <p><strong>Content Generation:</strong></p>
+                <p>
+                    Create outline: 
+                    <span class="shortcut shortcut-pending ai-request" data-shortcut-id="ai-scan-3" data-shortcut-type="ai" title="AI Request: outline:presentation - Waiting to process">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">outline:presentation</span>
+                        <span class="ai-status-indicator">⏳</span>
+                    </span>
+                    
+                    Generate introduction: 
+                    <span class="shortcut shortcut-error ai-request" data-shortcut-id="ai-scan-4" data-shortcut-type="ai" title="AI Request: intro:section - Error: Processing failed">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">intro:section</span>
+                        <span class="ai-status-indicator">❌</span>
+                    </span>
+                </p>
+                
+                <p><strong>Analysis Tasks:</strong></p>
+                <p>
+                    Sentiment analysis: 
+                    <span class="shortcut shortcut-processing ai-request" data-shortcut-id="ai-scan-5" data-shortcut-type="ai" title="AI Request: analyze:sentiment - Processing... 78%" style="--progress-width: 78%">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">analyze:sentiment</span>
+                        <span class="ai-status-indicator">🔄</span>
+                    </span>
+                    
+                    Topic classification: 
+                    <span class="shortcut shortcut-pending ai-request" data-shortcut-id="ai-scan-6" data-shortcut-type="ai" title="AI Request: classify:topics - Waiting to process">
+                        <span class="shortcut-icon">🤖</span>
+                        <span class="shortcut-content">classify:topics</span>
+                        <span class="ai-status-indicator">⏳</span>
+                    </span>
+                </p>
+            </div>
+            
+            <div style="background: #e9ecef; padding: 15px; border-radius: 6px; margin: 20px 0;">
+                <h4>📊 Quick Status Overview</h4>
+                <div id="status-summary" style="font-family: monospace; font-size: 0.9em;">
+                    <div>⏳ Pending: <span id="pending-count">2</span></div>
+                    <div>🔄 Processing: <span id="processing-count">2</span></div>
+                    <div>✅ Ready: <span id="ready-count">1</span></div>
+                    <div>❌ Error: <span id="error-count">1</span></div>
+                    <div style="margin-top: 10px; font-weight: bold;">Total AI Requests: 6</div>
+                </div>
+            </div>
+
+            <h3>Advanced Shortcuts</h3>
+            <div class="demo-content">
+                <p>Workflow management and collaboration:</p>
+                <p>
+                    Deployment workflow: 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="wf1" data-shortcut-type="workflow">
+                        <span class="shortcut-icon">⚡</span>
+                        <span class="shortcut-content">deployment-template</span>
+                    </span>
+                    
+                    Team member: 
+                    <span class="shortcut shortcut-ready" data-shortcut-id="user1" data-shortcut-type="user">
+                        <span class="shortcut-icon">👤</span>
+                        <span class="shortcut-content">john.doe</span>
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-container">
+        <div class="demo-section">
+            <h2>Status Indicators</h2>
+            
+            <div class="status-demo">
+                <span class="shortcut shortcut-pending" data-shortcut-id="status1" data-shortcut-type="doc">
+                    <span class="shortcut-icon">📄</span>
+                    <span class="shortcut-content">pending</span>
+                </span>
+                
+                <span class="shortcut shortcut-processing" data-shortcut-id="status2" data-shortcut-type="ai">
+                    <span class="shortcut-icon">🤖</span>
+                    <span class="shortcut-content">processing</span>
+                </span>
+                
+                <span class="shortcut shortcut-ready" data-shortcut-id="status3" data-shortcut-type="chart">
+                    <span class="shortcut-icon">📊</span>
+                    <span class="shortcut-content">ready</span>
+                </span>
+                
+                <span class="shortcut shortcut-error" data-shortcut-id="status4" data-shortcut-type="img">
+                    <span class="shortcut-icon">🖼️</span>
+                    <span class="shortcut-content">error</span>
+                </span>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🔄 Pending Status</h4>
+                    <p>Shortcut has been created but not yet processed. Displays with amber/yellow styling to indicate waiting state.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>⚡ Processing Status</h4>
+                    <p>Shortcut is actively being processed by the system. Shows animated border and pulsing effect to indicate activity.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>✅ Ready Status</h4>
+                    <p>Shortcut has been successfully processed and content is available. Green styling indicates success and interactivity.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>❌ Error Status</h4>
+                    <p>Shortcut processing failed or encountered an error. Red styling provides clear visual feedback about the issue.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-container">
+        <div class="demo-section">
+            <h2>Interactive Features</h2>
+            
+            <div class="controls">
+                <h3>Demo Controls</h3>
+                <button onclick="simulateProcessing()">Simulate Processing</button>
+                <button onclick="simulateError()">Simulate Error</button>
+                <button onclick="simulateSuccess()">Simulate Success</button>
+                <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+                <button onclick="showAllTooltips()">Show All Tooltips</button>
+            </div>
+            
+            <div class="controls">
+                <h3>AI Status Scanning</h3>
+                <button onclick="highlightAI()">Highlight AI Requests (Ctrl+Shift+H)</button>
+                <button onclick="nextAIError()">Next AI Error (Ctrl+Shift+E)</button>
+                <button onclick="nextAIProcessing()">Next Processing (Ctrl+Shift+P)</button>
+                <button onclick="toggleAIOverview()">Toggle Status Overview (Ctrl+Shift+S)</button>
+                <button onclick="showStatusSummary()">Show Status Summary</button>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>�️ Visual Status Scanning</h4>
+                    <p>Quickly scan document status with color-coded indicators, status icons, and progress bars. AI requests are prominently highlighted for easy identification.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>📊 Status Overview Panel</h4>
+                    <p>Real-time status overview shows counts of pending, processing, ready, and error states. Automatically appears when AI requests are present.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>⌨️ Keyboard Navigation</h4>
+                    <p>Use Ctrl+Shift+H to highlight AI requests, Ctrl+Shift+E/P to jump to errors/processing, and Ctrl+Shift+S to toggle status overview.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>🖱️ Hover Interactions</h4>
+                    <p>Hover over any shortcut to see detailed tooltip with status, preview, and available actions. Tooltips appear after a configurable delay.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>🎯 Click Actions</h4>
+                    <p>Click shortcuts to perform actions based on their status: open content (ready), show errors (error), or view progress (processing).</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h4>📱 Responsive Design</h4>
+                    <p>Shortcuts adapt to different screen sizes and input methods. Touch-friendly on mobile devices with appropriate sizing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-container">
+        <div class="demo-section">
+            <h2>Implementation Example</h2>
+            
+            <div class="syntax-example">
+// Initialize the markdown extension shortcuts system
+const shortcutManager = new MarkdownExtensionShortcuts({
+    hoverDelay: 500,
+    autoProcess: true,
+    previewSize: 'medium',
+    apiEndpoint: '/api/shortcuts'
+});
+
+// Process markdown content with shortcuts
+const markdown = `
+# Project Report
+
+## Summary
+@[ai:summarize:project-data:style=executive]
+
+## Performance Metrics  
+@[chart:performance-data:type=line|period=ytd]
+
+## Team Members
+@[user:team-lead] @[user:developer-1] @[user:designer-1]
+
+## Related Documents
+@[collection:project-docs:recent:limit=5]
+`;
+
+// Process and render
+const processedContent = await shortcutManager.processMarkdown(
+    markdown, 
+    'document-hash-id'
+);
+
+// Insert into DOM
+document.getElementById('content').innerHTML = processedContent;
+            </div>
+        </div>
+    </div>
+
+    <script src="markdown-extension-shortcuts.js"></script>
+    <script>
+        // Demo functionality
+        let demoShortcuts = [];
+        
+        // Collect all demo shortcuts
+        document.addEventListener('DOMContentLoaded', function() {
+            demoShortcuts = Array.from(document.querySelectorAll('.shortcut'));
+            
+            // Add mock data for tooltips
+            demoShortcuts.forEach(shortcut => {
+                const id = shortcut.dataset.shortcutId;
+                const type = shortcut.dataset.shortcutType;
+                
+                // Mock shortcut data
+                const mockShortcut = {
+                    id: id,
+                    type: type,
+                    status: shortcut.classList.contains('shortcut-pending') ? 'pending' :
+                           shortcut.classList.contains('shortcut-processing') ? 'processing' :
+                           shortcut.classList.contains('shortcut-error') ? 'error' : 'ready',
+                    identifier: shortcut.querySelector('.shortcut-content').textContent,
+                    result: {
+                        preview: `This is a preview of ${type} content for ${id}`,
+                        title: `${type.charAt(0).toUpperCase() + type.slice(1)} Content`
+                    },
+                    error: shortcut.classList.contains('shortcut-error') ? 'Failed to load resource' : null
+                };
+                
+                window.shortcutManager.activeShortcuts.set(id, mockShortcut);
+            });
+        });
+        
+        function simulateProcessing() {
+            const readyShortcuts = demoShortcuts.filter(s => s.classList.contains('shortcut-ready'));
+            if (readyShortcuts.length > 0) {
+                const shortcut = readyShortcuts[Math.floor(Math.random() * readyShortcuts.length)];
+                shortcut.className = 'shortcut shortcut-processing';
+                
+                setTimeout(() => {
+                    shortcut.className = 'shortcut shortcut-ready';
+                }, 3000);
+            }
+        }
+        
+        function simulateError() {
+            const readyShortcuts = demoShortcuts.filter(s => s.classList.contains('shortcut-ready'));
+            if (readyShortcuts.length > 0) {
+                const shortcut = readyShortcuts[Math.floor(Math.random() * readyShortcuts.length)];
+                shortcut.className = 'shortcut shortcut-error';
+                
+                // Update mock data
+                const id = shortcut.dataset.shortcutId;
+                const mockShortcut = window.shortcutManager.activeShortcuts.get(id);
+                if (mockShortcut) {
+                    mockShortcut.status = 'error';
+                    mockShortcut.error = 'Simulated processing error';
+                }
+            }
+        }
+        
+        function simulateSuccess() {
+            const errorShortcuts = demoShortcuts.filter(s => s.classList.contains('shortcut-error'));
+            if (errorShortcuts.length > 0) {
+                const shortcut = errorShortcuts[Math.floor(Math.random() * errorShortcuts.length)];
+                shortcut.className = 'shortcut shortcut-ready';
+                
+                // Update mock data
+                const id = shortcut.dataset.shortcutId;
+                const mockShortcut = window.shortcutManager.activeShortcuts.get(id);
+                if (mockShortcut) {
+                    mockShortcut.status = 'ready';
+                    mockShortcut.error = null;
+                }
+            }
+        }
+        
+        function toggleDarkMode() {
+            document.body.style.filter = document.body.style.filter === 'invert(1) hue-rotate(180deg)' ? 
+                '' : 'invert(1) hue-rotate(180deg)';
+        }
+        
+        function showAllTooltips() {
+            alert('Hover over any shortcut to see its tooltip with detailed information and available actions!');
+        }
+        
+        // AI Status scanning functions
+        function highlightAI(duration = 3000) {
+            const aiShortcuts = document.querySelectorAll('.shortcut[data-shortcut-type="ai"]');
+            aiShortcuts.forEach(element => {
+                element.style.outline = '3px solid #6f42c1';
+                element.style.outlineOffset = '3px';
+                element.style.transform = 'scale(1.05)';
+            });
+            
+            setTimeout(() => {
+                aiShortcuts.forEach(element => {
+                    element.style.outline = '';
+                    element.style.outlineOffset = '';
+                    element.style.transform = '';
+                });
+            }, duration);
+        }
+        
+        function nextAIError() {
+            const errorShortcuts = document.querySelectorAll('.shortcut[data-shortcut-type="ai"].shortcut-error');
+            if (errorShortcuts.length > 0) {
+                errorShortcuts[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                errorShortcuts[0].style.boxShadow = '0 0 20px rgba(220, 53, 69, 0.8)';
+                setTimeout(() => {
+                    errorShortcuts[0].style.boxShadow = '';
+                }, 2000);
+            } else {
+                alert('No AI errors found in document');
+            }
+        }
+        
+        function nextAIProcessing() {
+            const processingShortcuts = document.querySelectorAll('.shortcut[data-shortcut-type="ai"].shortcut-processing');
+            if (processingShortcuts.length > 0) {
+                processingShortcuts[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                processingShortcuts[0].style.boxShadow = '0 0 20px rgba(13, 202, 240, 0.8)';
+                setTimeout(() => {
+                    processingShortcuts[0].style.boxShadow = '';
+                }, 2000);
+            } else {
+                alert('No AI requests currently processing');
+            }
+        }
+        
+        function toggleAIOverview() {
+            // Mock the status overview panel
+            let panel = document.getElementById('mock-status-panel');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'mock-status-panel';
+                panel.className = 'ai-status-overview visible';
+                panel.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 8px; color: #495057;">AI Requests Status</div>
+                    <div class="ai-status-item">
+                        <span class="ai-status-count ai-status-pending">2</span>
+                        <span>⏳ Pending</span>
+                    </div>
+                    <div class="ai-status-item">
+                        <span class="ai-status-count ai-status-processing">2</span>
+                        <span>🔄 Processing</span>
+                    </div>
+                    <div class="ai-status-item">
+                        <span class="ai-status-count ai-status-ready">1</span>
+                        <span>✅ Ready</span>
+                    </div>
+                    <div class="ai-status-item">
+                        <span class="ai-status-count ai-status-error">1</span>
+                        <span>❌ Error</span>
+                    </div>
+                `;
+                document.body.appendChild(panel);
+            } else {
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+        
+        function showStatusSummary() {
+            const summary = {
+                pending: document.querySelectorAll('.shortcut[data-shortcut-type="ai"].shortcut-pending').length,
+                processing: document.querySelectorAll('.shortcut[data-shortcut-type="ai"].shortcut-processing').length,
+                ready: document.querySelectorAll('.shortcut[data-shortcut-type="ai"].shortcut-ready').length,
+                error: document.querySelectorAll('.shortcut[data-shortcut-type="ai"].shortcut-error').length
+            };
+            
+            const total = Object.values(summary).reduce((a, b) => a + b, 0);
+            const hasErrors = summary.error > 0;
+            const hasProcessing = summary.processing > 0;
+            const allComplete = summary.pending === 0 && summary.processing === 0;
+            
+            alert(`AI Status Summary:\n\n` +
+                  `⏳ Pending: ${summary.pending}\n` +
+                  `🔄 Processing: ${summary.processing}\n` +
+                  `✅ Ready: ${summary.ready}\n` +
+                  `❌ Error: ${summary.error}\n\n` +
+                  `Total: ${total} AI requests\n` +
+                  `Status: ${allComplete ? 'All Complete' : hasErrors ? 'Has Errors' : hasProcessing ? 'In Progress' : 'Mixed'}`);
+        }
+        
+        // Add some interactivity
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.shortcut')) {
+                const shortcut = e.target.closest('.shortcut');
+                const type = shortcut.dataset.shortcutType;
+                const content = shortcut.querySelector('.shortcut-content').textContent;
+                
+                console.log(`Clicked ${type} shortcut: ${content}`);
+            }
+        });
+    </script>
+</body>
+</html>

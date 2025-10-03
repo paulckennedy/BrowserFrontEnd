@@ -1,0 +1,641 @@
+/**
+ * Markdown Extension Shortcuts Styles
+ * 
+ * Comprehensive styling for markdown extension shortcuts with consistent
+ * hover identification, status indicators, and interactive elements.
+ */
+
+/* Base shortcut styling */
+.shortcut {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.85em;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.shortcut:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Shortcut icon styling */
+.shortcut-icon {
+    font-size: 1em;
+    line-height: 1;
+    opacity: 0.8;
+}
+
+.shortcut-content {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Status-based styling */
+.shortcut-pending {
+    background: linear-gradient(135deg, #fff3cd 0%, #fef8e7 100%);
+    border-color: #ffeaa7;
+    color: #856404;
+    position: relative;
+}
+
+.shortcut-pending::before {
+    content: '⏳';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.shortcut-pending:hover {
+    background: linear-gradient(135deg, #ffeaa7 0%, #fff3cd 100%);
+    border-color: #f1c40f;
+}
+
+.shortcut-processing {
+    background: linear-gradient(135deg, #d1ecf1 0%, #e8f6f8 100%);
+    border-color: #bee5eb;
+    color: #0c5460;
+    animation: processing-pulse 1.5s infinite ease-in-out;
+    position: relative;
+    padding-left: 12px;
+}
+
+.shortcut-processing::before {
+    content: '🔄';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8em;
+    animation: spin 2s linear infinite;
+}
+
+.shortcut-processing::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border-radius: 6px;
+    background: linear-gradient(45deg, transparent, rgba(13, 202, 240, 0.3), transparent);
+    animation: processing-border 2s linear infinite;
+    z-index: -1;
+}
+
+/* Progress bar for processing AI requests */
+.shortcut-processing[data-shortcut-type="ai"]::after {
+    background: linear-gradient(90deg, 
+        #bee5eb 0%, 
+        var(--progress-width, 30%) rgba(13, 202, 240, 0.6) var(--progress-width, 30%), 
+        #d1ecf1 var(--progress-width, 30%));
+    animation: none;
+}
+
+.shortcut-ready {
+    background: linear-gradient(135deg, #d4edda 0%, #e8f5e9 100%);
+    border-color: #c3e6cb;
+    color: #155724;
+    position: relative;
+}
+
+.shortcut-ready::before {
+    content: '✅';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8em;
+}
+
+.shortcut-ready:hover {
+    background: linear-gradient(135deg, #c3e6cb 0%, #d4edda 100%);
+    border-color: #28a745;
+    color: #0f4622;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.shortcut-error {
+    background: linear-gradient(135deg, #f8d7da 0%, #fce4e6 100%);
+    border-color: #f5c6cb;
+    color: #721c24;
+    position: relative;
+}
+
+.shortcut-error::before {
+    content: '❌';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8em;
+}
+
+.shortcut-error:hover {
+    background: linear-gradient(135deg, #f5c6cb 0%, #f8d7da 100%);
+    border-color: #dc3545;
+    animation: error-shake 0.5s ease-in-out;
+}
+
+/* Processing animations */
+@keyframes processing-pulse {
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.7; 
+        transform: scale(1.02);
+    }
+}
+
+@keyframes processing-border {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+@keyframes error-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* AI request progress animation */
+@keyframes ai-progress {
+    0% { --progress-width: 0%; }
+    100% { --progress-width: 100%; }
+}
+
+.shortcut-processing[data-shortcut-type="ai"] {
+    animation: processing-pulse 1.5s infinite ease-in-out, ai-progress 30s linear;
+}
+
+/* Status scanning helpers */
+.markdown-content {
+    line-height: 1.8;
+    padding-left: 30px; /* Space for status icons */
+}
+
+.shortcut {
+    margin: 0 4px 0 0;
+    display: inline-block;
+}
+
+/* Tooltip styling */
+.shortcut-tooltip {
+    position: absolute;
+    z-index: 1000;
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    min-width: 280px;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.shortcut-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Tooltip arrow */
+.shortcut-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 20px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #ffffff;
+    filter: drop-shadow(0 -2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Tooltip header */
+.tooltip-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.tooltip-icon {
+    font-size: 1.2em;
+    opacity: 0.8;
+}
+
+.tooltip-title {
+    font-weight: 600;
+    color: #2c3e50;
+    flex: 1;
+}
+
+.tooltip-status {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-processing {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-ready {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Tooltip content */
+.tooltip-content {
+    padding: 12px 16px;
+    color: #495057;
+    line-height: 1.5;
+}
+
+.tooltip-content .preview {
+    background: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 3px solid #007bff;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+}
+
+.tooltip-content .error-message {
+    color: #721c24;
+    background: #f8d7da;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 3px solid #dc3545;
+}
+
+.tooltip-content .processing-message {
+    color: #0c5460;
+    font-style: italic;
+}
+
+.tooltip-content .description {
+    color: #6c757d;
+}
+
+/* Tooltip actions */
+.tooltip-actions {
+    display: flex;
+    gap: 8px;
+    padding: 8px 16px 12px;
+    border-top: 1px solid #f1f3f4;
+}
+
+.tooltip-actions button {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #495057;
+    font-size: 0.8em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tooltip-actions button:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+    color: #212529;
+}
+
+.tooltip-actions button:active {
+    transform: translateY(1px);
+}
+
+/* Specific shortcut type styling */
+.shortcut[data-shortcut-type="doc"] {
+    --shortcut-color: #007bff;
+}
+
+.shortcut[data-shortcut-type="ai"] {
+    --shortcut-color: #6f42c1;
+    font-weight: 600;
+    border-width: 2px;
+}
+
+.shortcut[data-shortcut-type="ai"].shortcut-processing {
+    box-shadow: 0 0 15px rgba(111, 66, 193, 0.4);
+}
+
+.shortcut[data-shortcut-type="ai"].shortcut-ready {
+    box-shadow: 0 2px 8px rgba(111, 66, 193, 0.2);
+}
+
+.shortcut[data-shortcut-type="ai"].shortcut-error {
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.shortcut[data-shortcut-type="chart"] {
+    --shortcut-color: #28a745;
+}
+
+.shortcut[data-shortcut-type="img"] {
+    --shortcut-color: #fd7e14;
+}
+
+.shortcut[data-shortcut-type="video"] {
+    --shortcut-color: #dc3545;
+}
+
+.shortcut[data-shortcut-type="workflow"] {
+    --shortcut-color: #ffc107;
+}
+
+/* AI Status Overview Panel */
+.ai-status-overview {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-size: 0.85em;
+    z-index: 100;
+    display: none;
+}
+
+.ai-status-overview.visible {
+    display: block;
+}
+
+.ai-status-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.ai-status-count {
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+
+.ai-status-pending { color: #856404; }
+.ai-status-processing { color: #0c5460; }
+.ai-status-ready { color: #155724; }
+.ai-status-error { color: #721c24; }
+
+/* Type-specific hover effects */
+.shortcut-ready[data-shortcut-type]:hover {
+    border-color: var(--shortcut-color);
+    box-shadow: 0 2px 8px rgba(var(--shortcut-color-rgb, 0, 123, 255), 0.3);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .shortcut-tooltip {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .tooltip-header {
+        border-bottom-color: #4a5568;
+    }
+    
+    .tooltip-title {
+        color: #f7fafc;
+    }
+    
+    .status-pending {
+        background: #744210;
+        color: #fbb040;
+    }
+    
+    .status-processing {
+        background: #0c4a6e;
+        color: #7dd3fc;
+    }
+    
+    .status-ready {
+        background: #166534;
+        color: #86efac;
+    }
+    
+    .status-error {
+        background: #7f1d1d;
+        color: #fca5a5;
+    }
+    
+    .tooltip-content .preview {
+        background: #1a202c;
+        border-left-color: #63b3ed;
+        color: #e2e8f0;
+    }
+    
+    .tooltip-content .error-message {
+        background: #7f1d1d;
+        border-left-color: #f56565;
+        color: #fca5a5;
+    }
+    
+    .tooltip-actions {
+        border-top-color: #4a5568;
+    }
+    
+    .tooltip-actions button {
+        background: #4a5568;
+        border-color: #718096;
+        color: #e2e8f0;
+    }
+    
+    .tooltip-actions button:hover {
+        background: #2d3748;
+        border-color: #a0aec0;
+        color: #f7fafc;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .shortcut-tooltip {
+        min-width: 250px;
+        max-width: 90vw;
+        left: 5vw !important;
+        right: 5vw;
+    }
+    
+    .tooltip-actions {
+        flex-wrap: wrap;
+    }
+    
+    .tooltip-actions button {
+        flex: 1;
+        min-width: 60px;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .shortcut {
+        border-width: 2px;
+        font-weight: 700;
+    }
+    
+    .shortcut-ready {
+        background: #ffffff;
+        border-color: #000000;
+        color: #000000;
+    }
+    
+    .shortcut-error {
+        background: #ffffff;
+        border-color: #cc0000;
+        color: #cc0000;
+    }
+    
+    .shortcut-pending {
+        background: #ffffff;
+        border-color: #ff6600;
+        color: #ff6600;
+    }
+    
+    .shortcut-processing {
+        background: #ffffff;
+        border-color: #0066cc;
+        color: #0066cc;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .shortcut,
+    .shortcut-tooltip {
+        transition: none;
+    }
+    
+    .shortcut-processing {
+        animation: none;
+    }
+    
+    @keyframes processing-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    @keyframes processing-border {
+        0%, 100% { transform: none; }
+    }
+}
+
+/* Print styles */
+@media print {
+    .shortcut {
+        background: none !important;
+        border: 1px solid #000000 !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+    }
+    
+    .shortcut-tooltip {
+        display: none !important;
+    }
+}
+
+/* Focus styles for accessibility */
+.shortcut:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.shortcut:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Loading state for dynamic shortcuts */
+.shortcut-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 2s infinite;
+    color: transparent;
+}
+
+@keyframes loading-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Container for shortcuts within markdown */
+.markdown-content .shortcut {
+    margin: 0 2px;
+    vertical-align: baseline;
+}
+
+/* Shortcut grouping */
+.shortcut-group {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    margin: 0 4px;
+}
+
+.shortcut-group .shortcut {
+    margin: 0;
+}
+
+/* Special styling for embedded content */
+.shortcut-embedded {
+    display: block;
+    margin: 16px 0;
+    padding: 16px;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    text-align: center;
+    background: #f8f9fa;
+}
+
+.shortcut-embedded.shortcut-ready {
+    border-style: solid;
+    border-color: #28a745;
+    background: #d4edda;
+}
